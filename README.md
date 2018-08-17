@@ -1,2 +1,2 @@
 # aura
-The Soap Shop
+The Home Made Organic Soap Shop
