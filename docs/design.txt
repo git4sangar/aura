@@ -1,0 +1,105 @@
+sgn
+
+Detailed Design
+
+Profile Text
+	Home Made Organic Soaps: You can Browse, Buy, Track orders & Get updates. All at this chat window. We care your Privacy :)
+
+On Start
+	Text
+		Hi Name, I help you buy Aura Soaps. Choose from the following menu.
+	Keyboard
+		View Soaps, View Cart, Track Order
+
+On View Soap
+	Text
+		Choose a flavor
+	Keyboard
+		Coconut, Kasturi Manjal, Nalangu maavu, Vetiver, Sandal, Main Menu
+
+On Flavors
+	Photo of flavor
+	Keyboard
+		Buy chosen flavor, rest all flavors, Main Menu
+
+On Main Menu
+	goto "On Start"
+
+On View Cart
+	Text
+		Formated Cart cotent with Invoice number.
+	Keyboard
+		Checkout, Empty Cart, Main Menu
+
+On Empty Cart
+	Text
+		Cart Emptied
+	Keyboard
+		View Soaps, View Cart, Track Order
+
+On Checkout
+	Text
+		Choose your Block letter / number.
+	Keyboard
+		Block Letter-A/1, Block Letter-B/2, Block Letter-C/3,
+		Block Letter-D, Block Letter-E, Block Letter-F,
+		Block Letter-G, Block Letter-H, Block Letter-I,
+		Main Menu
+
+On Block Letter
+	Text
+		Choose Block Number. If no number, choose first option.
+	Keyboard
+		(Letter is what chosen in last menu)
+		Block Letter,
+		Block Letter-1, Block Letter-2, Block Letter-3,
+		Block Letter-4, Block Letter-5, Block Letter-6,
+		Block Letter-7, Block Letter-8, Block Letter-9
+		Main Menu
+
+On Block Number
+	Text
+		Choose Floor
+	Keyboard
+		(Block is what chosen from last menu)
+		Block 1st Floor, Block 2nd Floor, Block 3rd Floor, Block 4th Floor
+		Main Menu
+
+On Floor Number
+	Text
+		Choose Flat Number
+	Keyboard
+		(Block letter is what chose lastly)
+		Block Letter-Number 3 digit number
+		Main Menu
+
+On Block-Flat no
+	Text
+		Choose Appartment
+	Keyboard
+		SSM Nagar, Navins Brookfield, Navins Springfield, Garuda Ave
+		Main Menu
+
+On Appartment
+	Text
+		Share Contact
+	Keyboard
+		Contact, Main Menu
+
+On Mobile
+	Text
+		Pay Rs ## using one of the following app & mention invoice #
+		You get a confirmation call/SMS reg payment & delivery date within 24 hours
+	Keyboard
+		Paytm, Tez, NEFT, Cash on delivery, Main Menu
+
+On Paytm / Tez / NEFT
+	Text
+		Paytm details. Menion invoice #
+	Keyboard
+		Paytm, Tez, NEFT, Main Menu
+
+
+
+
+		
