@@ -37,6 +37,14 @@ On Empty Cart
 	Keyboard
 		View Soaps, View Cart, Track Order
 
+On Track Order
+	Text
+		List invoice numbers for last 3 transac
+		Delivery dates
+		Delivery status
+	Keyboard
+		View Soaps, View Cart, Track Order
+
 On Checkout
 	Text
 		Choose your Block letter / number.
