@@ -13,16 +13,47 @@
 #include <syslog.h>
 #include <unistd.h>
 #include <vector>
+#include <tgbot/tgbot.h>
+#include "SoapSeller.h"
 
-void do_heartbeat()
-{
+#define AURA_BOT_TOKEN  "655366902:AAGEaKH0q1xXu0Lwd5C5HBDZsUnPTjn13X4"
+//#define THRAYA_BOT_TOKEN  "664320846:AAHffJ_8LG0W8eGCuYsrgkK4fOCj9j2FgTo"
+#define AURA_DB_FILE    "/Users/shankarv/sgn/uthra_01/sgn_uthra_01.db"
+#define AURA_LOG_FILE   "/Users/shankarv/sgn/proj/sgnaura/git/aura/build/aura_log.log"
 
+void AuraMainLoop(FILE *fp) {
+   std::shared_ptr<TgBot::Bot> pBot = std::make_shared<TgBot::Bot>(AURA_BOT_TOKEN);
+   std::shared_ptr<SoapSeller> pSS  = std::make_shared<SoapSeller>(AURA_DB_FILE);
+   fprintf(fp, "AURA: Starting AuraMainLoop\n"); fflush(fp);
+
+   pBot->getEvents().onCommand("start", [pBot, pSS, fp](TgBot::Message::Ptr pMsg) {
+      pSS->onStartCommand(pBot, pMsg, fp);
+   });
+
+ 
+   std::string strMsg = "AURA: Bot username " + pBot->getApi().getMe()->username;
+   //syslog(LOG_NOTICE, "%s ", strMsg.c_str());
+   fprintf(fp, "AURA: Bot username %s\n", pBot->getApi().getMe()->username.c_str()); fflush(fp);
+
+   TgBot::TgLongPoll longPoll(*pBot);
+   while (true) {
+      try {
+         //syslog(LOG_NOTICE, "AURA: Long poll started");
+         fprintf(fp, "AURA: Long poll started\n"); fflush(fp);
+         longPoll.start();
+      } catch (std::exception& e) {
+         fprintf(fp, "AURA: An exception occured: %s\n", e.what().c_str()); fflush(fp);
+      }
+   }
 }
 
+
 int main(void) {
+   FILE *fp = fopen(AURA_LOG_FILE, "w");
    // Define variables
    pid_t pid, sid;
 
+   fprintf(fp, "AURA: Very start\n"); fflush(fp);
    // Fork the current process
    pid = fork();
 
@@ -42,15 +73,17 @@ int main(void) {
    umask(0);
 
    // Open system logs for the child process
-   openlog("daemon-named", LOG_NOWAIT | LOG_PID, LOG_USER);
-   syslog(LOG_NOTICE, "Successfully started daemon-name");
+   //openlog("daemon-named", LOG_NOWAIT | LOG_PID, LOG_USER);
+   //syslog(LOG_NOTICE, "AURA: Successfully started daemon-name");
+   fprintf(fp, "AURA: Successfully started Bot daemon\n"); fflush(fp);
 
    // Generate a session ID for the child process
    sid = setsid();
    // Ensure a valid SID for the child process
    if(sid < 0) {
       // Log failure and exit
-      syslog(LOG_ERR, "Could not generate session ID for child process");
+      //syslog(LOG_ERR, "AURA: Could not generate session ID for child process");
+      fprintf(fp, "AURA: Could not generate session ID for child process\n"); fflush(fp);
 
       // If a new session ID could not be generated, we must terminate the child process
       // or it will be orphaned
@@ -60,7 +93,8 @@ int main(void) {
    // Change the current working directory to a directory guaranteed to exist
    if((chdir("/")) < 0) {
       // Log failure and exit
-      syslog(LOG_ERR, "Could not change working directory to /");
+      //syslog(LOG_ERR, "AURA: Could not change working directory to /");
+      fprintf(fp, "AURA: Could not change working directory to\n"); fflush(fp);
 
       // If our guaranteed directory does not exist, terminate the child process to ensure
       // the daemon has not been hijacked
@@ -72,22 +106,12 @@ int main(void) {
    close(STDOUT_FILENO);
    close(STDERR_FILENO);
 
-   // Daemon-specific intialization should go here
-   const int SLEEP_INTERVAL = 5;
-
-   int iLoop = 3;
-
-   while(iLoop > 0) {
-      // Execute daemon heartbeat, where your recurring activity occurs
-      do_heartbeat();
-
-      // Sleep for a period of time
-      sleep(SLEEP_INTERVAL);
-      iLoop--;
-   }
+   AuraMainLoop(fp);
 
    // Close system logs for the child process
-   syslog(LOG_NOTICE, "Stopping daemon-name");
+   //syslog(LOG_NOTICE, "AURA: Stopping daemon-name");
+   fprintf(fp, "AURA: Stopping Bot daemon\n"); fflush(fp);
+   fclose(fp);
    closelog();
 
    // Terminate the child process when the daemon completes

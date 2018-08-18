@@ -3,7 +3,9 @@ sgn
 Detailed Design
 
 Profile Text
-	Home Made Organic Soaps: You can Browse, Buy, Track orders & Get updates. All at this chat window. We care your Privacy :)
+	Aura Organic Soap Bot:
+	You can Browse, Buy, Track orders & Get updates.
+	All at this chat window. We care your Privacy :)
 
 On Start
 	Text
@@ -13,21 +15,21 @@ On Start
 
 On View Soap
 	Text
-		Choose a flavor
+		Choose a flavour
 	Keyboard
 		Coconut, Kasturi Manjal, Nalangu maavu, Vetiver, Sandal, Main Menu
 
 On Flavors
-	Photo of flavor
+	Photo of flavour
 	Keyboard
-		Buy chosen flavor, rest all flavors, Main Menu
+		Buy chosen flavour, rest all flavours, Main Menu
 
 On Main Menu
 	goto "On Start"
 
 On View Cart
 	Text
-		Formated Cart cotent with Invoice number.
+		Formatted Cart content with Invoice number.
 	Keyboard
 		Checkout, Empty Cart, Main Menu
 
@@ -39,7 +41,7 @@ On Empty Cart
 
 On Track Order
 	Text
-		List invoice numbers for last 3 transac
+		List invoice numbers for last 3 transactions
 		Delivery dates
 		Delivery status
 	Keyboard
@@ -83,12 +85,12 @@ On Floor Number
 
 On Block-Flat no
 	Text
-		Choose Appartment
+		Choose Apartment
 	Keyboard
 		SSM Nagar, Navins Brookfield, Navins Springfield, Garuda Ave
 		Main Menu
 
-On Appartment
+On Apartment
 	Text
 		Share Contact
 	Keyboard
@@ -103,7 +105,7 @@ On Mobile
 
 On Paytm / Tez / NEFT
 	Text
-		Paytm details. Menion invoice #
+		Paytm details. Mention invoice #
 	Keyboard
 		Paytm, Tez, NEFT, Main Menu
 
