@@ -8,6 +8,7 @@
 #include <SQLiteCpp/VariadicBind.h>
 #include <tgbot/tgbot.h>
 #include <vector>
+#include <functional>
 
 #include "SoapSeller.h"
 
@@ -18,10 +19,33 @@ SoapSeller::SoapSeller(std::string strDBFile) {
 	m_hDB = std::make_shared<SQLite::Database>(strDBFile, SQLite::OPEN_READWRITE);
 }
 
+TgBot::ReplyKeyboardMarkup::Ptr SoapSeller::getMainMenuKBoard() {
+	TgBot::KeyboardButton::Ptr btnView, btnCart, btnOrder;
+	btnView		= std::make_shared<TgBot::KeyboardButton>();
+	btnCart		= std::make_shared<TgBot::KeyboardButton>();
+	btnOrder	= std::make_shared<TgBot::KeyboardButton>();
+
+	btnView->text	= "View Soaps";
+	btnCart->text	= "View Cart";
+	btnOrder->text	= "View Orders";
+
+	TgBot::ReplyKeyboardMarkup::Ptr pMainMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
+	std::vector<TgBot::KeyboardButton::Ptr> row0, row1, row2;
+	row0.push_back(btnView);
+	row1.push_back(btnCart);
+	row2.push_back(btnOrder);
+
+	pMainMenu->keyboard.push_back(row0);
+	pMainMenu->keyboard.push_back(row1);
+	pMainMenu->keyboard.push_back(row2);
+	return pMainMenu;
+}
+
 void SoapSeller::onStartCommand(std::shared_ptr<TgBot::Bot> pBot, TgBot::Message::Ptr pMessage, FILE *fp) {
 	fprintf(fp, "AURA: onStartCommand\n"); fflush(fp);
 	SQLite::Statement   query(*m_hDB, "SELECT * FROM User WHERE chat_id = ?");
-	query.bind(1, pMessage->chat->id);
+	long long llid = static_cast<long long>(pMessage->chat->id);
+	query.bind(1, llid);
 	if(!query.executeStep()) {
 		fprintf(fp, "AURA: New User %s\n", pMessage->from->firstName.c_str()); fflush(fp);
 		char sql[2048];

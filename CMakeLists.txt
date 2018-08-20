@@ -17,7 +17,7 @@ INCLUDE_DIRECTORIES(include)
 
 find_library(BOOST_SYSTEM NAMES boost_system HINTS "${MFCPP_DEPS_LIBS}/boost")
 find_library(BOOST_CHRONO NAMES boost_chrono HINTS "${MFCPP_DEPS_LIBS}/boost")
-find_library(BOOST_THREAD NAMES boost_thread-mt HINTS "${MFCPP_DEPS_LIBS}/boost")
+find_library(BOOST_THREAD NAMES boost_thread HINTS "${MFCPP_DEPS_LIBS}/boost")
 find_library(OPEN_SSL NAMES ssl HINTS "${MFCPP_DEPS_LIBS}/openssl")
 find_library(CRYPTO NAMES crypto HINTS "${MFCPP_DEPS_LIBS}/openssl")
 find_library(SQLITECPP NAMES SQLiteCpp HINTS "${MFCPP_DEPS_LIBS}/sqlitecpp")
@@ -31,4 +31,4 @@ endif()
 
 add_executable(SoapSeller src/Daemon.cpp src/SoapSeller.cpp)
 
-target_link_libraries(SoapSeller /usr/local/lib/libTgBot.a ${CMAKE_THREAD_LIBS_INIT} ${BOOST_THREAD} ${BOOST_SYSTEM} ${BOOST_CHRONO} ${OPEN_SSL} ${CRYPTO} ${CURL_LIBRARIES} ${DEPPREFIX}/lib/sqlitecpp/libSQLiteCpp.a ${DEPPREFIX}/lib/sqlitecpp/libsqlite3.a)
+target_link_libraries(SoapSeller /usr/local/lib/libTgBot.a ${CMAKE_THREAD_LIBS_INIT} ${BOOST_THREAD} ${BOOST_SYSTEM} ${BOOST_CHRONO} ${OPEN_SSL} ${CRYPTO} ${CURL_LIBRARIES} ${DEPPREFIX}/lib/sqlitecpp/libSQLiteCpp.a ${DEPPREFIX}/lib/sqlitecpp/libsqlite3.a pthread dl)
