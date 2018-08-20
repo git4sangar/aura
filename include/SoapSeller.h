@@ -15,6 +15,7 @@ public:
 
 	void onStartCommand(std::shared_ptr<TgBot::Bot> pBot, TgBot::Message::Ptr pMessage, FILE *fp);
 	void onViewCommand(std::shared_ptr<TgBot::Bot> pBot, TgBot::Message::Ptr pMessage, FILE *fp);
+	TgBot::ReplyKeyboardMarkup::Ptr getMainMenuKBoard();
 	
 
 	static std::string STR_MSG_DEFERRED_RELEASE;

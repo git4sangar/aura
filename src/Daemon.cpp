@@ -18,8 +18,8 @@
 
 #define AURA_BOT_TOKEN  "655366902:AAGEaKH0q1xXu0Lwd5C5HBDZsUnPTjn13X4"
 //#define THRAYA_BOT_TOKEN  "664320846:AAHffJ_8LG0W8eGCuYsrgkK4fOCj9j2FgTo"
-#define AURA_DB_FILE    "/Users/shankarv/sgn/uthra_01/sgn_uthra_01.db"
-#define AURA_LOG_FILE   "/Users/shankarv/sgn/proj/sgnaura/git/aura/build/aura_log.log"
+#define AURA_DB_FILE    "/home/ezvaish/sgn/proj/sgnaura/git/aura/sgn_uthra_01.db"
+#define AURA_LOG_FILE   "/home/ezvaish/sgn/proj/sgnaura/git/aura/build/aura_log.log"
 
 void AuraMainLoop(FILE *fp) {
    std::shared_ptr<TgBot::Bot> pBot = std::make_shared<TgBot::Bot>(AURA_BOT_TOKEN);
@@ -27,7 +27,9 @@ void AuraMainLoop(FILE *fp) {
    fprintf(fp, "AURA: Starting AuraMainLoop\n"); fflush(fp);
 
    pBot->getEvents().onCommand("start", [pBot, pSS, fp](TgBot::Message::Ptr pMsg) {
-      pBot->getApi().sendMessage(pMsg->chat->id, "Hi " + pMsg->from->firstName + ",\n" + SoapSeller::STR_MSG_DEFERRED_RELEASE);
+      pBot->getApi().sendMessage(pMsg->chat->id,
+                     "Hi " + pMsg->from->firstName + ",\n" + SoapSeller::STR_MSG_DEFERRED_RELEASE,
+                     false, 0, pSS->getMainMenuKBoard());
       fprintf(fp, "AURA: Received start command\n"); fflush(fp);
       pSS->onStartCommand(pBot, pMsg, fp);
    });
