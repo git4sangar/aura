@@ -9,7 +9,6 @@
 
 class SoapSeller {
 	std::shared_ptr<SQLite::Database> m_hDB;
-	static std::string STR_MSG_DEFERRED_RELEASE;
 public:
 	SoapSeller(std::string strDBFile);
 	~SoapSeller() {};
@@ -17,6 +16,8 @@ public:
 	void onStartCommand(std::shared_ptr<TgBot::Bot> pBot, TgBot::Message::Ptr pMessage, FILE *fp);
 	void onViewCommand(std::shared_ptr<TgBot::Bot> pBot, TgBot::Message::Ptr pMessage, FILE *fp);
 	
+
+	static std::string STR_MSG_DEFERRED_RELEASE;
 };
 
 #endif

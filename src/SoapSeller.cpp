@@ -34,7 +34,6 @@ void SoapSeller::onStartCommand(std::shared_ptr<TgBot::Bot> pBot, TgBot::Message
 	} else {
 		fprintf(fp, "AURA: User %s alreay existing\n", pMessage->from->firstName.c_str()); fflush(fp);
 	}
-	pBot->getApi().sendMessage(pMessage->chat->id, "Hi " + pMessage->from->firstName + ",\n" + SoapSeller::STR_MSG_DEFERRED_RELEASE);
 }
 
 void SoapSeller::onViewCommand(std::shared_ptr<TgBot::Bot> pBot, TgBot::Message::Ptr pMessage, FILE *fp) {

@@ -27,6 +27,8 @@ void AuraMainLoop(FILE *fp) {
    fprintf(fp, "AURA: Starting AuraMainLoop\n"); fflush(fp);
 
    pBot->getEvents().onCommand("start", [pBot, pSS, fp](TgBot::Message::Ptr pMsg) {
+      pBot->getApi().sendMessage(pMsg->chat->id, "Hi " + pMsg->from->firstName + ",\n" + SoapSeller::STR_MSG_DEFERRED_RELEASE);
+      fprintf(fp, "AURA: Received start command\n"); fflush(fp);
       pSS->onStartCommand(pBot, pMsg, fp);
    });
 
@@ -42,7 +44,7 @@ void AuraMainLoop(FILE *fp) {
          fprintf(fp, "AURA: Long poll started\n"); fflush(fp);
          longPoll.start();
       } catch (std::exception& e) {
-         fprintf(fp, "AURA: An exception occured: %s\n", e.what().c_str()); fflush(fp);
+         //fprintf(fp, "AURA: An exception occured: %s\n", e.what().c_str()); fflush(fp);
       }
    }
 }
