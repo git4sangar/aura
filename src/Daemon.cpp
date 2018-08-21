@@ -14,15 +14,26 @@
 #include <unistd.h>
 #include <vector>
 #include <tgbot/tgbot.h>
+#include "vigenere/encrypt.h"
 #include "SoapSeller.h"
 
-#define AURA_BOT_TOKEN  "655366902:AAGEaKH0q1xXu0Lwd5C5HBDZsUnPTjn13X4"
-//#define THRAYA_BOT_TOKEN  "664320846:AAHffJ_8LG0W8eGCuYsrgkK4fOCj9j2FgTo"
-#define AURA_DB_FILE    "/home/ezvaish/sgn/proj/sgnaura/git/aura/sgn_uthra_01.db"
-#define AURA_LOG_FILE   "/home/ezvaish/sgn/proj/sgnaura/git/aura/build/aura_log.log"
+// Stringify param x.
+// Step (01): Replaces the pattern MAKE_STR(x) with MAKE_STR(value-of-x)
+#define MAKE_STR(x)  _MAKE_STR(x)
+// Step (02): Replaces the pattern _MAKE_STR(value-of-x) with quotes-added-param, ie "value-of-x"
+#define _MAKE_STR(x) #x          // Adds quotes to the param
+
+#define AURA_BOT_TOKEN  "uPwIhbFxqA6avQhimCCNuHM9UohLrjB2voJXupoIngq y5ixTRdBGZL3oIMC"
+//#define THRAYA_BOT_TOKEN  "uPAHhbp2qklEvQhiniGSu3DGA PdqbZRtHiDDspfuEagpnurxx1MGWqbBIm8"
+#define AURA_DB_FILE    "/Users/shankarv/sgn/proj/sgnaura/git/aura/sgn_uthra_01.db"
+#define AURA_LOG_FILE   "/Users/shankarv/sgn/proj/sgnaura/git/aura/build/aura_log.log"
+
+std::string decode_string(std::string enc_msg, std::string key) {
+   return aura_decrypt(enc_msg, key);
+}
 
 void AuraMainLoop(FILE *fp) {
-   std::shared_ptr<TgBot::Bot> pBot = std::make_shared<TgBot::Bot>(AURA_BOT_TOKEN);
+   std::shared_ptr<TgBot::Bot> pBot = std::make_shared<TgBot::Bot>(decode_string(AURA_BOT_TOKEN, MAKE_STR(DECRYPT_KEY)));
    std::shared_ptr<SoapSeller> pSS  = std::make_shared<SoapSeller>(AURA_DB_FILE);
    fprintf(fp, "AURA: Starting AuraMainLoop\n"); fflush(fp);
 
