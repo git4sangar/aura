@@ -10,13 +10,24 @@
 #include <vector>
 #include <functional>
 
-#include "SoapSeller.h"
-
 std::string SoapSeller::STR_MSG_DEFERRED_RELEASE =
 	"I am the AuraSoap Bot & am getting ready now..!\nBear with me for \"just a few more days\",\nI'll intimate you...";
 
+static std::string SoapSeller::STR_TABLE_SOAP_COLUMN_NAME	= "name";
+
+
 SoapSeller::SoapSeller(std::string strDBFile) {
 	m_hDB = std::make_shared<SQLite::Database>(strDBFile, SQLite::OPEN_READWRITE);
+}
+
+void SoapSeller::onViewSoaps(std::shared_ptr<TgBot::Bot> pBot, TgBot::Message::Ptr pMessage, FILE *fp) {
+	fprintf(fp, "AURA: onViewSoaps\n"); fflush(fp);
+	SQLite::Statement   query(*m_hDB, "SELECT * FROM Soap");
+	if(query.executeStep()) {
+		int iLoop = 0;
+		while(!strcmp(STR_TABLE_SOAP_COLUMN_NAME, getColumn(iLoop).getName());
+		fprintf(fp, "AURA, Soap name %s\n", );
+	}
 }
 
 TgBot::ReplyKeyboardMarkup::Ptr SoapSeller::getMainMenuKBoard() {

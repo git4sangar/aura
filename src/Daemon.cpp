@@ -15,7 +15,10 @@
 #include <vector>
 #include <tgbot/tgbot.h>
 #include "vigenere/encrypt.h"
-#include "SoapSeller.h"
+#include "AuraButton.h"
+#include "StartButton.h"
+#include <map>
+#include "SQLiteCpp/SQLiteCpp.h"
 
 // Stringify param x.
 // Step (01): Replaces the pattern MAKE_STR(x) with MAKE_STR(value-of-x)
@@ -23,41 +26,70 @@
 // Step (02): Replaces the pattern _MAKE_STR(value-of-x) with quotes-added-param, ie "value-of-x"
 #define _MAKE_STR(x) #x          // Adds quotes to the param
 
+
+
 #define AURA_BOT_TOKEN  "uPwIhbFxqA6avQhimCCNuHM9UohLrjB2voJXupoIngq y5ixTRdBGZL3oIMC"
 //#define THRAYA_BOT_TOKEN  "uPAHhbp2qklEvQhiniGSu3DGA PdqbZRtHiDDspfuEagpnurxx1MGWqbBIm8"
-#define AURA_DB_FILE    "/Users/shankarv/sgn/proj/sgnaura/git/aura/sgn_uthra_01.db"
-#define AURA_LOG_FILE   "/Users/shankarv/sgn/proj/sgnaura/git/aura/build/aura_log.log"
+#define AURA_DB_FILE    "/home/ezvaish/sgn/proj/sgnaura/git/aura/sgn_uthra_01.db"
+#define AURA_LOG_FILE   "/home/ezvaish/sgn/proj/sgnaura/git/aura/build/aura_log.log"
+
 
 std::string decode_string(std::string enc_msg, std::string key) {
    return aura_decrypt(enc_msg, key);
 }
 
-void AuraMainLoop(FILE *fp) {
-   std::shared_ptr<TgBot::Bot> pBot = std::make_shared<TgBot::Bot>(decode_string(AURA_BOT_TOKEN, MAKE_STR(DECRYPT_KEY)));
-   std::shared_ptr<SoapSeller> pSS  = std::make_shared<SoapSeller>(AURA_DB_FILE);
-   fprintf(fp, "AURA: Starting AuraMainLoop\n"); fflush(fp);
 
-   pBot->getEvents().onCommand("start", [pBot, pSS, fp](TgBot::Message::Ptr pMsg) {
-      pBot->getApi().sendMessage(pMsg->chat->id,
-                     "Hi " + pMsg->from->firstName + ",\n" + SoapSeller::STR_MSG_DEFERRED_RELEASE,
-                     false, 0, pSS->getMainMenuKBoard());
+void AuraMainLoop(FILE *fp) {
+   fprintf(fp, "AURA: Starting AuraMainLoop\n"); fflush(fp);
+   std::shared_ptr<TgBot::Bot> pBot          = std::make_shared<TgBot::Bot>(decode_string(AURA_BOT_TOKEN, MAKE_STR(DECRYPT_KEY)));
+   std::shared_ptr<SQLite::Database> hDB     = std::make_shared<SQLite::Database>(AURA_DB_FILE, SQLite::OPEN_READWRITE);
+   std::map<std::string, std::shared_ptr<AuraButton>> kbButtons;
+
+   std::shared_ptr<StartButton> btnStart  = std::make_shared<StartButton>(hDB);
+   kbButtons["start"]                     = btnStart;
+
+
+   pBot->getEvents().onAnyMessage( [pBot, btnStart, kbButtons, fp](TgBot::Message::Ptr pMsg) {
+      fprintf(fp, "AURA: Received \"%s\" command\n",  pMsg->text.c_str()); fflush(fp);
+      std::map<std::string, std::shared_ptr<AuraButton>>::const_iterator itr;
+
+      itr = kbButtons.find(pMsg->text);
+      if(kbButtons.end() != itr) {
+         fprintf(fp, "AURA: Found \"%s\" button\n", pMsg->text.c_str()); fflush(fp);
+         itr->second->onClick(pMsg, fp);
+         pBot->getApi().sendMessage(pMsg->chat->id, itr->second->getMsg(), false, 0, itr->second->prepareMenu(kbButtons, fp));
+      } else {
+         fprintf(fp, "AURA: \"%s\" button missing\n", pMsg->text.c_str()); fflush(fp);
+      }
+   });
+   
+   pBot->getEvents().onCommand("start", [pBot, btnStart, kbButtons, fp](TgBot::Message::Ptr pMsg) {
       fprintf(fp, "AURA: Received start command\n"); fflush(fp);
-      pSS->onStartCommand(pBot, pMsg, fp);
+      std::map<std::string, std::shared_ptr<AuraButton>>::const_iterator itr;
+
+      itr = kbButtons.find("start");
+
+      if(kbButtons.end() != itr) {
+         fprintf(fp, "AURA: Found start button\n"); fflush(fp);
+         itr->second->onClick(pMsg, fp);
+         pBot->getApi().sendMessage(pMsg->chat->id,
+                        "Hi " + pMsg->from->firstName + ",\n" + itr->second->getMsg(),
+                        false, 0, itr->second->prepareMenu(kbButtons, fp));
+      } else {
+         fprintf(fp, "AURA: Start button missing\n"); fflush(fp);
+      }
    });
 
- 
    std::string strMsg = "AURA: Bot username " + pBot->getApi().getMe()->username;
-   //syslog(LOG_NOTICE, "%s ", strMsg.c_str());
    fprintf(fp, "AURA: Bot username %s\n", pBot->getApi().getMe()->username.c_str()); fflush(fp);
 
    TgBot::TgLongPoll longPoll(*pBot);
    while (true) {
       try {
-         //syslog(LOG_NOTICE, "AURA: Long poll started");
          fprintf(fp, "AURA: Long poll started\n"); fflush(fp);
          longPoll.start();
       } catch (std::exception& e) {
-         //fprintf(fp, "AURA: An exception occured: %s\n", e.what().c_str()); fflush(fp);
+         fprintf(fp, "AURA: An exception occured at longPoll\n"); fflush(fp);
       }
    }
 }
