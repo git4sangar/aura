@@ -13,7 +13,7 @@ std::string StartButton::STR_BTN_VIEW_CART		= "View Cart";
 std::string StartButton::STR_BTN_VIEW_ORDERS	= "View Orders";
 std::string StartButton::STR_MSG_DEFF_RELEASE	= "I am the AuraSoap Bot & am getting ready now..!\nBear with me for \"just a few more days\",\nI'll intimate you...";
 
-TgBot::ReplyKeyboardMarkup::Ptr StartButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>> listAuraBtns, FILE *fp) {
+TgBot::ReplyKeyboardMarkup::Ptr StartButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	TgBot::KeyboardButton::Ptr btnView, btnCart, btnOrder;
 	btnView		= std::make_shared<TgBot::KeyboardButton>();
 	btnCart		= std::make_shared<TgBot::KeyboardButton>();

@@ -38,43 +38,42 @@ std::string decode_string(std::string enc_msg, std::string key) {
    return aura_decrypt(enc_msg, key);
 }
 
-
 void AuraMainLoop(FILE *fp) {
    fprintf(fp, "AURA: Starting AuraMainLoop\n"); fflush(fp);
    std::shared_ptr<TgBot::Bot> pBot          = std::make_shared<TgBot::Bot>(decode_string(AURA_BOT_TOKEN, MAKE_STR(DECRYPT_KEY)));
    std::shared_ptr<SQLite::Database> hDB     = std::make_shared<SQLite::Database>(AURA_DB_FILE, SQLite::OPEN_READWRITE);
-   std::map<std::string, std::shared_ptr<AuraButton>> kbButtons;
+   std::map<std::string, std::shared_ptr<AuraButton>> auraButtons;
 
    std::shared_ptr<StartButton> btnStart  = std::make_shared<StartButton>(hDB);
-   kbButtons["start"]                     = btnStart;
+   auraButtons["start"]                   = btnStart;
 
 
-   pBot->getEvents().onAnyMessage( [pBot, btnStart, kbButtons, fp](TgBot::Message::Ptr pMsg) {
+   pBot->getEvents().onAnyMessage( [pBot, btnStart, &auraButtons, fp](TgBot::Message::Ptr pMsg) {
       fprintf(fp, "AURA: Received \"%s\" command\n",  pMsg->text.c_str()); fflush(fp);
       std::map<std::string, std::shared_ptr<AuraButton>>::const_iterator itr;
 
-      itr = kbButtons.find(pMsg->text);
-      if(kbButtons.end() != itr) {
+      itr = auraButtons.find(pMsg->text);
+      if(auraButtons.end() != itr) {
          fprintf(fp, "AURA: Found \"%s\" button\n", pMsg->text.c_str()); fflush(fp);
          itr->second->onClick(pMsg, fp);
-         pBot->getApi().sendMessage(pMsg->chat->id, itr->second->getMsg(), false, 0, itr->second->prepareMenu(kbButtons, fp));
+         pBot->getApi().sendMessage(pMsg->chat->id, itr->second->getMsg(), false, 0, itr->second->prepareMenu(auraButtons, fp));
       } else {
          fprintf(fp, "AURA: \"%s\" button missing\n", pMsg->text.c_str()); fflush(fp);
       }
    });
    
-   pBot->getEvents().onCommand("start", [pBot, btnStart, kbButtons, fp](TgBot::Message::Ptr pMsg) {
+   pBot->getEvents().onCommand("start", [pBot, btnStart, &auraButtons, fp](TgBot::Message::Ptr pMsg) {
       fprintf(fp, "AURA: Received start command\n"); fflush(fp);
       std::map<std::string, std::shared_ptr<AuraButton>>::const_iterator itr;
 
-      itr = kbButtons.find("start");
+      itr = auraButtons.find("start");
 
-      if(kbButtons.end() != itr) {
+      if(auraButtons.end() != itr) {
          fprintf(fp, "AURA: Found start button\n"); fflush(fp);
          itr->second->onClick(pMsg, fp);
          pBot->getApi().sendMessage(pMsg->chat->id,
                         "Hi " + pMsg->from->firstName + ",\n" + itr->second->getMsg(),
-                        false, 0, itr->second->prepareMenu(kbButtons, fp));
+                        false, 0, itr->second->prepareMenu(auraButtons, fp));
       } else {
          fprintf(fp, "AURA: Start button missing\n"); fflush(fp);
       }

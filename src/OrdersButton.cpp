@@ -3,7 +3,7 @@
 #include <iostream>
 #include <OrdersButton.h>
 
-TgBot::ReplyKeyboardMarkup::Ptr OrdersButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>> listAuraBtns, FILE *fp) {
+TgBot::ReplyKeyboardMarkup::Ptr OrdersButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	return nullptr;
 }
 
