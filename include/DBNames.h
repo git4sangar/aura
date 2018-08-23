@@ -1,9 +1,18 @@
 //sgn
 
-#define DB_TABLE_SOAP_COLUMN_ID			"soap_id"
-#define DB_TABLE_SOAP_COLUMN_NAME		"name"
-#define DB_TABLE_SOAP_COLUMN_WEIGHT		"weight"
-#define DB_TABLE_SOAP_COLUMN_DESC		"description"
-#define DB_TABLE_SOAP_COLUMN_PIC_ID		"pic_id"
-#define DB_TABLE_SOAP_COLUMN_STOCK		"stock"
-#define DB_TABLE_SOAP_COLUMN_PRICE		"price"
+#ifndef __DB_NAMES_H__
+#define __DB_NAMES_H__
+
+#include <iostream>
+class DBNames {
+public:
+	static std::string DB_TABLE_SOAP_COLUMN_ID;
+	static std::string DB_TABLE_SOAP_COLUMN_NAME;
+	static std::string DB_TABLE_SOAP_COLUMN_WEIGHT;
+	static std::string DB_TABLE_SOAP_COLUMN_DESC;
+	static std::string DB_TABLE_SOAP_COLUMN_PIC_ID;
+	static std::string DB_TABLE_SOAP_COLUMN_STOCK;
+	static std::string DB_TABLE_SOAP_COLUMN_PRICE;
+};
+
+#endif

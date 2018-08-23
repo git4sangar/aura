@@ -8,13 +8,14 @@
 #include <SoapButton.h>
 #include <DBNames.h>
 #include <FlavoursButton.h>
+#include <DBNames.h>
 
 
 std::string SoapButton::STR_CHOOSE_A_SOAP = "Choose a soap from below list";
 
 TgBot::ReplyKeyboardMarkup::Ptr SoapButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	std::vector<TgBot::KeyboardButton::Ptr> btnSoaps;
-	TgBot::KeyboardButton::Ptr btnSoap;
+	TgBot::KeyboardButton::Ptr btnSoap, btnMMenu;
 	std::shared_ptr<FlavoursButton> flvrsBtn = std::make_shared<FlavoursButton>(getDBHandle());
 
 	for(auto &soapName : soapNames) {
@@ -26,10 +27,18 @@ TgBot::ReplyKeyboardMarkup::Ptr SoapButton::prepareMenu(std::map<std::string, st
 
 	TgBot::ReplyKeyboardMarkup::Ptr pFlavoursMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
 	std::vector<TgBot::KeyboardButton::Ptr> row;
-	for(auto &btnSoap : btnSoaps) {
-		row.push_back(btnSoap);
+	for(auto &btnSoap2 : btnSoaps) {
+		row.push_back(btnSoap2);
 		pFlavoursMenu->keyboard.push_back(row);
+		row.clear();
 	}
+	btnMMenu 			= std::make_shared<TgBot::KeyboardButton>();
+	btnMMenu->text			= "Main Menu";
+	listAuraBtns["Main Menu"]	= listAuraBtns["start"];
+	row.clear();
+	row.push_back(btnMMenu);
+	pFlavoursMenu->keyboard.push_back(row);
+
 	return pFlavoursMenu;
 }
 
@@ -40,10 +49,9 @@ void SoapButton::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 	int		iColNo		= 0;
 	bool	isColSet	= false;
 	while(query.executeStep()) {
-
 		//	First find the column number for Soap Names
 		while(!isColSet && iColNo < query.getColumnCount()) {
-			if(DB_TABLE_SOAP_COLUMN_NAME == query.getColumnName(iColNo)) {
+			if(DBNames::DB_TABLE_SOAP_COLUMN_NAME == query.getColumnName(iColNo)) {
 				isColSet = true;
 				break;
 			}
