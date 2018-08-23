@@ -6,17 +6,29 @@
 #include <iostream>
 #include <stdio.h>
 #include <memory>
+
 #include <tgbot/tgbot.h>
-#include "AuraButton.h"
-#include "SQLiteCpp/SQLiteCpp.h"
+#include <AuraButton.h>
+#include <SQLiteCpp/SQLiteCpp.h>
+#include <DBInterface.h>
+#include <tgbot/tgbot.h>
 
 class AuraButton {
 protected:
-	std::shared_ptr<SQLite::Database> m_hDB;
+	DBInterface::Ptr m_hDB;
 public:
-	AuraButton(std::shared_ptr<SQLite::Database> hDB) : m_hDB{hDB} {}
+	AuraButton(std::shared_ptr<DBInterface> hDB) : m_hDB{hDB} {}
 	~AuraButton() {}
-	std::shared_ptr<SQLite::Database> getDBHandle() {return m_hDB;}
+	DBInterface::Ptr getDBHandle() {return m_hDB;}
+
+	std::vector<TgBot::KeyboardButton::Ptr> getMainMenu() {
+		std::vector<TgBot::KeyboardButton::Ptr> row;
+		TgBot::KeyboardButton::Ptr kbBtnMMenu;
+		kbBtnMMenu 			= std::make_shared<TgBot::KeyboardButton>();
+		kbBtnMMenu->text	= "Main Menu";
+		row.push_back(kbBtnMMenu);
+		return row;
+	}
 
 	virtual std::string getMsg() = 0;
 	virtual TgBot::ReplyKeyboardMarkup::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) = 0;

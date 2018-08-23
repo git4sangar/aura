@@ -5,10 +5,11 @@
 
 #include <iostream>
 #include "AuraButton.h"
+#include <DBInterface.h>
 
 class CartButton : public AuraButton {
 public:
-	CartButton(std::shared_ptr<SQLite::Database> hDB) : AuraButton(hDB) {}
+	CartButton(DBInterface::Ptr hDB) : AuraButton(hDB) {}
 	virtual ~CartButton() {}
 
 	std::string getMsg() { return std::string();}

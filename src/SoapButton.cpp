@@ -6,59 +6,51 @@
 #include <SQLiteCpp/SQLiteCpp.h>
 
 #include <SoapButton.h>
-#include <DBNames.h>
+#include <DBInterface.h>
 #include <FlavoursButton.h>
-#include <DBNames.h>
+#include <BuyButton.h>
 
 
-std::string SoapButton::STR_CHOOSE_A_SOAP = "Choose a soap from below list";
+std::string SoapButton::STR_CHOOSE_A_SOAP = "Choose a flavour from below list";
 
 TgBot::ReplyKeyboardMarkup::Ptr SoapButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
-	std::vector<TgBot::KeyboardButton::Ptr> btnSoaps;
-	TgBot::KeyboardButton::Ptr btnSoap, btnMMenu;
-	std::shared_ptr<FlavoursButton> flvrsBtn = std::make_shared<FlavoursButton>(getDBHandle());
+	std::vector<TgBot::KeyboardButton::Ptr>	kbBtnFlvrs, kbBuyBtns;
+	TgBot::KeyboardButton::Ptr 				kbBtnFlvr, kbBtnBuy;
 
-	for(auto &soapName : soapNames) {
-		btnSoap 				= std::make_shared<TgBot::KeyboardButton>();
-		btnSoap->text			= soapName;
-		listAuraBtns[soapName]	= flvrsBtn;
-		btnSoaps.push_back(btnSoap);
+	std::shared_ptr<FlavoursButton> auraBtnFlvr	= std::make_shared<FlavoursButton>(getDBHandle());
+	std::shared_ptr<BuyButton> auraBtnBuy		= std::make_shared<BuyButton>(getDBHandle());
+
+	for(auto &flavour : flvrNames) {
+		kbBtnFlvr 				= std::make_shared<TgBot::KeyboardButton>();
+		kbBtnFlvr->text			= "View " + flavour;
+		kbBtnFlvrs.push_back(kbBtnFlvr);
+		listAuraBtns[kbBtnFlvr->text]	= auraBtnFlvr;
+
+		kbBtnBuy		= std::make_shared<TgBot::KeyboardButton>();
+		kbBtnBuy->text	= "Buy " + flavour;
+		kbBuyBtns.push_back(kbBtnBuy);
+		listAuraBtns[kbBtnBuy->text]	= auraBtnBuy;
 	}
 
 	TgBot::ReplyKeyboardMarkup::Ptr pFlavoursMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
 	std::vector<TgBot::KeyboardButton::Ptr> row;
-	for(auto &btnSoap2 : btnSoaps) {
-		row.push_back(btnSoap2);
+	int iLoop = 0;
+	for(auto &kbBtn : kbBtnFlvrs) {
+		row.push_back(kbBtn);
+		row.push_back(kbBuyBtns[iLoop++]);
 		pFlavoursMenu->keyboard.push_back(row);
 		row.clear();
 	}
-	btnMMenu 			= std::make_shared<TgBot::KeyboardButton>();
-	btnMMenu->text			= "Main Menu";
-	listAuraBtns["Main Menu"]	= listAuraBtns["start"];
+	/*kbBtnMMenu 		= std::make_shared<TgBot::KeyboardButton>();
+	kbBtnMMenu->text	= "Main Menu";
 	row.clear();
-	row.push_back(btnMMenu);
-	pFlavoursMenu->keyboard.push_back(row);
+	row.push_back(kbBtnMMenu);*/
+	pFlavoursMenu->keyboard.push_back(getMainMenu());
 
 	return pFlavoursMenu;
 }
 
 void SoapButton::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 	fprintf(fp, "AURA: \"%s\" onClick\n", pMsg->text.c_str()); fflush(fp);
-	SQLite::Statement   query(*m_hDB, "SELECT * FROM Soap;");
-
-	int		iColNo		= 0;
-	bool	isColSet	= false;
-	while(query.executeStep()) {
-		//	First find the column number for Soap Names
-		while(!isColSet && iColNo < query.getColumnCount()) {
-			if(DBNames::DB_TABLE_SOAP_COLUMN_NAME == query.getColumnName(iColNo)) {
-				isColSet = true;
-				break;
-			}
-			iColNo++;
-		}
-		const std::string soapName = query.getColumn(iColNo);
-		fprintf(fp, "AURA: Queried a flavour \"%s\" from Soap Table\n", soapName.c_str());
-		soapNames.push_back(soapName);
-	}
+	flvrNames = getDBHandle()->getFlavours();
 }

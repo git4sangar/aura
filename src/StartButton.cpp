@@ -42,19 +42,5 @@ TgBot::ReplyKeyboardMarkup::Ptr StartButton::prepareMenu(std::map<std::string, s
 
 void StartButton::onClick(TgBot::Message::Ptr pMessage, FILE *fp) {
 	fprintf(fp, "AURA: StartButton onClick\n"); fflush(fp);
-	SQLite::Statement   query(*m_hDB, "SELECT * FROM User WHERE chat_id = ?");
-	long long llid = static_cast<long long>(pMessage->chat->id);
-	query.bind(1, llid);
-	if(!query.executeStep()) {
-		fprintf(fp, "AURA: New User %s\n", pMessage->from->firstName.c_str()); fflush(fp);
-		char sql[2048];
-		//	A new user. So add him / her to database
-		SQLite::Transaction transaction(*m_hDB);
-		sprintf(sql, "INSERT INTO User (first_name, last_name, chat_id) VALUES (\"%s\", \"%s\", %ld)", 
-			pMessage->from->firstName.c_str(), pMessage->from->lastName.c_str(), pMessage->chat->id);
-		int nb = m_hDB->exec(sql);
-		transaction.commit();
-	} else {
-		fprintf(fp, "AURA: User %s alreay existing\n", pMessage->from->firstName.c_str()); fflush(fp);
-	}
+	getDBHandle()->addNewUser(pMessage->chat->id, pMessage->from->firstName, pMessage->from->lastName);
 }

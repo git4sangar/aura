@@ -43,7 +43,9 @@ add_executable(SoapSeller
 	src/CartButton.cpp
 	src/OrdersButton.cpp
 	src/FlavoursButton.cpp
-	src/DBNames.cpp
+	src/DBInterface.cpp
+	src/BuyButton.cpp
+	src/QuantityButton.cpp
 	)
 
 target_link_libraries(SoapSeller /usr/local/lib/libTgBot.a ${CMAKE_THREAD_LIBS_INIT} ${BOOST_THREAD} ${BOOST_SYSTEM} ${BOOST_CHRONO} ${OPEN_SSL} ${CRYPTO} ${CURL_LIBRARIES} ${DEPPREFIX}/lib/sqlitecpp/libSQLiteCpp.a ${DEPPREFIX}/lib/sqlitecpp/libsqlite3.a pthread dl)

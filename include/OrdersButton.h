@@ -9,7 +9,7 @@
 class OrdersButton : public AuraButton {
 
 public:
-	OrdersButton(std::shared_ptr<SQLite::Database> hDB) : AuraButton(hDB) {}
+	OrdersButton(DBInterface::Ptr hDB) : AuraButton(hDB) {}
 	virtual ~OrdersButton() {}
 
 	std::string getMsg() { return std::string();}

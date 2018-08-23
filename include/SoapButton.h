@@ -8,10 +8,11 @@
 #include <vector>
 
 class SoapButton : public AuraButton {
-	std::vector<std::string> soapNames;
+	std::vector<std::string> flvrNames;
 	static std::string STR_CHOOSE_A_SOAP;
+
 public:
-	SoapButton(std::shared_ptr<SQLite::Database> hDB) : AuraButton(hDB) {}
+	SoapButton(DBInterface::Ptr hDB) : AuraButton(hDB) {}
 	virtual ~SoapButton() {}
 
 	std::string getMsg() { return STR_CHOOSE_A_SOAP;}

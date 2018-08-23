@@ -13,7 +13,7 @@ class StartButton : public AuraButton {
 	static std::string STR_MSG_DEFF_RELEASE;
 
 public:
-	StartButton(std::shared_ptr<SQLite::Database> hDB) : AuraButton(hDB) {}
+	StartButton(DBInterface::Ptr hDB) : AuraButton(hDB) {}
 	virtual ~StartButton() {}
 
 	std::string getMsg() { return STR_MSG_DEFF_RELEASE;}

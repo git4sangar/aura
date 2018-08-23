@@ -28,12 +28,12 @@
 
 
 
-#define AURA_BOT_TOKEN  "uPwIhbFxqA6avQhimCCNuHM9UohLrjB2voJXupoIngq y5ixTRdBGZL3oIMC"
-//#define THRAYA_BOT_TOKEN  "uPAHhbp2qklEvQhiniGSu3DGA PdqbZRtHiDDspfuEagpnurxx1MGWqbBIm8"
-//#define AURA_DB_FILE    "/home/ezvaish/sgn/proj/sgnaura/git/aura/sgn_uthra_01.db"
-//#define AURA_LOG_FILE   "/home/ezvaish/sgn/proj/sgnaura/git/aura/build/aura_log.log"
-#define AURA_DB_FILE    "/Users/shankarv/sgn/proj/sgnaura/git/aura/sgn_uthra_01.db"
-#define AURA_LOG_FILE   "/Users/shankarv/sgn/proj/sgnaura/git/aura/build/aura_log.log"
+#define AURA_BOT_TOKEN     "uPwIhbFxqA6avQhimCCNuHM9UohLrjB2voJXupoIngq y5ixTRdBGZL3oIMC"
+#define THRAYA_BOT_TOKEN   "uPAHhbp2qklEvQhiniGSu3DGA PdqbZRtHiDDspfuEagpnurxx1MGWqbBIm8"
+#define AURA_DB_FILE    "/home/ezvaish/sgn/proj/sgnaura/git/aura/sgn_uthra_01.db"
+#define AURA_LOG_FILE   "/home/ezvaish/sgn/proj/sgnaura/git/aura/build/aura_log.log"
+//#define AURA_DB_FILE    "/Users/shankarv/sgn/proj/sgnaura/git/aura/sgn_uthra_01.db"
+//#define AURA_LOG_FILE   "/Users/shankarv/sgn/proj/sgnaura/git/aura/build/aura_log.log"
 
 
 std::string decode_string(std::string enc_msg, std::string key) {
@@ -43,28 +43,33 @@ std::string decode_string(std::string enc_msg, std::string key) {
 void AuraMainLoop(FILE *fp) {
    fprintf(fp, "AURA: Starting AuraMainLoop\n"); fflush(fp);
    std::shared_ptr<TgBot::Bot> pBot          = std::make_shared<TgBot::Bot>(decode_string(AURA_BOT_TOKEN, MAKE_STR(DECRYPT_KEY)));
-   std::shared_ptr<SQLite::Database> hDB     = std::make_shared<SQLite::Database>(AURA_DB_FILE, SQLite::OPEN_READWRITE);
+   DBInterface::Ptr hDB       = std::make_shared<DBInterface>(std::string(AURA_DB_FILE), fp);
    std::map<std::string, std::shared_ptr<AuraButton>> auraButtons;
 
    std::shared_ptr<StartButton> btnStart  = std::make_shared<StartButton>(hDB);
    auraButtons["start"]                   = btnStart;
+   auraButtons["Main Menu"]               = btnStart;
 
-
-   pBot->getEvents().onAnyMessage( [pBot, btnStart, &auraButtons, fp](TgBot::Message::Ptr pMsg) {
+   pBot->getEvents().onAnyMessage( [pBot, &auraButtons, fp](TgBot::Message::Ptr pMsg) {
       fprintf(fp, "AURA: Received \"%s\" command\n",  pMsg->text.c_str()); fflush(fp);
       std::map<std::string, std::shared_ptr<AuraButton>>::const_iterator itr;
 
       itr = auraButtons.find(pMsg->text);
       if(auraButtons.end() != itr) {
+         TgBot::ReplyKeyboardMarkup::Ptr pMenu;
          fprintf(fp, "AURA: Found \"%s\" button\n", pMsg->text.c_str()); fflush(fp);
          itr->second->onClick(pMsg, fp);
-         pBot->getApi().sendMessage(pMsg->chat->id, itr->second->getMsg(), false, 0, itr->second->prepareMenu(auraButtons, fp));
+
+         pMenu = itr->second->prepareMenu(auraButtons, fp);
+         if(pMenu) {
+            pBot->getApi().sendMessage(pMsg->chat->id, itr->second->getMsg(), false, 0, pMenu);
+         }
       } else {
          fprintf(fp, "AURA: \"%s\" button missing\n", pMsg->text.c_str()); fflush(fp);
       }
    });
-   
-   pBot->getEvents().onCommand("start", [pBot, btnStart, &auraButtons, fp](TgBot::Message::Ptr pMsg) {
+
+   pBot->getEvents().onCommand("start", [pBot, &auraButtons, fp](TgBot::Message::Ptr pMsg) {
       fprintf(fp, "AURA: Received start command\n"); fflush(fp);
       std::map<std::string, std::shared_ptr<AuraButton>>::const_iterator itr;
 
@@ -90,7 +95,7 @@ void AuraMainLoop(FILE *fp) {
          fprintf(fp, "AURA: Long poll started\n"); fflush(fp);
          longPoll.start();
       } catch (std::exception& e) {
-         fprintf(fp, "AURA: An exception occured at longPoll\n"); fflush(fp);
+         fprintf(fp, "AURA: An exception occured at longPoll %s\n", e.what()); fflush(fp);
       }
    }
 }
