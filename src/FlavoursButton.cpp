@@ -11,5 +11,4 @@ TgBot::ReplyKeyboardMarkup::Ptr FlavoursButton::prepareMenu(std::map<std::string
 
 void FlavoursButton::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 	fprintf(fp, "AURA: \"%s\" onClick\n", pMsg->text.c_str()); fflush(fp);
-	std::vector<std::string> flvrNames	= getDBHandle()->getFlavours();
 }

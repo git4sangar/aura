@@ -4,11 +4,14 @@
 #define __SOAP_BUTTON__
 
 #include <iostream>
-#include <AuraButton.h>
 #include <vector>
 
+#include <DBInterface.h>
+#include <AuraButton.h>
+
+
 class SoapButton : public AuraButton {
-	std::vector<std::string> flvrNames;
+	std::vector<Soap::Ptr> m_SoapFlvrs;
 	static std::string STR_CHOOSE_A_SOAP;
 
 public:

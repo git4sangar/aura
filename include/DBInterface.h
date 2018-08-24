@@ -13,7 +13,7 @@
 class Soap {
 public:
 	typedef std::shared_ptr<Soap> Ptr;
-	int m_Soap_id, m_Weight, m_Price, m_PicId, m_Stock;
+	unsigned int m_SoapId, m_Weight, m_Price, m_PicId, m_Stock;
 	std::string m_Name, m_Desc;
 };
 
@@ -28,7 +28,7 @@ public:
 	~DBInterface();
 
 	Soap::Ptr getSoapByName(std::string name);
-	std::vector<std::string> getFlavours();
+	std::vector<Soap::Ptr> getFlavours();
 	bool addNewUser(
 			int64_t chatId,
 			std::string fname,

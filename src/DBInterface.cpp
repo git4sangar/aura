@@ -24,7 +24,26 @@ Soap::Ptr DBInterface::getSoapByName(std::string name) {
 	return nullptr;
 }
 
-std::vector<std::string> DBInterface::getFlavours() {
+std::vector<Soap::Ptr> DBInterface::getFlavours() {
+	std::vector<Soap::Ptr> soaps;
+	Soap::Ptr soap;
+
+	SQLite::Statement   query(*m_hDB, "SELECT * FROM Soap;");
+	while(query.executeStep()) {
+		soap = std::make_shared<Soap>();
+		soap->m_SoapId		= query.getColumn(DB_TABLE_SOAP_COLUMN_ID.c_str()).getUInt();
+		soap->m_Weight		= query.getColumn(DB_TABLE_SOAP_COLUMN_WEIGHT.c_str()).getUInt();
+		soap->m_Price		= query.getColumn(DB_TABLE_SOAP_COLUMN_PRICE.c_str()).getUInt();
+		soap->m_PicId		= query.getColumn(DB_TABLE_SOAP_COLUMN_PIC_ID.c_str()).getUInt();
+		soap->m_Stock		= query.getColumn(DB_TABLE_SOAP_COLUMN_STOCK.c_str()).getUInt();
+		soap->m_Name		= query.getColumn(DB_TABLE_SOAP_COLUMN_NAME.c_str()).getString();
+		soap->m_Desc		= query.getColumn(DB_TABLE_SOAP_COLUMN_DESC.c_str()).getString();
+		soaps.push_back(soap);
+	}
+	return soaps;
+}
+
+/*std::vector<std::string> DBInterface::getFlavours() {
 	int		iColNo		= 0;
 	bool	isColSet	= false;
 	std::vector<std::string> flvrNames;
@@ -46,7 +65,7 @@ std::vector<std::string> DBInterface::getFlavours() {
 		}
 	}
 	return flvrNames;
-}
+}*/
 
 
 bool DBInterface::addNewUser(int64_t chatId, std::string fname, std::string lname, int64_t mobile, std::string address, std::string email) {

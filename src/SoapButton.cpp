@@ -20,15 +20,16 @@ TgBot::ReplyKeyboardMarkup::Ptr SoapButton::prepareMenu(std::map<std::string, st
 	std::shared_ptr<FlavoursButton> auraBtnFlvr	= std::make_shared<FlavoursButton>(getDBHandle());
 	std::shared_ptr<BuyButton> auraBtnBuy		= std::make_shared<BuyButton>(getDBHandle());
 
-	for(auto &flavour : flvrNames) {
+	for(auto &flavour : m_SoapFlvrs) {
 		kbBtnFlvr 				= std::make_shared<TgBot::KeyboardButton>();
-		kbBtnFlvr->text			= "View " + flavour;
+		kbBtnFlvr->text			= "View " + flavour->m_Name + " soap";
 		kbBtnFlvrs.push_back(kbBtnFlvr);
 		listAuraBtns[kbBtnFlvr->text]	= auraBtnFlvr;
 
 		kbBtnBuy		= std::make_shared<TgBot::KeyboardButton>();
-		kbBtnBuy->text	= "Buy " + flavour;
+		kbBtnBuy->text	= "Buy " + flavour->m_Name + " soap";
 		kbBuyBtns.push_back(kbBtnBuy);
+		auraBtnBuy->setEvent(kbBtnBuy->text, flavour->m_SoapId);
 		listAuraBtns[kbBtnBuy->text]	= auraBtnBuy;
 	}
 
@@ -41,10 +42,6 @@ TgBot::ReplyKeyboardMarkup::Ptr SoapButton::prepareMenu(std::map<std::string, st
 		pFlavoursMenu->keyboard.push_back(row);
 		row.clear();
 	}
-	/*kbBtnMMenu 		= std::make_shared<TgBot::KeyboardButton>();
-	kbBtnMMenu->text	= "Main Menu";
-	row.clear();
-	row.push_back(kbBtnMMenu);*/
 	pFlavoursMenu->keyboard.push_back(getMainMenu());
 
 	return pFlavoursMenu;
@@ -52,5 +49,5 @@ TgBot::ReplyKeyboardMarkup::Ptr SoapButton::prepareMenu(std::map<std::string, st
 
 void SoapButton::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 	fprintf(fp, "AURA: \"%s\" onClick\n", pMsg->text.c_str()); fflush(fp);
-	flvrNames = getDBHandle()->getFlavours();
+	m_SoapFlvrs = getDBHandle()->getFlavours();
 }

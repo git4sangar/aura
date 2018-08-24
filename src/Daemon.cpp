@@ -92,6 +92,7 @@ void AuraMainLoop(FILE *fp) {
    TgBot::TgLongPoll longPoll(*pBot);
    while (true) {
       try {
+         pBot->getApi().deleteWebhook();
          fprintf(fp, "AURA: Long poll started\n"); fflush(fp);
          longPoll.start();
       } catch (std::exception& e) {
