@@ -57,11 +57,10 @@ void BuyButton::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 		m_MsgToUser		= "Choose quantity";
 		fprintf(fp, "AURA: flavor selected %s\n", m_Soap->m_Name.c_str()); fflush(fp);
 	}
-
-	std::map<std::string, int>::iterator itQnty = m_QntyEvents.find(pMsg->text);
-	if(m_QntyEvents.end() != itQnty) {
+	else if(m_QntyEvents.end() != m_QntyEvents.find(pMsg->text)) {
 		fprintf(fp, "AURA: Getting Quantity %d\n", m_QntyEvents[pMsg->text]); fflush(fp);
-		//	Add to cart the quantity and price
+		User::Ptr user = getDBHandle()->getUserForChatId(pMsg->chat->id);
+		getDBHandle()->addToCart(m_Soap->m_SoapId, user->m_UserId, m_QntyEvents[pMsg->text]);
 		m_MsgToUser		= "Your cart is added with " +
 							std::to_string(m_QntyEvents[pMsg->text]) +
 							std::string(" ") +
