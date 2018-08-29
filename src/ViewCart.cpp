@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 #include <SQLiteCpp/SQLiteCpp.h>
-#include <QuantityButton.h>
+#include <ShippingAddress.h>
 #include <StartButton.h>
 
 std::string ViewCart::STR_BTN_EMPTY_CART	= "Empty Cart";
@@ -20,11 +20,11 @@ TgBot::ReplyKeyboardMarkup::Ptr ViewCart::prepareMenu(std::map<std::string, std:
 	kbBtnEmpty->text	= STR_BTN_EMPTY_CART;
 	kbBtnChkOut->text	= STR_BTN_PURCHASE;
 
-	listAuraBtns[STR_BTN_EMPTY_CART]	= shared_from_this();;
-	listAuraBtns[STR_BTN_PURCHASE]		= std::make_shared<QuantityButton>(getDBHandle());
+	listAuraBtns[STR_BTN_EMPTY_CART]	= shared_from_this();
+	listAuraBtns[STR_BTN_PURCHASE]		= std::make_shared<ShippingAddress>(getDBHandle());
 
 	TgBot::ReplyKeyboardMarkup::Ptr pViewCartMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
-	std::vector<TgBot::KeyboardButton::Ptr> row0, row1, row2;
+	std::vector<TgBot::KeyboardButton::Ptr> row0, row1;
 	row0.push_back(kbBtnChkOut);
 	row1.push_back(kbBtnEmpty);
 

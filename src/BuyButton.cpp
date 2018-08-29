@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <SQLiteCpp/SQLiteCpp.h>
+#include <StartButton.h>
 
 #include <BuyButton.h>
 #include <DBInterface.h>
@@ -18,7 +19,6 @@ TgBot::ReplyKeyboardMarkup::Ptr BuyButton::prepareMenu(std::map<std::string, std
 	std::vector<TgBot::KeyboardButton::Ptr> qntyBtns;
 	TgBot::KeyboardButton::Ptr 				qntyBtn;
 
-	std::shared_ptr<QuantityButton> auraBtnQnty	= std::make_shared<QuantityButton>(getDBHandle());
 	int iLoop1 = 0, iLoop2, iRun = 0;
 	for(iLoop1 = 0, iRun = 0; iLoop1 < (m_Rows*m_Cols); iLoop1++) {
 		qntyBtn			= std::make_shared<TgBot::KeyboardButton>();
@@ -40,7 +40,16 @@ TgBot::ReplyKeyboardMarkup::Ptr BuyButton::prepareMenu(std::map<std::string, std
 		pQntyMenu->keyboard.push_back(row);
 	}
 
-	pQntyMenu->keyboard.push_back(getMainMenu());
+	TgBot::KeyboardButton::Ptr kbBtnVwSoap, kbBtnVwCart;
+	row.clear();
+	kbBtnVwSoap 		= std::make_shared<TgBot::KeyboardButton>();
+	kbBtnVwSoap->text	= StartButton::STR_BTN_VIEW_SOAPS;
+	row.push_back(kbBtnVwSoap);
+	kbBtnVwCart 		= std::make_shared<TgBot::KeyboardButton>();
+	kbBtnVwCart->text	= StartButton::STR_BTN_VIEW_CART;
+	row.push_back(kbBtnVwCart);
+	pQntyMenu->keyboard.push_back(row);
+
 	return pQntyMenu;
 }
 
