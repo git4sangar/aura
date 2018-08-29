@@ -66,6 +66,11 @@ void AuraMainLoop(FILE *fp) {
          }
       } else {
          fprintf(fp, "AURA: \"%s\" button missing\n", pMsg->text.c_str()); fflush(fp);
+         itr = auraButtons.find("start");
+         itr->second->onClick(pMsg, fp);
+         pBot->getApi().sendMessage(pMsg->chat->id,
+                        "Hi " + pMsg->from->firstName + ",\n" + itr->second->getMsg(),
+                        false, 0, itr->second->prepareMenu(auraButtons, fp));
       }
    });
 

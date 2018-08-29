@@ -39,13 +39,28 @@ public:
 	static std::string DB_TABLE_SOAP_COLUMN_PRICE;
 };
 
+class Invoice {
+public:
+	typedef std::shared_ptr<Invoice> Ptr;
+
+	static std::string DB_TABLE_INVOICE_COLUMN_ID;
+	static std::string DB_TABLE_INVOICE_COLUMN_NO;
+};
+
 enum class CartStatus{PENDING, PAID, DELIVERED, NOTA};
 
 class Cart {
 public:
 	typedef std::shared_ptr<Cart> Ptr;
-	unsigned int m_CartId, m_SoapId, m_UserId, m_Qnty;
+	unsigned int m_CartId, m_SoapId, m_UserId, m_Qnty, m_InvoiceId;
 	CartStatus m_Status;
+
+	static std::string DB_TABLE_CART_COLUMN_CART_ID;
+	static std::string DB_TABLE_CART_COLUMN_SOAP_ID;
+	static std::string DB_TABLE_CART_COLUMN_USER_ID;
+	static std::string DB_TABLE_CART_COLUMN_STATUS;
+	static std::string DB_TABLE_CART_COLUMN_QNTY;
+	static std::string DB_TABLE_CART_COLUMN_INVOICE_ID;
 };
 
 class DBInterface {
@@ -58,11 +73,14 @@ public:
 	DBInterface(std::string dbFileName, FILE *fp);
 	~DBInterface();
 
-	Soap::Ptr getSoapByName(std::string name);
+	Soap::Ptr getSoapById(unsigned int soapId);
 	std::vector<Soap::Ptr> getFlavours();
 	User::Ptr getUserForChatId(unsigned int chatId);
 	void addToCart(unsigned int soapId, unsigned int userId, unsigned int qnty, CartStatus stat = CartStatus::PENDING);
 	int getIntStatus(CartStatus stat);
+	std::vector<Cart::Ptr> getUserCart(unsigned int chatId);
+	unsigned int generateInvoiceNo();
+	void emptyCartForUser(unsigned int chatId);
 	bool addNewUser(
 			int64_t chatId,
 			std::string fname,

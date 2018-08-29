@@ -4,7 +4,7 @@
 #include "AuraButton.h"
 #include "StartButton.h"
 #include "SoapButton.h"
-#include "CartButton.h"
+#include "ViewCart.h"
 #include "OrdersButton.h"
 
 
@@ -25,7 +25,7 @@ TgBot::ReplyKeyboardMarkup::Ptr StartButton::prepareMenu(std::map<std::string, s
 
 	//	Overwrite any previous values at the index
 	listAuraBtns[STR_BTN_VIEW_SOAPS]	= std::make_shared<SoapButton>(getDBHandle());
-	listAuraBtns[STR_BTN_VIEW_CART]		= std::make_shared<CartButton>(getDBHandle());
+	listAuraBtns[STR_BTN_VIEW_CART]		= std::make_shared<ViewCart>(getDBHandle());
 	listAuraBtns[STR_BTN_VIEW_ORDERS]	= std::make_shared<OrdersButton>(getDBHandle());
 
 	TgBot::ReplyKeyboardMarkup::Ptr pMainMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();

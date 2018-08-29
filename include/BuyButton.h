@@ -23,7 +23,7 @@ class BuyButton :
 	std::map<std::string, int> m_BuyEvents;
 
 	//	Button name and quantity of recently-chosen-soap by User
-	std::map<std::string, int> m_QntyEvents;
+	std::map<std::string, std::tuple<unsigned int, unsigned int>> m_QntyEvents;
 
 	std::string m_MsgToUser;
 
