@@ -19,6 +19,7 @@
 #include "StartButton.h"
 #include <map>
 #include <SQLiteCpp/SQLiteCpp.h>
+#include <ShippingAddress.h>
 
 // Stringify param x.
 // Step (01): Replaces the pattern MAKE_STR(x) with MAKE_STR(value-of-x)
@@ -52,6 +53,10 @@ void AuraMainLoop(FILE *fp) {
 
    pBot->getEvents().onAnyMessage( [pBot, &auraButtons, fp](TgBot::Message::Ptr pMsg) {
       fprintf(fp, "AURA: Received \"%s\" command\n",  pMsg->text.c_str()); fflush(fp);
+      if(pMsg->contact) {
+         pMsg->text = ShippingAddress::STR_BTN_CONTACT;
+      }
+
       std::map<std::string, std::shared_ptr<AuraButton>>::const_iterator itr;
 
       itr = auraButtons.find(pMsg->text);

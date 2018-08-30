@@ -63,6 +63,12 @@ public:
 	static std::string DB_TABLE_CART_COLUMN_INVOICE_ID;
 };
 
+/*class Shipping {
+public:
+	typedef std::shared_ptr<Shipping> Ptr;
+	unsigned int m_Flat
+};*/
+
 class DBInterface {
 	std::shared_ptr<SQLite::Database> m_hDB;
 	FILE *m_Fp;
@@ -81,6 +87,7 @@ public:
 	std::vector<Cart::Ptr> getUserCart(unsigned int chatId);
 	unsigned int generateInvoiceNo();
 	void emptyCartForUser(unsigned int chatId);
+	void updateMobileNo(unsigned int chatId, std::string mobileNo);
 	bool addNewUser(
 			int64_t chatId,
 			std::string fname,

@@ -38,7 +38,23 @@ DBInterface::DBInterface(std::string dbFileName, FILE *fp) {
 
 DBInterface::~DBInterface() {}
 
+void DBInterface::updateMobileNo(unsigned int chatId, std::string strMobileNo) {
+	fprintf(m_Fp, "AURA: updateMobileNo\n"); fflush(m_Fp);
+	unsigned int mobileNo;
+	SQLite::Transaction transaction(*m_hDB);
+
+	std::stringstream ss(strMobileNo);
+	ss >> mobileNo;
+
+	ss.str(std::string());
+	ss << "UPDATE User set " << User::DB_TABLE_USER_COLUMN_MOBILE << " = " << mobileNo <<
+		"WHERE " << User::DB_TABLE_USER_COLUMN_CHAT_ID << " = " << chatId << ";";
+	m_hDB->exec(ss.str().c_str());
+	transaction.commit();
+}
+
 Soap::Ptr DBInterface::getSoapById(unsigned int soapId) {
+	fprintf(m_Fp, "AURA: getSoapById\n"); fflush(m_Fp);
 	Soap::Ptr soap = nullptr;
 	std::stringstream ss;
 	ss << "SELECT * from Soap WHERE soap_id = " << soapId << ";";
@@ -76,6 +92,7 @@ int DBInterface::getIntStatus(CartStatus stat) {
 }
 
 std::vector<Soap::Ptr> DBInterface::getFlavours() {
+	fprintf(m_Fp, "AURA: getFlavours\n"); fflush(m_Fp);
 	std::vector<Soap::Ptr> soaps;
 	Soap::Ptr soap;
 
@@ -95,6 +112,7 @@ std::vector<Soap::Ptr> DBInterface::getFlavours() {
 }
 
 User::Ptr DBInterface::getUserForChatId(unsigned int chatId) {
+	fprintf(m_Fp, "AURA: getUserForChatId\n"); fflush(m_Fp);
 	User::Ptr user = std::make_shared<User>();
 	SQLite::Statement   query(*m_hDB, "SELECT * FROM User WHERE chat_id = ?");
 	long long llid = static_cast<long long>(chatId);

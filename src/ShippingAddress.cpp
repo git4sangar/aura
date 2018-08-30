@@ -13,19 +13,33 @@
 	std::string ShippingAddress::STR_BTN_SSM	= "SSM Nagar";
 	std::string ShippingAddress::STR_BTN_BRKFLD	= "Navins Brookfield";
 	std::string ShippingAddress::STR_BTN_GARUDA	= "Garuda Avenue";
+	std::string ShippingAddress::STR_BTN_CONTACT= "Contact";
+
+TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::shareContactMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+	TgBot::KeyboardButton::Ptr btnContact	= std::make_shared<TgBot::KeyboardButton>();
+	btnContact->requestContact	= true;
+	btnContact->text	= "Your Mobile no pls...";
+	listAuraBtns[ShippingAddress::STR_BTN_CONTACT] = shared_from_this();
+	std::vector<TgBot::KeyboardButton::Ptr> row;
+	row.push_back(btnContact);
+	TgBot::ReplyKeyboardMarkup::Ptr pContactsMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
+	pContactsMenu->keyboard.push_back(row);
+	pContactsMenu->keyboard.push_back(getMainMenu());
+	return pContactsMenu;
+}
 
 TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFlatMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA: \"ShippingAddress::renderFlatMenu\" rendering\n"); fflush(fp);
 	TgBot::KeyboardButton::Ptr kbBtnFlat;
 	std::vector<TgBot::KeyboardButton::Ptr> kbBtnFlats;
 
-	m_Rows = 4;
-	m_Cols = 5;
+	m_Rows = 5;
+	m_Cols = 4;
 
 	int iLoop1 = 0, iLoop2 = 0, iRun = 0;
-	for(iLoop1 = 0, iRun = 1; iLoop1 < (m_Rows*m_Cols); iLoop1++, iRun++) {
+	for(iLoop1 = 0, iRun = (m_FloorNo * 100)+1; iLoop1 < (m_Rows*m_Cols); iLoop1++, iRun++) {
 		kbBtnFlat					= std::make_shared<TgBot::KeyboardButton>();
-		kbBtnFlat->text				= std::to_string(iRun);
+		kbBtnFlat->text				= m_Cache + " " + std::to_string(iRun);
 		m_Flats[kbBtnFlat->text]	= std::make_tuple(m_Cache, iRun);
 		listAuraBtns[kbBtnFlat->text]	= shared_from_this();
 		kbBtnFlats.push_back(kbBtnFlat);
@@ -34,7 +48,6 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFlatMenu(std::map<std::st
 	TgBot::ReplyKeyboardMarkup::Ptr pFlatsMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
 	std::vector<TgBot::KeyboardButton::Ptr> row;
 
-	//	Add other Floor numbers
 	for(iLoop1 = 0, iRun = 0; iLoop1 < m_Rows; iLoop1++) {
 		row.clear();
 		for(iLoop2 = 0; iLoop2 < m_Cols; iLoop2++) {
@@ -213,6 +226,13 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::prepareMenu(std::map<std::strin
 		case MenuRenderer::FLAT_NO:
 			pMenu = renderFlatMenu(listAuraBtns, fp);
 		break;
+		case MenuRenderer::CONTACT:
+			pMenu = shareContactMenu(listAuraBtns, fp);
+		break;
+		case MenuRenderer::DONE:
+			pMenu = std::make_shared<TgBot::ReplyKeyboardMarkup>();
+			pMenu->keyboard.push_back(getMainMenu());
+		break;
 	}
 	return pMenu;
 }
@@ -235,8 +255,7 @@ std::string ShippingAddress::floorNoToString(int iFloorNo) {
 
 void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 	fprintf(fp, "AURA: \"%s\" onClick\n", pMsg->text.c_str()); fflush(fp);
-	std::map<std::string, std::tuple<std::string,int>>::iterator itrBlkNos;
-	std::map<std::string, std::tuple<std::string,int>>::iterator itrFlrNos;
+	std::map<std::string, std::tuple<std::string,int>>::iterator itr;
 	
 	//	Get the Apartment name first
 	if(ViewCart::STR_BTN_PURCHASE == pMsg->text) {
@@ -258,23 +277,40 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 	}
 
 	//	Get the Floor
-	else if(m_BlockNos.end() != (itrBlkNos = m_BlockNos.find(pMsg->text))) {
+	else if(m_BlockNos.end() != (itr = m_BlockNos.find(pMsg->text))) {
 		m_RenderMenu	= MenuRenderer::FLOOR;
 		//	Parse the block number & cache
-		std::string strBlockNo = std::get<0>(itrBlkNos->second);
-		int iBlkNo = std::get<1>(itrBlkNos->second);
+		std::string strBlockNo = std::get<0>(itr->second);
+		int iBlkNo = std::get<1>(itr->second);
 		if(0 < iBlkNo) strBlockNo += std::to_string(iBlkNo);
 		m_Cache = strBlockNo;
 		m_StrMsg		= "Shipping Address: Choose your Floor";
 	}
 
 	//	Get the Flat number
-	else if(m_Floors.end() != (itrFlrNos  = m_Floors.find(pMsg->text))) {
+	else if(m_Floors.end() != (itr  = m_Floors.find(pMsg->text))) {
 		m_RenderMenu	= MenuRenderer::FLAT_NO;
 		//	Parse the Floor number & cache
-		std::string strBlkNFlr = std::get<0>(itrFlrNos->second);
-		int iFlrNo = std::get<1>(itrFlrNos->second);
-		m_Cache = strBlkNFlr + std::string(" ") + floorNoToString(iFlrNo);
-		m_StrMsg		= "Shipping Address: Choose your Flat No\nEg: For 101, Choose 1 & so on";
+		m_Cache 	= std::get<0>(itr->second);
+		m_FloorNo	= std::get<1>(itr->second);
+		m_StrMsg	= "Shipping Address: Choose your Flat No\nIf it's 3rd floor, flat no 6, Choose 306 & so on";
+	}
+
+	//	Put the address in database & get contact
+	else if(m_Flats.end() != (itr = m_Flats.find(pMsg->text))) {
+		m_RenderMenu	= MenuRenderer::CONTACT;
+		m_StrMsg		= "Share your contact";
+	}
+
+	// Put the mobile no in database & go to payments
+	else if(ShippingAddress::STR_BTN_CONTACT == pMsg->text) {
+		if(pMsg->contact) getDBHandle()->updateMobileNo(pMsg->chat->id, pMsg->contact->phoneNumber);
+		m_RenderMenu	= MenuRenderer::DONE;
+		m_StrMsg		= std::string("Please pay using Paytm or Tez to 91 98406 25165.\n") +
+							std::string("Dont forget to mention the Order number: ") +
+							std::to_string(getDBHandle()->generateInvoiceNo()) +
+							std::string(" while paying.\n") +
+							std::string("You will receive an OTP within 24 hrs once your payment is successfully received.\n") +
+							std::string("You can choose to pay on delivery too.");
 	}
 }

@@ -11,13 +11,13 @@
 #include <AuraButton.h>
 #include <DBInterface.h>
 
-enum class MenuRenderer {APARTMENT, BLOCK, BLOCK_NO, FLOOR, FLAT_NO};
+enum class MenuRenderer {APARTMENT, BLOCK, BLOCK_NO, FLOOR, FLAT_NO, CONTACT, DONE};
 
 class ShippingAddress :
 		public AuraButton,
 		public std::enable_shared_from_this<ShippingAddress> {
 	std::string m_StrMsg, m_Cache;
-	int m_Rows, m_Cols;
+	int m_Rows, m_Cols, m_FloorNo;
 	std::vector<std::string> m_Apts;
 	std::vector<std::string> m_Blocks;
 	std::map<std::string, std::tuple<std::string,int>> m_BlockNos;
@@ -30,10 +30,11 @@ class ShippingAddress :
 	TgBot::ReplyKeyboardMarkup::Ptr renderBlockNoMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
 	TgBot::ReplyKeyboardMarkup::Ptr renderFloorMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
 	TgBot::ReplyKeyboardMarkup::Ptr renderFlatMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
+	TgBot::ReplyKeyboardMarkup::Ptr shareContactMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
 	std::string floorNoToString(int iFloorNo);
 public:
 	typedef std::shared_ptr<ShippingAddress> Ptr;
-	ShippingAddress(std::shared_ptr<DBInterface> hDB) : AuraButton(hDB) {}
+	ShippingAddress(std::shared_ptr<DBInterface> hDB) : AuraButton(hDB) {m_Rows = m_Cols = m_FloorNo = 0;}
 	virtual ~ShippingAddress() {}
 
 	std::string getMsg() { return m_StrMsg;}
@@ -43,7 +44,7 @@ public:
 	static std::string STR_BTN_SSM;
 	static std::string STR_BTN_BRKFLD;
 	static std::string STR_BTN_GARUDA;
-	static std::string STR_BTN_SKIP;
+	static std::string STR_BTN_CONTACT;
 };
 
 
