@@ -20,13 +20,17 @@ class ShippingAddress :
 	int m_Rows, m_Cols;
 	std::vector<std::string> m_Apts;
 	std::vector<std::string> m_Blocks;
-	std::map<std::string, int> m_BlockNos;
-	std::map<std::string, std::tuple<int, int>> m_Flats;
+	std::map<std::string, std::tuple<std::string,int>> m_BlockNos;
+	std::map<std::string, std::tuple<std::string,int>> m_Floors;
+	std::map<std::string, std::tuple<std::string,int>> m_Flats;
 	MenuRenderer m_RenderMenu;
 
 	TgBot::ReplyKeyboardMarkup::Ptr renderAptMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
 	TgBot::ReplyKeyboardMarkup::Ptr renderBlockMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
 	TgBot::ReplyKeyboardMarkup::Ptr renderBlockNoMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
+	TgBot::ReplyKeyboardMarkup::Ptr renderFloorMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
+	TgBot::ReplyKeyboardMarkup::Ptr renderFlatMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
+	std::string floorNoToString(int iFloorNo);
 public:
 	typedef std::shared_ptr<ShippingAddress> Ptr;
 	ShippingAddress(std::shared_ptr<DBInterface> hDB) : AuraButton(hDB) {}
