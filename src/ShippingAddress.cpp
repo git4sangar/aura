@@ -308,7 +308,7 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 		m_RenderMenu	= MenuRenderer::DONE;
 		m_StrMsg		= std::string("Please pay using Paytm or Tez to 91 98406 25165.\n") +
 							std::string("Dont forget to mention the Order number: ") +
-							std::to_string(getDBHandle()->generateInvoiceNo()) +
+							std::to_string(getDBHandle()->generateOrderNo()) +
 							std::string(" while paying.\n") +
 							std::string("You will receive an OTP within 24 hrs once your payment is successfully received.\n") +
 							std::string("You can choose to pay on delivery too.");
