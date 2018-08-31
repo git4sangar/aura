@@ -20,16 +20,21 @@
 	std::string User::DB_TABLE_USER_COLUMN_ADDRRESS		= "address";
 	std::string User::DB_TABLE_USER_COLUMN_CHAT_ID		= "chat_id";
 	std::string User::DB_TABLE_USER_COLUMN_MOBILE		= "mobile";
-
-	std::string Invoice::DB_TABLE_INVOICE_COLUMN_ID		= "invoice_id";
-	std::string Invoice::DB_TABLE_INVOICE_COLUMN_NO		= "invoice_no";
+	std::string User::DB_TABLE_USER_COLUMN_ORDER_NO		= "invoice_no";
 
 	std::string Cart::DB_TABLE_CART_COLUMN_CART_ID		= "cart_id";
 	std::string Cart::DB_TABLE_CART_COLUMN_SOAP_ID		= "soap_id";
 	std::string Cart::DB_TABLE_CART_COLUMN_USER_ID		= "user_id";
 	std::string Cart::DB_TABLE_CART_COLUMN_STATUS		= "status";
 	std::string Cart::DB_TABLE_CART_COLUMN_QNTY			= "quantity";
-	std::string Cart::DB_TABLE_CART_COLUMN_INVOICE_ID	= "invoice_id";
+	std::string Cart::DB_TABLE_CART_COLUMN_ORDER_NO		= "invoice_id";
+
+	std::string Shipping::DB_TABLE_SHIPPING_COLUMN_SHIP_ID	= "ship_id";
+	std::string Shipping::DB_TABLE_SHIPPING_COLUMN_USER_ID	= "user_id";
+	std::string Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME	= "apt_name";
+	std::string Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO	= "block_no";
+	std::string Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO	= "flat_no";
+	std::string Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO	= "order_no";
 
 DBInterface::DBInterface(std::string dbFileName, FILE *fp) {
 	m_hDB   = std::make_shared<SQLite::Database>(dbFileName, SQLite::OPEN_READWRITE);
@@ -38,6 +43,7 @@ DBInterface::DBInterface(std::string dbFileName, FILE *fp) {
 
 DBInterface::~DBInterface() {}
 
+//	Updates the mobile number in User Table
 void DBInterface::updateMobileNo(unsigned int chatId, std::string strMobileNo) {
 	fprintf(m_Fp, "AURA: updateMobileNo\n"); fflush(m_Fp);
 	unsigned int mobileNo;
@@ -183,37 +189,39 @@ std::vector<Cart::Ptr> DBInterface::getUserCart(unsigned int chatId) {
 		item->m_SoapId		= query.getColumn(Cart::DB_TABLE_CART_COLUMN_SOAP_ID.c_str()).getUInt();
 		item->m_UserId		= query.getColumn(Cart::DB_TABLE_CART_COLUMN_USER_ID.c_str()).getUInt();
 		item->m_Qnty		= query.getColumn(Cart::DB_TABLE_CART_COLUMN_QNTY.c_str()).getUInt();
-		item->m_InvoiceId	= query.getColumn(Cart::DB_TABLE_CART_COLUMN_INVOICE_ID.c_str()).getUInt();
+		item->m_InvoiceId	= query.getColumn(Cart::DB_TABLE_CART_COLUMN_ORDER_NO.c_str()).getUInt();
 		item->m_Status		= CartStatus::PENDING;
 		items.push_back(item);
 	}
 	return items;
 }
 
-unsigned int DBInterface::generateInvoiceNo() {
+unsigned int DBInterface::generateOrderNo() {
+	fprintf(m_Fp, "AURA: generateOrderNo\n"); fflush(m_Fp);
 	int invoice_no = 0;
-	fprintf(m_Fp, "AURA: generateInvoiceNo\n"); fflush(m_Fp);
 	std::stringstream ss;
-	ss << "SELECT MAX(" << Invoice::DB_TABLE_INVOICE_COLUMN_NO << ") from Invoice;";
+	ss << "SELECT MAX(" << User::DB_TABLE_USER_COLUMN_ORDER_NO << ") from User;";
 	SQLite::Statement query(*m_hDB, ss.str());
 	if(query.executeStep()) {
-		ss.str(std::string()); ss << "MAX(" << Invoice::DB_TABLE_INVOICE_COLUMN_NO << ")";
+		ss.str(std::string()); ss << "MAX(" << User::DB_TABLE_USER_COLUMN_ORDER_NO << ")";
 		invoice_no = query.getColumn(ss.str().c_str()).getUInt();
 	}
 	return invoice_no + 1;
 }
 
-bool DBInterface::addNewUser(int64_t chatId, std::string fname, std::string lname, int64_t mobile, std::string address, std::string email) {
-	SQLite::Statement   query(*m_hDB, "SELECT * FROM User WHERE chat_id = ?");
-	long long llid = static_cast<long long>(chatId);
-	query.bind(1, llid);
+bool DBInterface::addNewUser(int64_t chatId, std::string fname, std::string lname, int64_t mobile) {
+	fprintf(m_Fp, "AURA: addNewUser\n"); fflush(m_Fp);
+	unsigned int order_no = generateOrderNo();
+	std::stringstream ss;
+	ss << "SELECT * FROM User WHERE " << User::DB_TABLE_USER_COLUMN_CHAT_ID << " = " << chatId;
+	SQLite::Statement   query(*m_hDB, ss.str());
 	if(!query.executeStep()) {
 		fprintf(m_Fp, "AURA: New User %s\n", fname.c_str()); fflush(m_Fp);
 		char sql[2048];
 		//	A new user. So add him / her to database
 		SQLite::Transaction transaction(*m_hDB);
-		sprintf(sql, "INSERT INTO User (first_name, last_name, chat_id) VALUES (\"%s\", \"%s\", %ld)", 
-			fname.c_str(), lname.c_str(), chatId);
+		sprintf(sql, "INSERT INTO User (first_name, last_name, chat_id, order_no) VALUES (\"%s\", \"%s\", %ld, %ld)", 
+			fname.c_str(), lname.c_str(), chatId, order_no);
 		int nb = m_hDB->exec(sql);
 		transaction.commit();
 	} else {
