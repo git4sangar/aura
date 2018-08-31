@@ -68,7 +68,6 @@ void BuyButton::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 	}
 	else if(m_QntyEvents.end() != m_QntyEvents.find(pMsg->text)) {
 		fprintf(fp, "AURA: Getting Quantity %d\n", std::get<1>(m_QntyEvents[pMsg->text])); fflush(fp);
-		User::Ptr user = getDBHandle()->getUserForChatId(pMsg->chat->id);
 		std::vector<Soap::Ptr> flvrs = getDBHandle()->getFlavours();
 		int iSoapId 	= std::get<0>(m_QntyEvents[pMsg->text]);
 		for(auto &flvr : flvrs) {
@@ -76,7 +75,7 @@ void BuyButton::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 				m_Soap = flvr;
 		}
 
-		getDBHandle()->addToCart(m_Soap->m_SoapId, user->m_UserId, std::get<1>(m_QntyEvents[pMsg->text]));
+		getDBHandle()->addToCart(m_Soap->m_SoapId, pMsg->chat->id, std::get<1>(m_QntyEvents[pMsg->text]));
 		m_MsgToUser		= "Your cart is added with " +
 							std::to_string(std::get<1>(m_QntyEvents[pMsg->text])) +
 							std::string(" ") +

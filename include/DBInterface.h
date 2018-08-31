@@ -13,7 +13,7 @@
 class User {
 public:
 	typedef std::shared_ptr<User> Ptr;
-	unsigned int m_UserId, m_ChatId, m_Mobile;
+	unsigned int m_UserId, m_ChatId, m_Mobile, m_OrderNo;
 	std::string m_FName, m_LName, m_Address;
 
 	static std::string DB_TABLE_USER_COLUMN_ID;
@@ -22,6 +22,7 @@ public:
 	static std::string DB_TABLE_USER_COLUMN_ADDRRESS;
 	static std::string DB_TABLE_USER_COLUMN_CHAT_ID;
 	static std::string DB_TABLE_USER_COLUMN_MOBILE;
+	static std::string DB_TABLE_USER_COLUMN_ORDER_NO;
 };
 
 class Soap {
@@ -43,8 +44,7 @@ class Invoice {
 public:
 	typedef std::shared_ptr<Invoice> Ptr;
 
-	static std::string DB_TABLE_INVOICE_COLUMN_ID;
-	static std::string DB_TABLE_INVOICE_COLUMN_NO;
+	static std::string DB_TABLE_INVOICE_ORDER_NO;
 };
 
 enum class CartStatus{PENDING, PAID, DELIVERED, NOTA};
@@ -52,7 +52,7 @@ enum class CartStatus{PENDING, PAID, DELIVERED, NOTA};
 class Cart {
 public:
 	typedef std::shared_ptr<Cart> Ptr;
-	unsigned int m_CartId, m_SoapId, m_UserId, m_Qnty, m_InvoiceId;
+	unsigned int m_CartId, m_SoapId, m_UserId, m_Qnty, m_OrderNo;
 	CartStatus m_Status;
 
 	static std::string DB_TABLE_CART_COLUMN_CART_ID;
@@ -60,14 +60,22 @@ public:
 	static std::string DB_TABLE_CART_COLUMN_USER_ID;
 	static std::string DB_TABLE_CART_COLUMN_STATUS;
 	static std::string DB_TABLE_CART_COLUMN_QNTY;
-	static std::string DB_TABLE_CART_COLUMN_INVOICE_ID;
+	static std::string DB_TABLE_CART_COLUMN_ORDER_NO;
 };
 
-/*class Shipping {
+class Shipping {
 public:
 	typedef std::shared_ptr<Shipping> Ptr;
-	unsigned int m_Flat
-};*/
+	unsigned int m_ShippingId, m_UserId, m_FlatNo, m_OrderNo;
+	std::string m_AptName, m_BlockNo;
+
+	static std::string DB_TABLE_SHIPPING_COLUMN_SHIP_ID;
+	static std::string DB_TABLE_SHIPPING_COLUMN_USER_ID;
+	static std::string DB_TABLE_SHIPPING_COLUMN_APT_NAME;
+	static std::string DB_TABLE_SHIPPING_COLUMN_BLOCK_NO;
+	static std::string DB_TABLE_SHIPPING_COLUMN_FLAT_NO;
+	static std::string DB_TABLE_SHIPPING_COLUMN_ORDER_NO;
+};
 
 class DBInterface {
 	std::shared_ptr<SQLite::Database> m_hDB;
@@ -82,19 +90,19 @@ public:
 	Soap::Ptr getSoapById(unsigned int soapId);
 	std::vector<Soap::Ptr> getFlavours();
 	User::Ptr getUserForChatId(unsigned int chatId);
-	void addToCart(unsigned int soapId, unsigned int userId, unsigned int qnty, CartStatus stat = CartStatus::PENDING);
+	void addToCart(unsigned int soapId, unsigned int chatId, unsigned int qnty, CartStatus stat = CartStatus::PENDING);
 	int getIntStatus(CartStatus stat);
 	std::vector<Cart::Ptr> getUserCart(unsigned int chatId);
-	unsigned int generateInvoiceNo();
+	unsigned int generateOrderNo();
+	void addToShipping(unsigned int chatId, std::string aptName = "aptName", std::string blkNo = "blkNo", unsigned int flatNo = 0);
 	void emptyCartForUser(unsigned int chatId);
+	unsigned int getOrderNoForUser(unsigned int chatId);
 	void updateMobileNo(unsigned int chatId, std::string mobileNo);
 	bool addNewUser(
 			int64_t chatId,
 			std::string fname,
 			std::string lname = "",
-			int64_t mobile = 0,
-			std::string address = "",
-			std::string email = ""
+			int64_t mobile = 0
 		);
 };
 
