@@ -265,6 +265,7 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 
 	//	Get the Block Letter
 	else if(std::find(m_Apts.begin(), m_Apts.end(), pMsg->text) != m_Apts.end()) {
+		getDBHandle()->addAptNameToShipping(pMsg->chat->id, pMsg->text);
 		m_RenderMenu	= MenuRenderer::BLOCK;
 		m_StrMsg		= "Shipping Address: Choose your Block Letter\nEg: For C13, Choose C";
 	}
@@ -284,6 +285,7 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 		int iBlkNo = std::get<1>(itr->second);
 		if(0 < iBlkNo) strBlockNo += std::to_string(iBlkNo);
 		m_Cache = strBlockNo;
+		getDBHandle()->addBlockNoToShipping(pMsg->chat->id, m_Cache);
 		m_StrMsg		= "Shipping Address: Choose your Floor";
 	}
 
@@ -298,6 +300,7 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 
 	//	Put the address in database & get contact
 	else if(m_Flats.end() != (itr = m_Flats.find(pMsg->text))) {
+		getDBHandle()->addFlatNoToShipping(pMsg->chat->id, std::get<1>(itr->second));
 		m_RenderMenu	= MenuRenderer::CONTACT;
 		m_StrMsg		= "Share your contact";
 	}

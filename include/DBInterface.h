@@ -94,7 +94,9 @@ public:
 	int getIntStatus(CartStatus stat);
 	std::vector<Cart::Ptr> getUserCart(unsigned int chatId);
 	unsigned int generateOrderNo();
-	void addToShipping(unsigned int chatId, std::string aptName = "aptName", std::string blkNo = "blkNo", unsigned int flatNo = 0);
+	void addBlockNoToShipping(unsigned int chatId, std::string blkNo);
+	void addFlatNoToShipping(unsigned int chatId, unsigned int flatNo);
+	void addAptNameToShipping(unsigned int chatId, std::string aptName);
 	void emptyCartForUser(unsigned int chatId);
 	unsigned int getOrderNoForUser(unsigned int chatId);
 	void updateMobileNo(unsigned int chatId, std::string mobileNo);

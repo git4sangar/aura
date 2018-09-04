@@ -44,7 +44,7 @@ DBInterface::DBInterface(std::string dbFileName, FILE *fp) {
 DBInterface::~DBInterface() {}
 
 void DBInterface::updateMobileNo(unsigned int chatId, std::string strMobileNo) {
-	fprintf(m_Fp, "AURA: updateMobileNo\n"); fflush(m_Fp);
+	fprintf(m_Fp, "AURA: updateMobileNo: %s\n", strMobileNo.c_str()); fflush(m_Fp);
 	unsigned int mobileNo;
 	SQLite::Transaction transaction(*m_hDB);
 
@@ -54,12 +54,13 @@ void DBInterface::updateMobileNo(unsigned int chatId, std::string strMobileNo) {
 	ss.str(std::string());
 	ss << "UPDATE User set " << User::DB_TABLE_USER_COLUMN_MOBILE << " = " << mobileNo <<
 		"WHERE " << User::DB_TABLE_USER_COLUMN_CHAT_ID << " = " << chatId << ";";
+	fprintf(m_Fp, "sql updateMobileNo %s\n", ss.str().c_str());
 	m_hDB->exec(ss.str().c_str());
 	transaction.commit();
 }
 
 Soap::Ptr DBInterface::getSoapById(unsigned int soapId) {
-	fprintf(m_Fp, "AURA: getSoapById\n"); fflush(m_Fp);
+	fprintf(m_Fp, "AURA: getSoapById: %d\n", soapId); fflush(m_Fp);
 	Soap::Ptr soap = nullptr;
 	std::stringstream ss;
 	ss << "SELECT * from Soap WHERE soap_id = " << soapId << ";";
@@ -96,8 +97,85 @@ int DBInterface::getIntStatus(CartStatus stat) {
 	return iStat;
 }
 
-void DBInterface::addToShipping(unsigned int chatId, std::string aptName, std::string blkNo, unsigned int flatNo) {
+void DBInterface::addBlockNoToShipping(unsigned int chatId, std::string blkNo) {
+	fprintf(m_Fp, "AURA: addBlockNoToShipping blkNo: %s\n", blkNo.c_str()); fflush(m_Fp);
+	User::Ptr user = getUserForChatId(chatId);
+	std::stringstream ss;
+	ss << "SELECT * from Shipping WHERE " <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << user->m_OrderNo << ";";
+	SQLite::Statement   query(*m_hDB, ss.str());
+	if(query.executeStep()) {
+		SQLite::Transaction transaction(*m_hDB);
+		ss.str(std::string());
+		ss << "UPDATE Shipping set " <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO << " = \"" << blkNo << "\" WHERE "<<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << user->m_OrderNo << ";";
+		m_hDB->exec(ss.str());
+		transaction.commit();
+	} else {
+		SQLite::Transaction transaction(*m_hDB);
+		ss.str(std::string());
+		ss << "INSERT INTO Shipping (" <<
+				Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO << ", " <<
+				Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO <<  ") VALUES (\"" <<
+				blkNo << "\", " << user->m_OrderNo << ");";
+		m_hDB->exec(ss.str());
+		transaction.commit();
+	}
+}
 
+void DBInterface::addFlatNoToShipping(unsigned int chatId, unsigned int flatNo) {
+	fprintf(m_Fp, "AURA: addFlatNoToShipping flatNo: %d\n", flatNo); fflush(m_Fp);
+	User::Ptr user = getUserForChatId(chatId);
+	std::stringstream ss;
+	ss << "SELECT * from Shipping WHERE " <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << user->m_OrderNo << ";";
+	SQLite::Statement   query(*m_hDB, ss.str());
+	if(query.executeStep()) {
+		SQLite::Transaction transaction(*m_hDB);
+		ss.str(std::string());
+		ss << "UPDATE Shipping set " <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO << " = " << flatNo << " WHERE "<<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << user->m_OrderNo << ";";
+		m_hDB->exec(ss.str());
+		transaction.commit();
+	} else {
+		SQLite::Transaction transaction(*m_hDB);
+		ss.str(std::string());
+		ss << "INSERT INTO Shipping (" <<
+				Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO << ", " <<
+				Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO <<  ") VALUES (" <<
+				flatNo << ", " << user->m_OrderNo << ");";
+		m_hDB->exec(ss.str());
+		transaction.commit();
+	}
+}
+
+void DBInterface::addAptNameToShipping(unsigned int chatId, std::string aptName) {
+	fprintf(m_Fp, "AURA: addAptNameToShipping aptName: %s\n", aptName.c_str()); fflush(m_Fp);
+	User::Ptr user = getUserForChatId(chatId);
+	std::stringstream ss;
+	ss << "SELECT * from Shipping WHERE " <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << user->m_OrderNo << ";";
+	SQLite::Statement   query(*m_hDB, ss.str());
+	if(query.executeStep()) {
+		SQLite::Transaction transaction(*m_hDB);
+		ss.str(std::string());
+		ss << "UPDATE Shipping set " <<
+				Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME << " = \"" << aptName << "\" WHERE "<<
+				Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << user->m_OrderNo << ";";
+		m_hDB->exec(ss.str());
+		transaction.commit();
+	} else {
+		SQLite::Transaction transaction(*m_hDB);
+		ss.str(std::string());
+		ss << " INSERT INTO Shipping (" << Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME << ", " <<
+				Shipping::DB_TABLE_SHIPPING_COLUMN_USER_ID << ", " <<
+				Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO <<  ") VALUES (\"" <<
+				aptName << "\", " << user->m_UserId << ", " << user->m_OrderNo << ");";
+		m_hDB->exec(ss.str());
+		transaction.commit();
+	}
 }
 
 std::vector<Soap::Ptr> DBInterface::getFlavours() {
@@ -121,18 +199,19 @@ std::vector<Soap::Ptr> DBInterface::getFlavours() {
 }
 
 User::Ptr DBInterface::getUserForChatId(unsigned int chatId) {
-	fprintf(m_Fp, "AURA: getUserForChatId\n"); fflush(m_Fp);
+	fprintf(m_Fp, "AURA: getUserForChatId : %d\n", chatId); fflush(m_Fp);
+	std::stringstream ss;
+	ss << "SELECT * FROM User WHERE " << User::DB_TABLE_USER_COLUMN_CHAT_ID << " = " <<
+		chatId << ";";
+	fprintf(m_Fp, "AURA: getUserForChatId %s\n", ss.str().c_str()); fflush(m_Fp);
 	User::Ptr user = std::make_shared<User>();
-	SQLite::Statement   query(*m_hDB, "SELECT * FROM User WHERE chat_id = ?");
-	long long llid = static_cast<long long>(chatId);
-	query.bind(1, llid);
+	SQLite::Statement   query(*m_hDB, ss.str());
 	if(query.executeStep()) {
 		user->m_UserId	= query.getColumn(User::DB_TABLE_USER_COLUMN_ID.c_str()).getUInt();
 		user->m_ChatId	= query.getColumn(User::DB_TABLE_USER_COLUMN_CHAT_ID.c_str()).getUInt();
 		user->m_Mobile	= query.getColumn(User::DB_TABLE_USER_COLUMN_MOBILE.c_str()).getUInt();
 		user->m_FName	= query.getColumn(User::DB_TABLE_USER_COLUMN_FNAME.c_str()).getString();
 		user->m_LName	= query.getColumn(User::DB_TABLE_USER_COLUMN_LNAME.c_str()).getString();
-		user->m_Address	= query.getColumn(User::DB_TABLE_USER_COLUMN_ADDRRESS.c_str()).getString();
 		user->m_OrderNo	= query.getColumn(User::DB_TABLE_USER_COLUMN_ORDER_NO.c_str()).getUInt();
 	}
 	return user;
@@ -203,7 +282,7 @@ std::vector<Cart::Ptr> DBInterface::getUserCart(unsigned int chatId) {
 }
 
 unsigned int DBInterface::getOrderNoForUser(unsigned int chatId) {
-	fprintf(m_Fp, "AURA: getOrderNoForUser\n"); fflush(m_Fp);
+	fprintf(m_Fp, "AURA: getOrderNoForUser chatId: %d\n", chatId); fflush(m_Fp);
 	int order_no = 0;
 	std::stringstream ss;
 	ss << "SELECT " << User::DB_TABLE_USER_COLUMN_ORDER_NO << " FROM User WHERE " <<
@@ -229,7 +308,7 @@ unsigned int DBInterface::generateOrderNo() {
 }
 
 bool DBInterface::addNewUser(int64_t chatId, std::string fname, std::string lname, int64_t mobile) {
-	fprintf(m_Fp, "AURA: addNewUser\n"); fflush(m_Fp);
+	fprintf(m_Fp, "AURA: addNewUser chatId: %lld, fname :%s\n", chatId, fname.c_str()); fflush(m_Fp);
 	unsigned int order_no = generateOrderNo();
 	std::stringstream ss;
 	ss << "SELECT * FROM User WHERE " << User::DB_TABLE_USER_COLUMN_CHAT_ID << " = " << chatId << ";";

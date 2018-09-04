@@ -31,10 +31,10 @@
 
 #define AURA_BOT_TOKEN     "uPwIhbFxqA6avQhimCCNuHM9UohLrjB2voJXupoIngq y5ixTRdBGZL3oIMC"
 #define THRAYA_BOT_TOKEN   "uPAHhbp2qklEvQhiniGSu3DGA PdqbZRtHiDDspfuEagpnurxx1MGWqbBIm8"
-#define AURA_DB_FILE    "/home/ezvaish/sgn/proj/sgnaura/git/aura/sgn_uthra_01.db"
-#define AURA_LOG_FILE   "/home/ezvaish/sgn/proj/sgnaura/git/aura/build/aura_log.log"
-//#define AURA_DB_FILE    "/Users/shankarv/sgn/proj/sgnaura/git/aura/sgn_uthra_01.db"
-//#define AURA_LOG_FILE   "/Users/shankarv/sgn/proj/sgnaura/git/aura/build/aura_log.log"
+//#define AURA_DB_FILE    "/home/ezvaish/sgn/proj/sgnaura/git/aura/sgn_uthra_01.db"
+//#define AURA_LOG_FILE   "/home/ezvaish/sgn/proj/sgnaura/git/aura/build/aura_log.log"
+#define AURA_DB_FILE    "/Users/shankarv/sgn/proj/sgnaura/git/aura/sgn_uthra_01.db"
+#define AURA_LOG_FILE   "/Users/shankarv/sgn/proj/sgnaura/git/aura/build/aura_log.log"
 
 
 std::string decode_string(std::string enc_msg, std::string key) {
@@ -43,7 +43,7 @@ std::string decode_string(std::string enc_msg, std::string key) {
 
 void AuraMainLoop(FILE *fp) {
    fprintf(fp, "AURA: Starting AuraMainLoop\n"); fflush(fp);
-   std::shared_ptr<TgBot::Bot> pBot          = std::make_shared<TgBot::Bot>(decode_string(AURA_BOT_TOKEN, MAKE_STR(DECRYPT_KEY)));
+   std::shared_ptr<TgBot::Bot> pBot          = std::make_shared<TgBot::Bot>(decode_string(THRAYA_BOT_TOKEN, MAKE_STR(DECRYPT_KEY)));
    DBInterface::Ptr hDB       = std::make_shared<DBInterface>(std::string(AURA_DB_FILE), fp);
    std::map<std::string, std::shared_ptr<AuraButton>> auraButtons;
 
@@ -71,11 +71,11 @@ void AuraMainLoop(FILE *fp) {
          }
       } else {
          fprintf(fp, "AURA: \"%s\" button missing\n", pMsg->text.c_str()); fflush(fp);
-         itr = auraButtons.find("start");
+         /*itr = auraButtons.find("start");
          itr->second->onClick(pMsg, fp);
          pBot->getApi().sendMessage(pMsg->chat->id,
                         "Hi " + pMsg->from->firstName + ",\n" + itr->second->getMsg(),
-                        false, 0, itr->second->prepareMenu(auraButtons, fp));
+                        false, 0, itr->second->prepareMenu(auraButtons, fp));*/
       }
    });
 
