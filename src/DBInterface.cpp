@@ -43,6 +43,60 @@ DBInterface::DBInterface(std::string dbFileName, FILE *fp) {
 
 DBInterface::~DBInterface() {}
 
+bool DBInterface::updateShippingFromPrevOrder(unsigned int chatId, unsigned int order_no) {
+	fprintf(m_Fp, "AURA: repeatShipping: %d\n", chatId); fflush(m_Fp);
+	unsigned int newOrderNo	= getOrderNoForUser(chatId);
+
+	//	No need to update database
+	if(newOrderNo == order_no) {
+		fprintf(m_Fp, "AURA: Chosen address already exists for order_no %d\n", order_no); fflush(m_Fp);
+		return false;
+	}
+
+	std::stringstream ss;
+	ss << "INSERT INTO Shipping (" <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_USER_ID << ", " <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME << ", " <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO << ", " <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << ", " <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO << ")" <<
+		" SELECT " <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_USER_ID << ", " <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME << ", " <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO << ", " <<
+			newOrderNo << ", " <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO << " FROM Shipping WHERE " <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << order_no << ";";
+	SQLite::Transaction transaction(*m_hDB);
+	m_hDB->exec(ss.str().c_str());
+	transaction.commit();
+	fprintf(m_Fp, "AURA: Updating address for order_no %d\n", newOrderNo); fflush(m_Fp);
+	return true;
+}
+
+std::tuple<std::string, unsigned int> DBInterface::getShippingForUser(unsigned int chatId) {
+	fprintf(m_Fp, "AURA: getShippingForUser: %d\n", chatId); fflush(m_Fp);
+	std::stringstream ss;
+	std::string strAddr;
+	std::tuple<std::string, unsigned int> tplShip;
+	unsigned int maxOrderNo = 0, order_no = 0;
+	User::Ptr user = getUserForChatId(chatId);
+
+	ss << "SELECT * from Shipping WHERE " << Shipping::DB_TABLE_SHIPPING_COLUMN_USER_ID << " = " << user->m_UserId << ";";
+	SQLite::Statement query(*m_hDB, ss.str());
+	while(query.executeStep()) {
+		order_no = query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO.c_str()).getUInt();
+		if(order_no > maxOrderNo) {
+			maxOrderNo = order_no;
+			strAddr = query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO.c_str()).getString() + " ";
+			strAddr += std::to_string(query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO.c_str()).getUInt()) + " ";
+			strAddr += query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME.c_str()).getString() + " ";
+			tplShip = std::make_tuple(strAddr, order_no);
+		}
+	}
+	return tplShip;
+}
+
 void DBInterface::updateMobileNo(unsigned int chatId, std::string strMobileNo) {
 	fprintf(m_Fp, "AURA: updateMobileNo: %s\n", strMobileNo.c_str()); fflush(m_Fp);
 	unsigned long long mobileNo;
@@ -306,7 +360,7 @@ unsigned int DBInterface::generateOrderNo() {
 }
 
 bool DBInterface::addNewUser(int64_t chatId, std::string fname, std::string lname, int64_t mobile) {
-	fprintf(m_Fp, "AURA: addNewUser chatId: %lld, fname :%s\n", chatId, fname.c_str()); fflush(m_Fp);
+	fprintf(m_Fp, "AURA: addNewUser chatId: %ld, fname :%s\n", chatId, fname.c_str()); fflush(m_Fp);
 	unsigned int order_no = generateOrderNo();
 	std::stringstream ss;
 	ss << "SELECT * FROM User WHERE " << User::DB_TABLE_USER_COLUMN_CHAT_ID << " = " << chatId << ";";

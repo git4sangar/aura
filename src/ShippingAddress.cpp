@@ -14,6 +14,17 @@
 	std::string ShippingAddress::STR_BTN_BRKFLD	= "Navins Brookfield";
 	std::string ShippingAddress::STR_BTN_GARUDA	= "Garuda Avenue";
 	std::string ShippingAddress::STR_BTN_CONTACT= "Contact";
+	std::string ShippingAddress::STR_BTN_BACK	= "Back to Apt";
+
+std::vector<TgBot::KeyboardButton::Ptr> ShippingAddress::getLastRow(
+			std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns,
+			std::vector<TgBot::KeyboardButton::Ptr>&& lastRow) {
+	TgBot::KeyboardButton::Ptr kbBtnBack	= std::make_shared<TgBot::KeyboardButton>();
+	kbBtnBack->text	= "Back to Apt";
+	listAuraBtns[kbBtnBack->text]	= shared_from_this();
+	lastRow.push_back(kbBtnBack);
+	return lastRow;
+}
 
 TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::shareContactMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	TgBot::KeyboardButton::Ptr btnContact	= std::make_shared<TgBot::KeyboardButton>();
@@ -24,7 +35,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::shareContactMenu(std::map<std::
 	row.push_back(btnContact);
 	TgBot::ReplyKeyboardMarkup::Ptr pContactsMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
 	pContactsMenu->keyboard.push_back(row);
-	pContactsMenu->keyboard.push_back(getMainMenu());
+	pContactsMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
 	return pContactsMenu;
 }
 
@@ -56,7 +67,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFlatMenu(std::map<std::st
 		pFlatsMenu->keyboard.push_back(row);
 	}
 
-	pFlatsMenu->keyboard.push_back(getMainMenu());
+	pFlatsMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
 	return pFlatsMenu;
 }
 
@@ -90,7 +101,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFloorMenu(std::map<std::s
 		pFloorsMenu->keyboard.push_back(row);
 	}
 
-	pFloorsMenu->keyboard.push_back(getMainMenu());
+	pFloorsMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
 	return pFloorsMenu;
 }
 
@@ -134,7 +145,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderBlockNoMenu(std::map<std:
 		pBlockNosMenu->keyboard.push_back(row);
 	}
 
-	pBlockNosMenu->keyboard.push_back(getMainMenu());
+	pBlockNosMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
 	return pBlockNosMenu;
 }
 
@@ -169,13 +180,21 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderBlockMenu(std::map<std::s
 		}
 		pBlockMenu->keyboard.push_back(row);
 	}
-	pBlockMenu->keyboard.push_back(getMainMenu());
+	pBlockMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
 	return pBlockMenu;
 }
 
 TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderAptMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA: \"ShippingAddress::renderAptMenu\" rendering\n"); fflush(fp);
-	TgBot::KeyboardButton::Ptr kbBtnSSM, kbBtnBrkFld, kbBtnGaruda;
+	TgBot::KeyboardButton::Ptr kbBtnSSM = nullptr, kbBtnBrkFld = nullptr, kbBtnGaruda = nullptr, kbBtnPrev = nullptr;
+
+	//	m_Addr is Full-address-string & order-no paid.
+	if(!std::get<0>(m_Addr).empty()) {
+		kbBtnPrev	= std::make_shared<TgBot::KeyboardButton>();
+		kbBtnPrev->text	= std::get<0>(m_Addr);
+		listAuraBtns[kbBtnPrev->text]	= shared_from_this();
+		m_PreDfnd[kbBtnPrev->text]		= std::get<1>(m_Addr);
+	}
 
 	kbBtnSSM		= std::make_shared<TgBot::KeyboardButton>();
 	kbBtnBrkFld		= std::make_shared<TgBot::KeyboardButton>();
@@ -194,16 +213,18 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderAptMenu(std::map<std::str
 	m_Apts.push_back(kbBtnGaruda->text);
 
 	TgBot::ReplyKeyboardMarkup::Ptr pAptMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
-	std::vector<TgBot::KeyboardButton::Ptr> row0, row1, row2;
-	row0.push_back(kbBtnSSM);
-	row1.push_back(kbBtnBrkFld);
-	row2.push_back(kbBtnGaruda);
+	std::vector<TgBot::KeyboardButton::Ptr> row0, row1, row2, row3;
+	if(!m_Cache.empty()) row0.push_back(kbBtnPrev);
+	row1.push_back(kbBtnSSM);
+	row2.push_back(kbBtnBrkFld);
+	row3.push_back(kbBtnGaruda);
 
-	pAptMenu->keyboard.push_back(row0);
+	if(!m_Cache.empty()) pAptMenu->keyboard.push_back(row0);
 	pAptMenu->keyboard.push_back(row1);
 	pAptMenu->keyboard.push_back(row2);
+	pAptMenu->keyboard.push_back(row3);
 
-	pAptMenu->keyboard.push_back(getMainMenu());
+	pAptMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
 	return pAptMenu;
 }
 
@@ -255,10 +276,16 @@ std::string ShippingAddress::floorNoToString(int iFloorNo) {
 
 void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 	fprintf(fp, "AURA: \"%s\" onClick\n", pMsg->text.c_str()); fflush(fp);
-	std::map<std::string, std::tuple<std::string,int>>::iterator itr;
+	std::map<std::string, std::tuple<std::string, int>>::iterator itr;
+	std::map<std::string, unsigned int>::iterator itrPreDfnd;
 	
+	if(m_PreDfnd.end() != (itrPreDfnd = m_PreDfnd.find(pMsg->text))) {
+		getDBHandle()->updateShippingFromPrevOrder(pMsg->chat->id, itrPreDfnd->second);
+	}
+
 	//	Get the Apartment name first
-	if(ViewCart::STR_BTN_PURCHASE == pMsg->text) {
+	else if(ViewCart::STR_BTN_PURCHASE == pMsg->text || STR_BTN_BACK == pMsg->text) {
+		m_Addr			= getDBHandle()->getShippingForUser(pMsg->chat->id);
 		m_RenderMenu	= MenuRenderer::APARTMENT;
 		m_StrMsg		= "Shipping Address: Choose your Apartment";
 	}

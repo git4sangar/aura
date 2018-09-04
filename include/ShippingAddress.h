@@ -23,6 +23,8 @@ class ShippingAddress :
 	std::map<std::string, std::tuple<std::string,int>> m_BlockNos;
 	std::map<std::string, std::tuple<std::string,int>> m_Floors;
 	std::map<std::string, std::tuple<std::string,int>> m_Flats;
+	std::map<std::string, unsigned int> m_PreDfnd;
+	std::tuple<std::string,unsigned int> m_Addr;
 	MenuRenderer m_RenderMenu;
 
 	TgBot::ReplyKeyboardMarkup::Ptr renderAptMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
@@ -32,6 +34,8 @@ class ShippingAddress :
 	TgBot::ReplyKeyboardMarkup::Ptr renderFlatMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
 	TgBot::ReplyKeyboardMarkup::Ptr shareContactMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
 	std::string floorNoToString(int iFloorNo);
+	std::vector<TgBot::KeyboardButton::Ptr> getLastRow(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns,
+														std::vector<TgBot::KeyboardButton::Ptr>&& lastRow);
 public:
 	typedef std::shared_ptr<ShippingAddress> Ptr;
 	ShippingAddress(std::shared_ptr<DBInterface> hDB) : AuraButton(hDB) {m_Rows = m_Cols = m_FloorNo = 0;}
@@ -45,6 +49,7 @@ public:
 	static std::string STR_BTN_BRKFLD;
 	static std::string STR_BTN_GARUDA;
 	static std::string STR_BTN_CONTACT;
+	static std::string STR_BTN_BACK;
 };
 
 

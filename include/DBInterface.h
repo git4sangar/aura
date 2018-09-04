@@ -93,11 +93,13 @@ public:
 	User::Ptr getUserForChatId(unsigned int chatId);
 	void addToCart(unsigned int soapId, unsigned int chatId, unsigned int qnty, CartStatus stat = CartStatus::PENDING);
 	int getIntStatus(CartStatus stat);
+	std::tuple<std::string, unsigned int> getShippingForUser(unsigned int chatId);
 	std::vector<Cart::Ptr> getUserCart(unsigned int chatId);
 	unsigned int generateOrderNo();
 	void addBlockNoToShipping(unsigned int chatId, std::string blkNo);
 	void addFlatNoToShipping(unsigned int chatId, unsigned int flatNo);
 	void addAptNameToShipping(unsigned int chatId, std::string aptName);
+	bool updateShippingFromPrevOrder(unsigned int chatId, unsigned int m_OrderNo);
 	void emptyCartForUser(unsigned int chatId);
 	unsigned int getOrderNoForUser(unsigned int chatId);
 	void updateMobileNo(unsigned int chatId, std::string mobileNo);
