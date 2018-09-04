@@ -13,7 +13,8 @@
 class User {
 public:
 	typedef std::shared_ptr<User> Ptr;
-	unsigned int m_UserId, m_ChatId, m_Mobile, m_OrderNo;
+	unsigned int m_UserId, m_ChatId, m_OrderNo;
+	unsigned long long m_Mobile;
 	std::string m_FName, m_LName, m_Address;
 
 	static std::string DB_TABLE_USER_COLUMN_ID;

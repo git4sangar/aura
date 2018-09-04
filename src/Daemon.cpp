@@ -1,6 +1,7 @@
 //sgn
 
 #include <iostream>
+#include <time.h>
 #include <dirent.h>
 #include <iterator>
 #include <cstdlib>
@@ -27,14 +28,14 @@
 // Step (02): Replaces the pattern _MAKE_STR(value-of-x) with quotes-added-param, ie "value-of-x"
 #define _MAKE_STR(x) #x          // Adds quotes to the param
 
-
+#define SKIP_INTERVAL   (5)
 
 #define AURA_BOT_TOKEN     "uPwIhbFxqA6avQhimCCNuHM9UohLrjB2voJXupoIngq y5ixTRdBGZL3oIMC"
 #define THRAYA_BOT_TOKEN   "uPAHhbp2qklEvQhiniGSu3DGA PdqbZRtHiDDspfuEagpnurxx1MGWqbBIm8"
-//#define AURA_DB_FILE    "/home/ezvaish/sgn/proj/sgnaura/git/aura/sgn_uthra_01.db"
-//#define AURA_LOG_FILE   "/home/ezvaish/sgn/proj/sgnaura/git/aura/build/aura_log.log"
-#define AURA_DB_FILE    "/Users/shankarv/sgn/proj/sgnaura/git/aura/sgn_uthra_01.db"
-#define AURA_LOG_FILE   "/Users/shankarv/sgn/proj/sgnaura/git/aura/build/aura_log.log"
+#define AURA_DB_FILE    "/home/ezvaish/sgn/proj/sgnaura/git/aura/sgn_uthra_01.db"
+#define AURA_LOG_FILE   "/home/ezvaish/sgn/proj/sgnaura/git/aura/build/aura_log.log"
+//#define AURA_DB_FILE    "/Users/shankarv/sgn/proj/sgnaura/git/aura/sgn_uthra_01.db"
+//#define AURA_LOG_FILE   "/Users/shankarv/sgn/proj/sgnaura/git/aura/build/aura_log.log"
 
 
 std::string decode_string(std::string enc_msg, std::string key) {
@@ -43,15 +44,24 @@ std::string decode_string(std::string enc_msg, std::string key) {
 
 void AuraMainLoop(FILE *fp) {
    fprintf(fp, "AURA: Starting AuraMainLoop\n"); fflush(fp);
-   std::shared_ptr<TgBot::Bot> pBot          = std::make_shared<TgBot::Bot>(decode_string(THRAYA_BOT_TOKEN, MAKE_STR(DECRYPT_KEY)));
+   std::shared_ptr<TgBot::Bot> pBot          = std::make_shared<TgBot::Bot>(decode_string(AURA_BOT_TOKEN, MAKE_STR(DECRYPT_KEY)));
    DBInterface::Ptr hDB       = std::make_shared<DBInterface>(std::string(AURA_DB_FILE), fp);
    std::map<std::string, std::shared_ptr<AuraButton>> auraButtons;
+   time_t startSec = time(NULL);
 
    std::shared_ptr<StartButton> btnStart  = std::make_shared<StartButton>(hDB);
    auraButtons["start"]                   = btnStart;
    auraButtons["Main Menu"]               = btnStart;
 
-   pBot->getEvents().onAnyMessage( [pBot, &auraButtons, fp](TgBot::Message::Ptr pMsg) {
+   pBot->getEvents().onAnyMessage( [pBot, &auraButtons, fp, &startSec](TgBot::Message::Ptr pMsg) {
+      static bool isSkipOver = false;
+      // Skip everything for a few secs
+      if(!isSkipOver && (startSec + SKIP_INTERVAL) > time(NULL)) {
+         fprintf(fp, "AURA: Skipping %s\n", pMsg->text.c_str()); fflush(fp);
+         return;
+      }
+      isSkipOver = true;
+
       fprintf(fp, "AURA: Received \"%s\" command\n",  pMsg->text.c_str()); fflush(fp);
       if(pMsg->contact) {
          pMsg->text = ShippingAddress::STR_BTN_CONTACT;
@@ -71,15 +81,23 @@ void AuraMainLoop(FILE *fp) {
          }
       } else {
          fprintf(fp, "AURA: \"%s\" button missing\n", pMsg->text.c_str()); fflush(fp);
-         /*itr = auraButtons.find("start");
+         itr = auraButtons.find("start");
          itr->second->onClick(pMsg, fp);
          pBot->getApi().sendMessage(pMsg->chat->id,
                         "Hi " + pMsg->from->firstName + ",\n" + itr->second->getMsg(),
-                        false, 0, itr->second->prepareMenu(auraButtons, fp));*/
+                        false, 0, itr->second->prepareMenu(auraButtons, fp));
       }
    });
 
-   pBot->getEvents().onCommand("start", [pBot, &auraButtons, fp](TgBot::Message::Ptr pMsg) {
+   pBot->getEvents().onCommand("start", [pBot, &auraButtons, fp, &startSec](TgBot::Message::Ptr pMsg) {
+      static bool isSkipOver = false;
+      // Skip everything for a few secs
+      if(!isSkipOver && (startSec + SKIP_INTERVAL) > time(NULL)) {
+         fprintf(fp, "AURA: Skipping %s\n", pMsg->text.c_str()); fflush(fp);
+         return;
+      }
+      isSkipOver = true;
+
       fprintf(fp, "AURA: Received start command\n"); fflush(fp);
       std::map<std::string, std::shared_ptr<AuraButton>>::const_iterator itr;
 

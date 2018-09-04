@@ -45,16 +45,14 @@ DBInterface::~DBInterface() {}
 
 void DBInterface::updateMobileNo(unsigned int chatId, std::string strMobileNo) {
 	fprintf(m_Fp, "AURA: updateMobileNo: %s\n", strMobileNo.c_str()); fflush(m_Fp);
-	unsigned int mobileNo;
+	unsigned long long mobileNo;
 	SQLite::Transaction transaction(*m_hDB);
 
-	std::stringstream ss(strMobileNo);
-	ss >> mobileNo;
+	mobileNo = std::stoull(strMobileNo);
 
-	ss.str(std::string());
+	std::stringstream ss;
 	ss << "UPDATE User set " << User::DB_TABLE_USER_COLUMN_MOBILE << " = " << mobileNo <<
-		"WHERE " << User::DB_TABLE_USER_COLUMN_CHAT_ID << " = " << chatId << ";";
-	fprintf(m_Fp, "sql updateMobileNo %s\n", ss.str().c_str());
+		" WHERE " << User::DB_TABLE_USER_COLUMN_CHAT_ID << " = " << chatId << ";";
 	m_hDB->exec(ss.str().c_str());
 	transaction.commit();
 }
@@ -209,7 +207,7 @@ User::Ptr DBInterface::getUserForChatId(unsigned int chatId) {
 	if(query.executeStep()) {
 		user->m_UserId	= query.getColumn(User::DB_TABLE_USER_COLUMN_ID.c_str()).getUInt();
 		user->m_ChatId	= query.getColumn(User::DB_TABLE_USER_COLUMN_CHAT_ID.c_str()).getUInt();
-		user->m_Mobile	= query.getColumn(User::DB_TABLE_USER_COLUMN_MOBILE.c_str()).getUInt();
+		user->m_Mobile	= query.getColumn(User::DB_TABLE_USER_COLUMN_MOBILE.c_str()).getInt64();
 		user->m_FName	= query.getColumn(User::DB_TABLE_USER_COLUMN_FNAME.c_str()).getString();
 		user->m_LName	= query.getColumn(User::DB_TABLE_USER_COLUMN_LNAME.c_str()).getString();
 		user->m_OrderNo	= query.getColumn(User::DB_TABLE_USER_COLUMN_ORDER_NO.c_str()).getUInt();
