@@ -214,12 +214,12 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderAptMenu(std::map<std::str
 
 	TgBot::ReplyKeyboardMarkup::Ptr pAptMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
 	std::vector<TgBot::KeyboardButton::Ptr> row0, row1, row2, row3;
-	if(!m_Cache.empty()) row0.push_back(kbBtnPrev);
+	if(!std::get<0>(m_Addr).empty()) row0.push_back(kbBtnPrev);
 	row1.push_back(kbBtnSSM);
 	row2.push_back(kbBtnBrkFld);
 	row3.push_back(kbBtnGaruda);
 
-	if(!m_Cache.empty()) pAptMenu->keyboard.push_back(row0);
+	if(!std::get<0>(m_Addr).empty()) pAptMenu->keyboard.push_back(row0);
 	pAptMenu->keyboard.push_back(row1);
 	pAptMenu->keyboard.push_back(row2);
 	pAptMenu->keyboard.push_back(row3);
@@ -281,6 +281,9 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 	
 	if(m_PreDfnd.end() != (itrPreDfnd = m_PreDfnd.find(pMsg->text))) {
 		getDBHandle()->updateShippingFromPrevOrder(pMsg->chat->id, itrPreDfnd->second);
+		m_RenderMenu	= MenuRenderer::DONE;
+		m_StrMsg		= getPaymentString(pMsg->chat->id);
+		getDBHandle()->updateOrderNoForUser(pMsg->chat->id);
 	}
 
 	//	Get the Apartment name first
@@ -336,11 +339,35 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 	else if(ShippingAddress::STR_BTN_CONTACT == pMsg->text) {
 		if(pMsg->contact) getDBHandle()->updateMobileNo(pMsg->chat->id, pMsg->contact->phoneNumber);
 		m_RenderMenu	= MenuRenderer::DONE;
-		m_StrMsg		= std::string("Please pay using Paytm or Tez to 91 98406 25165.\n") +
-							std::string("Dont forget to mention the Order number: ") +
-							std::to_string(getDBHandle()->generateOrderNo()) +
-							std::string(" while paying.\n") +
-							std::string("You will receive an OTP within 24 hrs once your payment is successfully received.\n") +
-							std::string("You can choose to pay on delivery too.");
+		m_StrMsg		= getPaymentString(pMsg->chat->id);
+		getDBHandle()->updateOrderNoForUser(pMsg->chat->id);
 	}
+}
+
+std::string ShippingAddress::getPaymentString(unsigned int chatId) {
+	std::stringstream ss;
+	int iTotal = 0;
+	std::tuple<std::string, int> delAddr = getDBHandle()->getShippingForUser(chatId);
+
+	ss << "<b>Cart</b>\n";
+	std::vector<Cart::Ptr> items = getDBHandle()->getUserCart(chatId);
+
+	for(auto &item : items) {
+		Soap::Ptr soap = getDBHandle()->getSoapById(item->m_SoapId);
+		ss << std::setw(15) << soap->m_Name << " - "
+			<< std::setw(2) << item->m_Qnty << " - "
+			<< std::setw(7) << "Rs " << (soap->m_Price * item->m_Qnty) << "\n";
+		iTotal += (soap->m_Price * item->m_Qnty);
+	}
+	ss << std::setw(18) << "Total = Rs " << iTotal << "\n\n";
+	ss << "Paytm or Google Pay to 98406 25165.\n" <<
+				"<b>Pls mention Order No: " <<
+				getDBHandle()->getOrderNoForUser(chatId) <<
+				" while paying.</b>\n\n" <<
+				"You can choose to pay \"on delivery\" too.\n\n" <<
+				"Once we receive payment, you will get an OTP.\n" <<
+				"Give that OTP during delivery.\n\n";
+
+	ss << "<b>Delivery Address</b>\n" << std::get<0>(delAddr);
+	return ss.str();
 }

@@ -17,6 +17,8 @@ public:
 	virtual ~ViewCart() {}
 
 	std::string getMsg() { return m_StrCart;}
+	std::string getParseMode() {return "HTML";}
+	
 	TgBot::ReplyKeyboardMarkup::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listKBBtns, FILE *fp);
 	void onClick(TgBot::Message::Ptr pMessage, FILE *fp);
 

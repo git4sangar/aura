@@ -43,13 +43,15 @@ void ViewCart::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 		int iTotal = 0;
 		for(auto &item : items) {
 			Soap::Ptr soap = getDBHandle()->getSoapById(item->m_SoapId);
-			ss << soap->m_Name << "\t: " << item->m_Qnty << " : Rs." << (soap->m_Price * item->m_Qnty) << "\n";
+			ss << std::setw(15) << soap->m_Name << " - "
+				<< std::setw(2) << item->m_Qnty << " - "
+				<< std::setw(7) << "Rs " << (soap->m_Price * item->m_Qnty) << "\n";
 			iTotal += (soap->m_Price * item->m_Qnty);
 		}
 		if(0 == items.size()) {
 			ss << "Your cart is empty";
 		} else {
-			ss << "Total = " << iTotal << "\n";
+			ss << std::setw(18) << "Total = " << iTotal << "\n";
 		}
 		m_StrCart = ss.str();
 	} else if(STR_BTN_EMPTY_CART == pMsg->text) {

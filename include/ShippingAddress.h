@@ -36,12 +36,14 @@ class ShippingAddress :
 	std::string floorNoToString(int iFloorNo);
 	std::vector<TgBot::KeyboardButton::Ptr> getLastRow(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns,
 														std::vector<TgBot::KeyboardButton::Ptr>&& lastRow);
+	std::string getPaymentString(unsigned int chatId);
 public:
 	typedef std::shared_ptr<ShippingAddress> Ptr;
 	ShippingAddress(std::shared_ptr<DBInterface> hDB) : AuraButton(hDB) {m_Rows = m_Cols = m_FloorNo = 0;}
 	virtual ~ShippingAddress() {}
 
 	std::string getMsg() { return m_StrMsg;}
+	std::string getParseMode() {return "HTML";}
 	TgBot::ReplyKeyboardMarkup::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
 	void onClick(TgBot::Message::Ptr pMessage, FILE *fp);
 

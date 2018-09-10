@@ -77,7 +77,7 @@ void AuraMainLoop(FILE *fp) {
 
          pMenu = itr->second->prepareMenu(auraButtons, fp);
          if(pMenu) {
-            pBot->getApi().sendMessage(pMsg->chat->id, itr->second->getMsg(), false, 0, pMenu);
+            pBot->getApi().sendMessage(pMsg->chat->id, itr->second->getMsg(), false, 0, pMenu, itr->second->getParseMode());
          }
       } else {
          fprintf(fp, "AURA: \"%s\" button missing\n", pMsg->text.c_str()); fflush(fp);

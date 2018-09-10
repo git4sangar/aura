@@ -88,6 +88,7 @@ public:
 	DBInterface(std::string dbFileName, FILE *fp);
 	~DBInterface();
 
+	void updateOrderNoForUser(unsigned int chatId);
 	Soap::Ptr getSoapById(unsigned int soapId);
 	std::vector<Soap::Ptr> getFlavours();
 	User::Ptr getUserForChatId(unsigned int chatId);

@@ -68,7 +68,7 @@ bool DBInterface::updateShippingFromPrevOrder(unsigned int chatId, unsigned int 
 			Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO << " FROM Shipping WHERE " <<
 			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << order_no << ";";
 	SQLite::Transaction transaction(*m_hDB);
-	m_hDB->exec(ss.str().c_str());
+	m_hDB->exec(ss.str());
 	transaction.commit();
 	fprintf(m_Fp, "AURA: Updating address for order_no %d\n", newOrderNo); fflush(m_Fp);
 	return true;
@@ -88,9 +88,9 @@ std::tuple<std::string, unsigned int> DBInterface::getShippingForUser(unsigned i
 		order_no = query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO.c_str()).getUInt();
 		if(order_no > maxOrderNo) {
 			maxOrderNo = order_no;
-			strAddr = query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO.c_str()).getString() + " ";
-			strAddr += std::to_string(query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO.c_str()).getUInt()) + " ";
-			strAddr += query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME.c_str()).getString() + " ";
+			strAddr = query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO.c_str()).getString() + "-";
+			strAddr += std::to_string(query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO.c_str()).getUInt()) + ", ";
+			strAddr += query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME.c_str()).getString();
 			tplShip = std::make_tuple(strAddr, order_no);
 		}
 	}
@@ -107,7 +107,7 @@ void DBInterface::updateMobileNo(unsigned int chatId, std::string strMobileNo) {
 	std::stringstream ss;
 	ss << "UPDATE User set " << User::DB_TABLE_USER_COLUMN_MOBILE << " = " << mobileNo <<
 		" WHERE " << User::DB_TABLE_USER_COLUMN_CHAT_ID << " = " << chatId << ";";
-	m_hDB->exec(ss.str().c_str());
+	m_hDB->exec(ss.str());
 	transaction.commit();
 }
 
@@ -275,7 +275,7 @@ void DBInterface::emptyCartForUser(unsigned int chatId) {
 	std::stringstream ss;
 	ss << "DELETE from Cart WHERE " << Cart::DB_TABLE_CART_COLUMN_ORDER_NO << " = " << order_no << ";";
 	SQLite::Transaction transaction(*m_hDB);
-	m_hDB->exec(ss.str().c_str());
+	m_hDB->exec(ss.str());
 	transaction.commit();
 }
 
@@ -292,7 +292,7 @@ void DBInterface::addToCart(unsigned int soapId, unsigned int chatId, unsigned i
 		fprintf(m_Fp, "AURA: Updating Cart : %d - %d\n", soapId, qnty); fflush(m_Fp);
 		SQLite::Transaction transaction(*m_hDB);
 		ss.str(std::string()); ss << "UPDATE Cart set " << Cart::DB_TABLE_CART_COLUMN_QNTY << " = " << qnty << ";";
-		m_hDB->exec(ss.str().c_str());
+		m_hDB->exec(ss.str());
 		transaction.commit();
 	} else {
 		fprintf(m_Fp, "AURA: Inserting into Cart : %d - %d\n", soapId, qnty); fflush(m_Fp);
@@ -307,7 +307,7 @@ void DBInterface::addToCart(unsigned int soapId, unsigned int chatId, unsigned i
 				Cart::DB_TABLE_CART_COLUMN_ORDER_NO << ") VALUES (" <<
 				soapId << "," << user->m_UserId << "," << qnty << "," <<
 				getIntStatus(stat) << "," << user->m_OrderNo << ");";
-		m_hDB->exec(ss.str().c_str());
+		m_hDB->exec(ss.str());
 		transaction.commit();
 	}
 }
@@ -359,6 +359,16 @@ unsigned int DBInterface::generateOrderNo() {
 	return invoice_no + 1;
 }
 
+void DBInterface::updateOrderNoForUser(unsigned int chatId) {
+	fprintf(m_Fp, "AURA: updateOrderNoForUser chatId: %d\n", chatId); fflush(m_Fp);
+	std::stringstream ss;
+	ss << "UPDATE User SET " << User::DB_TABLE_USER_COLUMN_ORDER_NO << " = " << generateOrderNo()
+		<< " WHERE " << User::DB_TABLE_USER_COLUMN_CHAT_ID << " = " << chatId << ";";
+	SQLite::Transaction transaction(*m_hDB);
+	m_hDB->exec(ss.str());
+	transaction.commit();
+}
+
 bool DBInterface::addNewUser(int64_t chatId, std::string fname, std::string lname, int64_t mobile) {
 	fprintf(m_Fp, "AURA: addNewUser chatId: %ld, fname :%s\n", chatId, fname.c_str()); fflush(m_Fp);
 	unsigned int order_no = generateOrderNo();
@@ -375,7 +385,7 @@ bool DBInterface::addNewUser(int64_t chatId, std::string fname, std::string lnam
 				User::DB_TABLE_USER_COLUMN_CHAT_ID << ", " <<
 				User::DB_TABLE_USER_COLUMN_ORDER_NO << ") VALUES (\"" <<
 				fname << "\", \"" << lname << "\", " << chatId << ", " << order_no << ");";
-		m_hDB->exec(ss.str().c_str());
+		m_hDB->exec(ss.str());
 		transaction.commit();
 	} else {
 		fprintf(m_Fp, "AURA: User %s alreay existing\n", fname.c_str()); fflush(m_Fp);

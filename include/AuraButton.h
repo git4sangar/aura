@@ -31,6 +31,7 @@ public:
 	}
 
 	virtual std::string getMsg() = 0;
+	virtual std::string getParseMode() {return std::string();}
 	virtual TgBot::ReplyKeyboardMarkup::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) = 0;
 	virtual void onClick(TgBot::Message::Ptr pMessage, FILE *fp) = 0;
 };
