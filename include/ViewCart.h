@@ -12,8 +12,9 @@ class ViewCart :
 	public AuraButton,
 	public std::enable_shared_from_this<ViewCart>  {
 	std::string m_StrCart;
+	bool m_IsCartEmpty;
 public:
-	ViewCart(DBInterface::Ptr hDB) : AuraButton(hDB) {}
+	ViewCart(DBInterface::Ptr hDB) : AuraButton(hDB) {m_IsCartEmpty = true;}
 	virtual ~ViewCart() {}
 
 	std::string getMsg() { return m_StrCart;}

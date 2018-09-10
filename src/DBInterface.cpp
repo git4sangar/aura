@@ -24,17 +24,25 @@
 
 	std::string Cart::DB_TABLE_CART_COLUMN_CART_ID		= "cart_id";
 	std::string Cart::DB_TABLE_CART_COLUMN_SOAP_ID		= "soap_id";
-	std::string Cart::DB_TABLE_CART_COLUMN_USER_ID		= "user_id";
+	std::string Cart::DB_TABLE_CART_COLUMN_CHAT_ID		= "chat_id";
 	std::string Cart::DB_TABLE_CART_COLUMN_STATUS		= "status";
 	std::string Cart::DB_TABLE_CART_COLUMN_QNTY		= "quantity";
 	std::string Cart::DB_TABLE_CART_COLUMN_ORDER_NO		= "order_no";
 
 	std::string Shipping::DB_TABLE_SHIPPING_COLUMN_SHIP_ID	= "ship_id";
-	std::string Shipping::DB_TABLE_SHIPPING_COLUMN_USER_ID	= "user_id";
+	std::string Shipping::DB_TABLE_SHIPPING_COLUMN_CHAT_ID	= "chat_id";
 	std::string Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME	= "apt_name";
 	std::string Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO	= "block_no";
 	std::string Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO	= "flat_no";
 	std::string Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO	= "order_no";
+
+	std::string POrder::DB_TABLE_PORDER_COLUMN_ORDER_ID	= "order_id";
+	std::string POrder::DB_TABLE_PORDER_COLUMN_ORDER_NO	= "order_no";
+	std::string POrder::DB_TABLE_PORDER_COLUMN_CHAT_ID	= "chat_id";
+	std::string POrder::DB_TABLE_PORDER_COLUMN_DATE	= "date";
+	std::string POrder::DB_TABLE_PORDER_COLUMN_TIME	= "time";
+	std::string POrder::DB_TABLE_PORDER_COLUMN_DATE_TIME	= "date_time";
+	std::string POrder::DB_TABLE_PORDER_COLUMN_STATUS	= "status";
 
 DBInterface::DBInterface(std::string dbFileName, FILE *fp) {
 	m_hDB   = std::make_shared<SQLite::Database>(dbFileName, SQLite::OPEN_READWRITE);
@@ -42,6 +50,43 @@ DBInterface::DBInterface(std::string dbFileName, FILE *fp) {
 }
 
 DBInterface::~DBInterface() {}
+
+void DBInterface::createPOrder(unsigned int chatId) {
+	fprintf(m_Fp, "AURA: createOrder: %d\n", chatId); fflush(m_Fp);
+	unsigned int order_no	= getOrderNoForUser(chatId);
+	std::stringstream ss;
+
+	time_t tnow = time(NULL);
+	struct tm ltm = *localtime(&tnow);
+	//printf("now: %d-%d-%d %d:%d:%d\n", ltm.tm_year + 1900, ltm.tm_mon + 1, ltm.tm_mday, ltm.tm_hour, ltm.tm_min, ltm.tm_sec);
+
+	ss.str(std::string());
+	ss << std::setfill('0') << std::setw(2) << ltm.tm_mday << "-" <<
+		std::setfill('0') << std::setw(2) << ltm.tm_mon + 1 << "-" <<
+		std::setfill('0') << std::setw(4) << ltm.tm_year + 1900;
+	std::string strDate = ss.str();
+
+	ss.str(std::string());
+	ss << std::setfill('0') << std::setw(2) << ltm.tm_hour << ":" <<
+			std::setfill('0') << std::setw(2) << ltm.tm_min << ":" <<
+			std::setfill('0') << std::setw(2) << ltm.tm_sec;
+	std::string strTime = ss.str();
+
+	ss.str(std::string());
+	ss << "INSERT INTO POrder (" <<
+		POrder::DB_TABLE_PORDER_COLUMN_ORDER_NO << ", " <<
+		POrder::DB_TABLE_PORDER_COLUMN_CHAT_ID << ", " <<
+		POrder::DB_TABLE_PORDER_COLUMN_DATE << ", " <<
+		POrder::DB_TABLE_PORDER_COLUMN_TIME << ", " <<
+		POrder::DB_TABLE_PORDER_COLUMN_DATE_TIME << ", " <<
+		POrder::DB_TABLE_PORDER_COLUMN_STATUS << ") VALUES (" <<
+		order_no << ", " << chatId << ", \"" << strDate << "\", \"" <<
+		strTime << "\", " << tnow << ", " << getIntStatus(CartStatus::PENDING) << ");";
+
+	SQLite::Transaction transaction(*m_hDB);
+	m_hDB->exec(ss.str());
+	transaction.commit();
+}
 
 bool DBInterface::updateShippingFromPrevOrder(unsigned int chatId, unsigned int order_no) {
 	fprintf(m_Fp, "AURA: repeatShipping: %d\n", chatId); fflush(m_Fp);
@@ -55,13 +100,13 @@ bool DBInterface::updateShippingFromPrevOrder(unsigned int chatId, unsigned int 
 
 	std::stringstream ss;
 	ss << "INSERT INTO Shipping (" <<
-			Shipping::DB_TABLE_SHIPPING_COLUMN_USER_ID << ", " <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_CHAT_ID << ", " <<
 			Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME << ", " <<
 			Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO << ", " <<
 			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << ", " <<
 			Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO << ")" <<
 		" SELECT " <<
-			Shipping::DB_TABLE_SHIPPING_COLUMN_USER_ID << ", " <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_CHAT_ID << ", " <<
 			Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME << ", " <<
 			Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO << ", " <<
 			newOrderNo << ", " <<
@@ -70,7 +115,6 @@ bool DBInterface::updateShippingFromPrevOrder(unsigned int chatId, unsigned int 
 	SQLite::Transaction transaction(*m_hDB);
 	m_hDB->exec(ss.str());
 	transaction.commit();
-	fprintf(m_Fp, "AURA: Updating address for order_no %d\n", newOrderNo); fflush(m_Fp);
 	return true;
 }
 
@@ -80,9 +124,8 @@ std::tuple<std::string, unsigned int> DBInterface::getShippingForUser(unsigned i
 	std::string strAddr;
 	std::tuple<std::string, unsigned int> tplShip;
 	unsigned int maxOrderNo = 0, order_no = 0;
-	User::Ptr user = getUserForChatId(chatId);
 
-	ss << "SELECT * from Shipping WHERE " << Shipping::DB_TABLE_SHIPPING_COLUMN_USER_ID << " = " << user->m_UserId << ";";
+	ss << "SELECT * from Shipping WHERE " << Shipping::DB_TABLE_SHIPPING_COLUMN_CHAT_ID << " = " << chatId << ";";
 	SQLite::Statement query(*m_hDB, ss.str());
 	while(query.executeStep()) {
 		order_no = query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO.c_str()).getUInt();
@@ -151,17 +194,17 @@ int DBInterface::getIntStatus(CartStatus stat) {
 
 void DBInterface::addBlockNoToShipping(unsigned int chatId, std::string blkNo) {
 	fprintf(m_Fp, "AURA: addBlockNoToShipping blkNo: %s\n", blkNo.c_str()); fflush(m_Fp);
-	User::Ptr user = getUserForChatId(chatId);
+	int order_no = getOrderNoForUser(chatId);
 	std::stringstream ss;
 	ss << "SELECT * from Shipping WHERE " <<
-			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << user->m_OrderNo << ";";
+			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << order_no << ";";
 	SQLite::Statement   query(*m_hDB, ss.str());
 	if(query.executeStep()) {
 		SQLite::Transaction transaction(*m_hDB);
 		ss.str(std::string());
 		ss << "UPDATE Shipping set " <<
 			Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO << " = \"" << blkNo << "\" WHERE "<<
-			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << user->m_OrderNo << ";";
+			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << order_no << ";";
 		m_hDB->exec(ss.str());
 		transaction.commit();
 	} else {
@@ -170,7 +213,7 @@ void DBInterface::addBlockNoToShipping(unsigned int chatId, std::string blkNo) {
 		ss << "INSERT INTO Shipping (" <<
 				Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO << ", " <<
 				Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO <<  ") VALUES (\"" <<
-				blkNo << "\", " << user->m_OrderNo << ");";
+				blkNo << "\", " << order_no << ");";
 		m_hDB->exec(ss.str());
 		transaction.commit();
 	}
@@ -178,17 +221,17 @@ void DBInterface::addBlockNoToShipping(unsigned int chatId, std::string blkNo) {
 
 void DBInterface::addFlatNoToShipping(unsigned int chatId, unsigned int flatNo) {
 	fprintf(m_Fp, "AURA: addFlatNoToShipping flatNo: %d\n", flatNo); fflush(m_Fp);
-	User::Ptr user = getUserForChatId(chatId);
+	int order_no = getOrderNoForUser(chatId);
 	std::stringstream ss;
 	ss << "SELECT * from Shipping WHERE " <<
-			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << user->m_OrderNo << ";";
+			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << order_no << ";";
 	SQLite::Statement   query(*m_hDB, ss.str());
 	if(query.executeStep()) {
 		SQLite::Transaction transaction(*m_hDB);
 		ss.str(std::string());
 		ss << "UPDATE Shipping set " <<
 			Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO << " = " << flatNo << " WHERE "<<
-			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << user->m_OrderNo << ";";
+			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << order_no << ";";
 		m_hDB->exec(ss.str());
 		transaction.commit();
 	} else {
@@ -197,7 +240,7 @@ void DBInterface::addFlatNoToShipping(unsigned int chatId, unsigned int flatNo) 
 		ss << "INSERT INTO Shipping (" <<
 				Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO << ", " <<
 				Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO <<  ") VALUES (" <<
-				flatNo << ", " << user->m_OrderNo << ");";
+				flatNo << ", " << order_no << ");";
 		m_hDB->exec(ss.str());
 		transaction.commit();
 	}
@@ -205,26 +248,26 @@ void DBInterface::addFlatNoToShipping(unsigned int chatId, unsigned int flatNo) 
 
 void DBInterface::addAptNameToShipping(unsigned int chatId, std::string aptName) {
 	fprintf(m_Fp, "AURA: addAptNameToShipping aptName: %s\n", aptName.c_str()); fflush(m_Fp);
-	User::Ptr user = getUserForChatId(chatId);
+	int order_no = getOrderNoForUser(chatId);
 	std::stringstream ss;
 	ss << "SELECT * from Shipping WHERE " <<
-			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << user->m_OrderNo << ";";
+			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << order_no << ";";
 	SQLite::Statement   query(*m_hDB, ss.str());
 	if(query.executeStep()) {
 		SQLite::Transaction transaction(*m_hDB);
 		ss.str(std::string());
 		ss << "UPDATE Shipping set " <<
 				Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME << " = \"" << aptName << "\" WHERE "<<
-				Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << user->m_OrderNo << ";";
+				Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << order_no << ";";
 		m_hDB->exec(ss.str());
 		transaction.commit();
 	} else {
 		SQLite::Transaction transaction(*m_hDB);
 		ss.str(std::string());
 		ss << " INSERT INTO Shipping (" << Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME << ", " <<
-				Shipping::DB_TABLE_SHIPPING_COLUMN_USER_ID << ", " <<
+				Shipping::DB_TABLE_SHIPPING_COLUMN_CHAT_ID << ", " <<
 				Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO <<  ") VALUES (\"" <<
-				aptName << "\", " << user->m_UserId << ", " << user->m_OrderNo << ");";
+				aptName << "\", " << chatId << ", " << order_no << ");";
 		m_hDB->exec(ss.str());
 		transaction.commit();
 	}
@@ -250,7 +293,7 @@ std::vector<Soap::Ptr> DBInterface::getFlavours() {
 	return soaps;
 }
 
-User::Ptr DBInterface::getUserForChatId(unsigned int chatId) {
+/*User::Ptr DBInterface::getUserForChatId(unsigned int chatId) {
 	fprintf(m_Fp, "AURA: getUserForChatId : %d\n", chatId); fflush(m_Fp);
 	std::stringstream ss;
 	ss << "SELECT * FROM User WHERE " << User::DB_TABLE_USER_COLUMN_CHAT_ID << " = " <<
@@ -267,9 +310,9 @@ User::Ptr DBInterface::getUserForChatId(unsigned int chatId) {
 		user->m_OrderNo	= query.getColumn(User::DB_TABLE_USER_COLUMN_ORDER_NO.c_str()).getUInt();
 	}
 	return user;
-}
+}*/
 
-void DBInterface::emptyCartForUser(unsigned int chatId) {
+bool DBInterface::emptyCartForUser(unsigned int chatId) {
 	fprintf(m_Fp, "AURA: emptyCartForUser\n"); fflush(m_Fp);
 	int order_no = getOrderNoForUser(chatId);
 	std::stringstream ss;
@@ -277,6 +320,7 @@ void DBInterface::emptyCartForUser(unsigned int chatId) {
 	SQLite::Transaction transaction(*m_hDB);
 	m_hDB->exec(ss.str());
 	transaction.commit();
+	return true;
 }
 
 void DBInterface::addToCart(unsigned int soapId, unsigned int chatId, unsigned int qnty, CartStatus stat) {
@@ -296,17 +340,16 @@ void DBInterface::addToCart(unsigned int soapId, unsigned int chatId, unsigned i
 		transaction.commit();
 	} else {
 		fprintf(m_Fp, "AURA: Inserting into Cart : %d - %d\n", soapId, qnty); fflush(m_Fp);
-		User::Ptr user = getUserForChatId(chatId);
 		SQLite::Transaction transaction(*m_hDB);
 		ss.str(std::string());
 		ss << "INSERT INTO Cart (" <<
 				Cart::DB_TABLE_CART_COLUMN_SOAP_ID << ", " <<
-				Cart::DB_TABLE_CART_COLUMN_USER_ID << ", " <<
+				Cart::DB_TABLE_CART_COLUMN_CHAT_ID << ", " <<
 				Cart::DB_TABLE_CART_COLUMN_QNTY << ", " <<
 				Cart::DB_TABLE_CART_COLUMN_STATUS << ", " <<
 				Cart::DB_TABLE_CART_COLUMN_ORDER_NO << ") VALUES (" <<
-				soapId << "," << user->m_UserId << "," << qnty << "," <<
-				getIntStatus(stat) << "," << user->m_OrderNo << ");";
+				soapId << "," << chatId << "," << qnty << "," <<
+				getIntStatus(stat) << "," << order_no << ");";
 		m_hDB->exec(ss.str());
 		transaction.commit();
 	}
@@ -324,7 +367,7 @@ std::vector<Cart::Ptr> DBInterface::getUserCart(unsigned int chatId) {
 		item = std::make_shared<Cart>();
 		item->m_CartId		= query.getColumn(Cart::DB_TABLE_CART_COLUMN_CART_ID.c_str()).getUInt();
 		item->m_SoapId		= query.getColumn(Cart::DB_TABLE_CART_COLUMN_SOAP_ID.c_str()).getUInt();
-		item->m_UserId		= query.getColumn(Cart::DB_TABLE_CART_COLUMN_USER_ID.c_str()).getUInt();
+		item->m_ChatId		= query.getColumn(Cart::DB_TABLE_CART_COLUMN_CHAT_ID.c_str()).getUInt();
 		item->m_Qnty		= query.getColumn(Cart::DB_TABLE_CART_COLUMN_QNTY.c_str()).getUInt();
 		item->m_OrderNo		= query.getColumn(Cart::DB_TABLE_CART_COLUMN_ORDER_NO.c_str()).getUInt();
 		item->m_Status		= CartStatus::PENDING;

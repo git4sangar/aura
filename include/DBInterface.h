@@ -41,24 +41,33 @@ public:
 	static std::string DB_TABLE_SOAP_COLUMN_PRICE;
 };
 
-class Invoice {
-public:
-	typedef std::shared_ptr<Invoice> Ptr;
-
-	static std::string DB_TABLE_INVOICE_ORDER_NO;
-};
-
 enum class CartStatus{PENDING, PAID, DELIVERED, NOTA};
+
+class POrder {
+public:
+	typedef std::shared_ptr<POrder> Ptr;
+	unsigned int m_OrderId, m_OrderNo, m_ChatId, m_DateTime;
+	std::string m_Date, m_Time;
+	CartStatus m_Status;
+
+	static std::string DB_TABLE_PORDER_COLUMN_ORDER_ID;
+	static std::string DB_TABLE_PORDER_COLUMN_ORDER_NO;
+	static std::string DB_TABLE_PORDER_COLUMN_CHAT_ID;
+	static std::string DB_TABLE_PORDER_COLUMN_DATE;
+	static std::string DB_TABLE_PORDER_COLUMN_TIME;
+	static std::string DB_TABLE_PORDER_COLUMN_DATE_TIME;
+	static std::string DB_TABLE_PORDER_COLUMN_STATUS;
+};
 
 class Cart {
 public:
 	typedef std::shared_ptr<Cart> Ptr;
-	unsigned int m_CartId, m_SoapId, m_UserId, m_Qnty, m_OrderNo;
+	unsigned int m_CartId, m_SoapId, m_ChatId, m_Qnty, m_OrderNo;
 	CartStatus m_Status;
 
 	static std::string DB_TABLE_CART_COLUMN_CART_ID;
 	static std::string DB_TABLE_CART_COLUMN_SOAP_ID;
-	static std::string DB_TABLE_CART_COLUMN_USER_ID;
+	static std::string DB_TABLE_CART_COLUMN_CHAT_ID;
 	static std::string DB_TABLE_CART_COLUMN_STATUS;
 	static std::string DB_TABLE_CART_COLUMN_QNTY;
 	static std::string DB_TABLE_CART_COLUMN_ORDER_NO;
@@ -67,11 +76,11 @@ public:
 class Shipping {
 public:
 	typedef std::shared_ptr<Shipping> Ptr;
-	unsigned int m_ShippingId, m_UserId, m_FlatNo, m_OrderNo;
+	unsigned int m_ShippingId, m_ChatId, m_FlatNo, m_OrderNo;
 	std::string m_AptName, m_BlockNo;
 
 	static std::string DB_TABLE_SHIPPING_COLUMN_SHIP_ID;
-	static std::string DB_TABLE_SHIPPING_COLUMN_USER_ID;
+	static std::string DB_TABLE_SHIPPING_COLUMN_CHAT_ID;
 	static std::string DB_TABLE_SHIPPING_COLUMN_APT_NAME;
 	static std::string DB_TABLE_SHIPPING_COLUMN_BLOCK_NO;
 	static std::string DB_TABLE_SHIPPING_COLUMN_FLAT_NO;
@@ -88,10 +97,11 @@ public:
 	DBInterface(std::string dbFileName, FILE *fp);
 	~DBInterface();
 
+	void createPOrder(unsigned int chatId);
 	void updateOrderNoForUser(unsigned int chatId);
 	Soap::Ptr getSoapById(unsigned int soapId);
 	std::vector<Soap::Ptr> getFlavours();
-	User::Ptr getUserForChatId(unsigned int chatId);
+	//User::Ptr getUserForChatId(unsigned int chatId);
 	void addToCart(unsigned int soapId, unsigned int chatId, unsigned int qnty, CartStatus stat = CartStatus::PENDING);
 	int getIntStatus(CartStatus stat);
 	std::tuple<std::string, unsigned int> getShippingForUser(unsigned int chatId);
@@ -101,7 +111,7 @@ public:
 	void addFlatNoToShipping(unsigned int chatId, unsigned int flatNo);
 	void addAptNameToShipping(unsigned int chatId, std::string aptName);
 	bool updateShippingFromPrevOrder(unsigned int chatId, unsigned int m_OrderNo);
-	void emptyCartForUser(unsigned int chatId);
+	bool emptyCartForUser(unsigned int chatId);
 	unsigned int getOrderNoForUser(unsigned int chatId);
 	void updateMobileNo(unsigned int chatId, std::string mobileNo);
 	bool addNewUser(

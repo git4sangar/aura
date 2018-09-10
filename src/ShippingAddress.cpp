@@ -283,14 +283,20 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 		getDBHandle()->updateShippingFromPrevOrder(pMsg->chat->id, itrPreDfnd->second);
 		m_RenderMenu	= MenuRenderer::DONE;
 		m_StrMsg		= getPaymentString(pMsg->chat->id);
+		getDBHandle()->createPOrder(pMsg->chat->id);
 		getDBHandle()->updateOrderNoForUser(pMsg->chat->id);
 	}
 
 	//	Get the Apartment name first
 	else if(ViewCart::STR_BTN_PURCHASE == pMsg->text || STR_BTN_BACK == pMsg->text) {
-		m_Addr			= getDBHandle()->getShippingForUser(pMsg->chat->id);
-		m_RenderMenu	= MenuRenderer::APARTMENT;
-		m_StrMsg		= "Shipping Address: Choose your Apartment";
+		std::vector<Cart::Ptr> items = getDBHandle()->getUserCart(pMsg->chat->id);
+		if(items.size() == 0) {
+			m_StrMsg		= "Your Cart is empty! Pls add to cart before purchase";
+		} else {
+			m_Addr			= getDBHandle()->getShippingForUser(pMsg->chat->id);
+			m_RenderMenu	= MenuRenderer::APARTMENT;
+			m_StrMsg		= "Shipping Address: Choose your Apartment";
+		}
 	}
 
 	//	Get the Block Letter
@@ -340,6 +346,7 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 		if(pMsg->contact) getDBHandle()->updateMobileNo(pMsg->chat->id, pMsg->contact->phoneNumber);
 		m_RenderMenu	= MenuRenderer::DONE;
 		m_StrMsg		= getPaymentString(pMsg->chat->id);
+		getDBHandle()->createPOrder(pMsg->chat->id);
 		getDBHandle()->updateOrderNoForUser(pMsg->chat->id);
 	}
 }
@@ -356,10 +363,11 @@ std::string ShippingAddress::getPaymentString(unsigned int chatId) {
 		Soap::Ptr soap = getDBHandle()->getSoapById(item->m_SoapId);
 		ss << std::setw(15) << soap->m_Name << " - "
 			<< std::setw(2) << item->m_Qnty << " - "
-			<< std::setw(7) << "Rs " << (soap->m_Price * item->m_Qnty) << "\n";
+			<< std::setw(3) << "Rs "
+			<< std::setw(4)<< (soap->m_Price * item->m_Qnty) << "\n";
 		iTotal += (soap->m_Price * item->m_Qnty);
 	}
-	ss << std::setw(18) << "Total = Rs " << iTotal << "\n\n";
+	ss << std::setw(20) << "Total = Rs " << iTotal << "\n\n";
 	ss << "Paytm or Google Pay to 98406 25165.\n" <<
 				"<b>Pls mention Order No: " <<
 				getDBHandle()->getOrderNoForUser(chatId) <<
@@ -368,6 +376,6 @@ std::string ShippingAddress::getPaymentString(unsigned int chatId) {
 				"Once we receive payment, you will get an OTP.\n" <<
 				"Give that OTP during delivery.\n\n";
 
-	ss << "<b>Delivery Address</b>\n" << std::get<0>(delAddr);
+	ss << "<b>Shipping Address</b>\n" << std::get<0>(delAddr);
 	return ss.str();
 }
