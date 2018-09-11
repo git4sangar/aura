@@ -382,7 +382,7 @@ std::vector<Soap::Ptr> DBInterface::getFlavours() {
 	return soaps;
 }
 
-/*User::Ptr DBInterface::getUserForChatId(unsigned int chatId) {
+User::Ptr DBInterface::getUserForChatId(unsigned int chatId) {
 	fprintf(m_Fp, "AURA: getUserForChatId : %d\n", chatId); fflush(m_Fp);
 	std::stringstream ss;
 	ss << "SELECT * FROM User WHERE " << User::DB_TABLE_USER_COLUMN_CHAT_ID << " = " <<
@@ -399,7 +399,7 @@ std::vector<Soap::Ptr> DBInterface::getFlavours() {
 		user->m_OrderNo	= query.getColumn(User::DB_TABLE_USER_COLUMN_ORDER_NO.c_str()).getUInt();
 	}
 	return user;
-}*/
+}
 
 bool DBInterface::emptyCartForUser(unsigned int chatId) {
 	fprintf(m_Fp, "AURA: emptyCartForUser\n"); fflush(m_Fp);

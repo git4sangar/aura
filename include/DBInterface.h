@@ -107,7 +107,7 @@ public:
 	void updateOrderNoForUser(unsigned int chatId);
 	Soap::Ptr getSoapById(unsigned int soapId);
 	std::vector<Soap::Ptr> getFlavours();
-	//User::Ptr getUserForChatId(unsigned int chatId);
+	User::Ptr getUserForChatId(unsigned int chatId);
 	void addToCart(unsigned int soapId, unsigned int chatId, unsigned int qnty, CartStatus stat = CartStatus::PENDING);
 
 	std::string getStrStatus(CartStatus stat);

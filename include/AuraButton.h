@@ -30,6 +30,7 @@ public:
 		return row;
 	}
 
+	virtual std::string getNotifyStr(unsigned int userParam) {return std::string();}
 	virtual std::string getMsg() = 0;
 	virtual std::string getParseMode() {return std::string();}
 	virtual TgBot::ReplyKeyboardMarkup::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) = 0;

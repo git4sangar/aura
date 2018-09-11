@@ -74,6 +74,14 @@ void AuraMainLoop(FILE *fp) {
       if(auraButtons.end() != itr) {
          TgBot::ReplyKeyboardMarkup::Ptr pMenu;
          fprintf(fp, "AURA: Found \"%s\" button\n", pMsg->text.c_str()); fflush(fp);
+
+         if(ShippingAddress::STR_BTN_PAYTM == pMsg->text ||
+            ShippingAddress::STR_BTN_TEZ == pMsg->text ||
+            ShippingAddress::STR_BTN_ON_DELIVERY == pMsg->text) {
+               pBot->getApi().sendMessage(303802126, itr->second->getNotifyStr(pMsg->chat->id),
+                     false, 0, nullptr, itr->second->getParseMode());
+         }
+         
          itr->second->onClick(pMsg, fp);
 
          pMenu = itr->second->prepareMenu(auraButtons, fp);

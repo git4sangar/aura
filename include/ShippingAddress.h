@@ -48,6 +48,7 @@ public:
 	}
 	virtual ~ShippingAddress() {}
 
+	std::string getNotifyStr(unsigned int userParam);
 	std::string getMsg() { return m_StrMsg;}
 	std::string getParseMode() {return "HTML";}
 	TgBot::ReplyKeyboardMarkup::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);

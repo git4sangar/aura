@@ -435,6 +435,26 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 	}
 }
 
+std::string ShippingAddress::getNotifyStr(unsigned int chatId) {
+	int iTotal;
+	std::tuple<std::string, int> delAddr = getDBHandle()->getShippingForUser(chatId);
+	User::Ptr user = getDBHandle()->getUserForChatId(chatId);
+	std::stringstream ss;
+	ss << user->m_FName << " has made an Order No: " << user->m_OrderNo << "\n";
+	std::vector<Cart::Ptr> items = getDBHandle()->getUserCart(chatId);
+	for(auto &item : items) {
+		Soap::Ptr soap = getDBHandle()->getSoapById(item->m_SoapId);
+		ss << std::setw(15) << soap->m_Name << " - "
+			<< std::setw(2) << item->m_Qnty << " - "
+			<< std::setw(3) << "₹ "
+			<< std::setw(4)<< (soap->m_Price * item->m_Qnty) << "\n";
+		iTotal += (soap->m_Price * item->m_Qnty);
+	}
+	ss << std::setw(20) << "Total = ₹ " << iTotal << "\n\n";
+	ss << "<b>Shipping Address</b>\n" << std::get<0>(delAddr);
+	return ss.str();
+}
+
 std::string ShippingAddress::getPaymentString(unsigned int chatId) {
 	std::stringstream ss;
 	int iTotal = 0;
