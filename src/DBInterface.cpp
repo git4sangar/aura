@@ -43,6 +43,7 @@
 	std::string POrder::DB_TABLE_PORDER_COLUMN_TIME	= "time";
 	std::string POrder::DB_TABLE_PORDER_COLUMN_DATE_TIME	= "date_time";
 	std::string POrder::DB_TABLE_PORDER_COLUMN_PAY_GW	= "payment_gw";
+	std::string POrder::DB_TABLE_PORDER_COLUMN_OTP = "otp";
 	std::string POrder::DB_TABLE_PORDER_COLUMN_STATUS	= "status";
 
 DBInterface::DBInterface(std::string dbFileName, FILE *fp) {
@@ -71,6 +72,32 @@ void DBInterface::updatePOrderPayGW(unsigned int chatId, std::string payGw) {
 	SQLite::Transaction transaction(*m_hDB);
 	m_hDB->exec(ss.str());
 	transaction.commit();
+}
+
+std::vector<POrder::Ptr> DBInterface::getPOrdersForUser(unsigned int chatId) {
+	fprintf(m_Fp, "AURA: getPOrdersForUser: %d\n", chatId); fflush(m_Fp);
+	POrder::Ptr pOrder;
+	std::vector<POrder::Ptr> pOrders;
+	std::stringstream ss;
+
+	ss << "SELECT * from POrder WHERE " << POrder::DB_TABLE_PORDER_COLUMN_CHAT_ID << " = " << chatId <<
+		" ORDER BY " << POrder::DB_TABLE_PORDER_COLUMN_DATE_TIME << " DESC;";
+	SQLite::Statement query(*m_hDB, ss.str());
+	while(query.executeStep()) {
+		pOrder = std::make_shared<POrder>();
+		pOrder->m_OrderId	= query.getColumn(POrder::DB_TABLE_PORDER_COLUMN_ORDER_ID.c_str()).getUInt();
+		pOrder->m_OrderNo	= query.getColumn(POrder::DB_TABLE_PORDER_COLUMN_ORDER_NO.c_str()).getUInt();
+		pOrder->m_ChatId	= query.getColumn(POrder::DB_TABLE_PORDER_COLUMN_CHAT_ID.c_str()).getUInt();
+		pOrder->m_OTP		= query.getColumn(POrder::DB_TABLE_PORDER_COLUMN_OTP.c_str()).getUInt();
+		pOrder->m_Date		= query.getColumn(POrder::DB_TABLE_PORDER_COLUMN_DATE.c_str()).getString();
+		pOrder->m_Time		= query.getColumn(POrder::DB_TABLE_PORDER_COLUMN_TIME.c_str()).getString();
+		pOrder->m_DateTime	= query.getColumn(POrder::DB_TABLE_PORDER_COLUMN_DATE_TIME.c_str()).getUInt();
+		pOrder->m_PayGW		= query.getColumn(POrder::DB_TABLE_PORDER_COLUMN_PAY_GW.c_str()).getString();
+		int iStat		= query.getColumn(POrder::DB_TABLE_PORDER_COLUMN_STATUS.c_str()).getUInt();
+		pOrder->m_Status	= getCartStatus(iStat);
+		pOrders.push_back(pOrder);
+	}
+	return pOrders;
 }
 
 void DBInterface::createPOrder(unsigned int chatId) {
@@ -145,19 +172,17 @@ std::tuple<std::string, unsigned int> DBInterface::getShippingForUser(unsigned i
 	std::stringstream ss;
 	std::string strAddr;
 	std::tuple<std::string, unsigned int> tplShip;
-	unsigned int maxOrderNo = 0, order_no = 0;
+	unsigned int order_no = 0;
 
-	ss << "SELECT * from Shipping WHERE " << Shipping::DB_TABLE_SHIPPING_COLUMN_CHAT_ID << " = " << chatId << ";";
+	ss << "SELECT * from Shipping WHERE " << Shipping::DB_TABLE_SHIPPING_COLUMN_CHAT_ID << " = " << chatId << 
+		" ORDER BY " << Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " DESC;";
 	SQLite::Statement query(*m_hDB, ss.str());
-	while(query.executeStep()) {
+	if(query.executeStep()) {
 		order_no = query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO.c_str()).getUInt();
-		if(order_no > maxOrderNo) {
-			maxOrderNo = order_no;
-			strAddr = query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO.c_str()).getString() + "-";
-			strAddr += std::to_string(query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO.c_str()).getUInt()) + ", ";
-			strAddr += query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME.c_str()).getString();
-			tplShip = std::make_tuple(strAddr, order_no);
-		}
+		strAddr = query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO.c_str()).getString() + "-";
+		strAddr += std::to_string(query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO.c_str()).getUInt()) + ", ";
+		strAddr += query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME.c_str()).getString();
+		tplShip = std::make_tuple(strAddr, order_no);
 	}
 	return tplShip;
 }
@@ -193,6 +218,45 @@ Soap::Ptr DBInterface::getSoapById(unsigned int soapId) {
 		soap->m_Desc		= query.getColumn(Soap::DB_TABLE_SOAP_COLUMN_DESC.c_str()).getString();
 	}
 	return soap;
+}
+
+CartStatus DBInterface::getCartStatus(int iStat) {
+	CartStatus stat = CartStatus::NOTA;
+	switch(iStat) {
+		case 1:
+			stat = CartStatus::PENDING;
+		break;
+		case 2:
+			stat = CartStatus::PAID;
+		break;
+		case 3:
+			stat = CartStatus::DELIVERED;
+		break;
+		case 0:
+		default:
+			stat = CartStatus::NOTA;
+		break;
+	} 
+	return stat;
+}
+
+std::string DBInterface::getStrStatus(CartStatus stat) {
+	std::string srStat;
+	switch(stat) {
+		case CartStatus::PENDING:
+			srStat = "Pending Payment";
+			break;
+		case CartStatus::PAID:
+			srStat = "Payment Received, Delivery Pending";
+			break;
+		case CartStatus::DELIVERED:
+			srStat = "Delivered";
+			break;
+		case CartStatus::NOTA:
+		default:
+			srStat = "Unknown";
+	}
+	return srStat;
 }
 
 int DBInterface::getIntStatus(CartStatus stat) {
@@ -377,9 +441,30 @@ void DBInterface::addToCart(unsigned int soapId, unsigned int chatId, unsigned i
 	}
 }
 
+std::vector<Cart::Ptr> DBInterface::getCartForOrderNo(unsigned int order_no) {
+	fprintf(m_Fp, "AURA: getCartForOrderNo(%d)\n", order_no); fflush(m_Fp);
+	std::vector<Cart::Ptr> items;
+	Cart::Ptr item;
+	std::stringstream ss;
+	ss << "SELECT * from Cart WHERE " << Cart::DB_TABLE_CART_COLUMN_ORDER_NO << " = " << order_no << ";";
+	SQLite::Statement query(*m_hDB, ss.str());
+	while(query.executeStep()) {
+		item = std::make_shared<Cart>();
+		item->m_CartId		= query.getColumn(Cart::DB_TABLE_CART_COLUMN_CART_ID.c_str()).getUInt();
+		item->m_SoapId		= query.getColumn(Cart::DB_TABLE_CART_COLUMN_SOAP_ID.c_str()).getUInt();
+		item->m_ChatId		= query.getColumn(Cart::DB_TABLE_CART_COLUMN_CHAT_ID.c_str()).getUInt();
+		item->m_Qnty		= query.getColumn(Cart::DB_TABLE_CART_COLUMN_QNTY.c_str()).getUInt();
+		item->m_OrderNo		= query.getColumn(Cart::DB_TABLE_CART_COLUMN_ORDER_NO.c_str()).getUInt();
+		item->m_Status		= CartStatus::PENDING;
+		items.push_back(item);
+	}
+	return items;
+}
+
 std::vector<Cart::Ptr> DBInterface::getUserCart(unsigned int chatId) {
 	fprintf(m_Fp, "AURA: getUserCart(%d)\n", chatId); fflush(m_Fp);
-	std::vector<Cart::Ptr> items;
+	return getCartForOrderNo(getOrderNoForUser(chatId));
+	/*std::vector<Cart::Ptr> items;
 	Cart::Ptr item;
 	std::stringstream ss;
 	int order_no = getOrderNoForUser(chatId);
@@ -395,7 +480,7 @@ std::vector<Cart::Ptr> DBInterface::getUserCart(unsigned int chatId) {
 		item->m_Status		= CartStatus::PENDING;
 		items.push_back(item);
 	}
-	return items;
+	return items;*/
 }
 
 unsigned int DBInterface::getOrderNoForUser(unsigned int chatId) {

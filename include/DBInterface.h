@@ -46,8 +46,8 @@ enum class CartStatus{PENDING, PAID, DELIVERED, NOTA};
 class POrder {
 public:
 	typedef std::shared_ptr<POrder> Ptr;
-	unsigned int m_OrderId, m_OrderNo, m_ChatId, m_DateTime;
-	std::string m_Date, m_Time;
+	unsigned int m_OrderId, m_OrderNo, m_ChatId, m_DateTime, m_OTP;
+	std::string m_Date, m_Time, m_PayGW;
 	CartStatus m_Status;
 
 	static std::string DB_TABLE_PORDER_COLUMN_ORDER_ID;
@@ -57,6 +57,7 @@ public:
 	static std::string DB_TABLE_PORDER_COLUMN_TIME;
 	static std::string DB_TABLE_PORDER_COLUMN_DATE_TIME;
 	static std::string DB_TABLE_PORDER_COLUMN_PAY_GW;
+	static std::string DB_TABLE_PORDER_COLUMN_OTP;
 	static std::string DB_TABLE_PORDER_COLUMN_STATUS;
 };
 
@@ -101,14 +102,23 @@ public:
 	void updatePOrderPayGW(unsigned int chatId, std::string payGw);
 	void deletePOrder(unsigned int chatId);
 	void createPOrder(unsigned int chatId);
+	std::vector<POrder::Ptr> getPOrdersForUser(unsigned int chatId);
+
 	void updateOrderNoForUser(unsigned int chatId);
 	Soap::Ptr getSoapById(unsigned int soapId);
 	std::vector<Soap::Ptr> getFlavours();
 	//User::Ptr getUserForChatId(unsigned int chatId);
 	void addToCart(unsigned int soapId, unsigned int chatId, unsigned int qnty, CartStatus stat = CartStatus::PENDING);
+
+	std::string getStrStatus(CartStatus stat);
 	int getIntStatus(CartStatus stat);
+	CartStatus getCartStatus(int iStat);
+
 	std::tuple<std::string, unsigned int> getShippingForUser(unsigned int chatId);
+
 	std::vector<Cart::Ptr> getUserCart(unsigned int chatId);
+	std::vector<Cart::Ptr> getCartForOrderNo(unsigned int order_no);
+	
 	unsigned int generateOrderNo();
 	void addBlockNoToShipping(unsigned int chatId, std::string blkNo);
 	void addFlatNoToShipping(unsigned int chatId, unsigned int flatNo);
