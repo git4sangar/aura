@@ -66,7 +66,8 @@ void DBInterface::updatePOrderPayGW(unsigned int chatId, std::string payGw) {
 	fprintf(m_Fp, "AURA: updatePOrderPayGW: %d\n", chatId); fflush(m_Fp);
 	unsigned int order_no	= getOrderNoForUser(chatId);
 	std::stringstream ss;
-	ss << "UPDATE POrder set " << POrder::DB_TABLE_PORDER_COLUMN_PAY_GW << " = \"" << payGw << "\";";
+	ss << "UPDATE POrder set " << POrder::DB_TABLE_PORDER_COLUMN_PAY_GW << " = \"" << payGw << "\" WHERE "
+		<< POrder::DB_TABLE_PORDER_COLUMN_ORDER_NO << " = " << order_no << ";";
 	SQLite::Transaction transaction(*m_hDB);
 	m_hDB->exec(ss.str());
 	transaction.commit();
