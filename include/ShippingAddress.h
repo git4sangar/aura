@@ -18,6 +18,7 @@ class ShippingAddress :
 		public std::enable_shared_from_this<ShippingAddress> {
 	std::string m_StrMsg, m_Cache;
 	int m_Rows, m_Cols, m_FloorNo;
+	int m_FlatsRendered, m_FloorsRendered, m_BlockNosRendered, m_BlocksRendered;
 	std::vector<std::string> m_Apts;
 	std::vector<std::string> m_Blocks;
 	std::map<std::string, std::tuple<std::string,int>> m_BlockNos;
@@ -37,10 +38,14 @@ class ShippingAddress :
 	std::string floorNoToString(int iFloorNo);
 	std::vector<TgBot::KeyboardButton::Ptr> getLastRow(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns,
 														std::vector<TgBot::KeyboardButton::Ptr>&& lastRow);
+	void clearAuraButtons(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, MenuRenderer item, FILE *fp);
 	std::string getPaymentString(unsigned int chatId);
 public:
 	typedef std::shared_ptr<ShippingAddress> Ptr;
-	ShippingAddress(std::shared_ptr<DBInterface> hDB) : AuraButton(hDB) {m_Rows = m_Cols = m_FloorNo = 0;}
+	ShippingAddress(std::shared_ptr<DBInterface> hDB) : AuraButton(hDB) {
+		m_Rows = m_Cols = m_FloorNo = 0;
+		m_FlatsRendered = m_FloorsRendered = m_BlockNosRendered = m_BlocksRendered = 0;
+	}
 	virtual ~ShippingAddress() {}
 
 	std::string getMsg() { return m_StrMsg;}

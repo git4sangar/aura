@@ -63,6 +63,7 @@ void AuraMainLoop(FILE *fp) {
       isSkipOver = true;
 
       fprintf(fp, "AURA: Received \"%s\" command\n",  pMsg->text.c_str()); fflush(fp);
+      fprintf(fp, "AURA: AuraBtnList Size %u \n",  auraButtons.size()); fflush(fp);
       if(pMsg->contact) {
          pMsg->text = ShippingAddress::STR_BTN_CONTACT;
       }

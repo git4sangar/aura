@@ -19,6 +19,29 @@
 	std::string ShippingAddress::STR_BTN_TEZ	= "Google Pay / Tez to 98406 25165";
 	std::string ShippingAddress::STR_BTN_ON_DELIVERY	= "Cash on Delivery";
 
+void ShippingAddress::clearAuraButtons(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, MenuRenderer item, FILE *fp) {
+	fprintf(fp, "AURA: ShippingAddress::clearAuraButtons { size: %ld\n", listAuraBtns.size()); fflush(fp);
+	switch(item) {
+		case MenuRenderer::BLOCK:
+			for(auto &block : m_Blocks) listAuraBtns.erase(block);
+			m_Blocks.clear();
+			break;
+		case MenuRenderer::BLOCK_NO:
+			for(auto &blockNo : m_BlockNos) listAuraBtns.erase(blockNo.first);
+			m_BlockNos.clear();
+		break;
+		case MenuRenderer::FLOOR:
+			for(auto &floor : m_Floors) listAuraBtns.erase(floor.first);
+			m_Floors.clear();
+		break;
+		case MenuRenderer::FLAT_NO:
+			for(auto &flat : m_Flats) listAuraBtns.erase(flat.first);
+			m_Flats.clear();
+		break;
+	}
+	fprintf(fp, "AURA: ShippingAddress::clearAuraButtons size: %ld }\n", listAuraBtns.size()); fflush(fp);
+}
+
 std::vector<TgBot::KeyboardButton::Ptr> ShippingAddress::getLastRow(
 			std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns,
 			std::vector<TgBot::KeyboardButton::Ptr>&& lastRow) {
@@ -44,6 +67,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::shareContactMenu(std::map<std::
 
 TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderCheckoutMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA: \"ShippingAddress::renderConfirmMenu\" rendering\n"); fflush(fp);
+	if(0 == m_FlatsRendered) clearAuraButtons(listAuraBtns, MenuRenderer::FLAT_NO, fp);
 	TgBot::KeyboardButton::Ptr kbBtnPaytm, kbBtnTez, kbBtnOnDelivery;
 
 	kbBtnPaytm 			= std::make_shared<TgBot::KeyboardButton>();
@@ -74,6 +98,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderCheckoutMenu(std::map<std
 
 TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFlatMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA: \"ShippingAddress::renderFlatMenu\" rendering\n"); fflush(fp);
+	if(0 == m_FloorsRendered) clearAuraButtons(listAuraBtns, MenuRenderer::FLOOR, fp);
 	TgBot::KeyboardButton::Ptr kbBtnFlat;
 	std::vector<TgBot::KeyboardButton::Ptr> kbBtnFlats;
 
@@ -101,11 +126,13 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFlatMenu(std::map<std::st
 	}
 
 	pFlatsMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
+	m_FlatsRendered++;
 	return pFlatsMenu;
 }
 
 TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFloorMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA: \"ShippingAddress::renderFloorMenu\" rendering\n"); fflush(fp);
+	if(0 == m_BlockNosRendered) clearAuraButtons(listAuraBtns, MenuRenderer::BLOCK_NO, fp);
 	TgBot::KeyboardButton::Ptr kbBtnFloor;
 	std::vector<TgBot::KeyboardButton::Ptr> kbBtnFloors;
 	std::stringstream ss;
@@ -135,11 +162,13 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFloorMenu(std::map<std::s
 	}
 
 	pFloorsMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
+	m_FloorsRendered++;
 	return pFloorsMenu;
 }
 
 TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderBlockNoMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA: \"ShippingAddress::renderBlockNoMenu\" rendering\n"); fflush(fp);
+	if(0 == m_BlocksRendered) clearAuraButtons(listAuraBtns, MenuRenderer::BLOCK, fp);
 	TgBot::KeyboardButton::Ptr kbBtnBlockNo;
 	std::vector<TgBot::KeyboardButton::Ptr> kbBtnBlockNos;
 	std::stringstream ss;
@@ -179,6 +208,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderBlockNoMenu(std::map<std:
 	}
 
 	pBlockNosMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
+	m_BlockNosRendered++;
 	return pBlockNosMenu;
 }
 
@@ -214,6 +244,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderBlockMenu(std::map<std::s
 		pBlockMenu->keyboard.push_back(row);
 	}
 	pBlockMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
+	m_BlocksRendered++;
 	return pBlockMenu;
 }
 
@@ -344,6 +375,7 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 
 	//	Get the Block number
 	else if(std::find(m_Blocks.begin(), m_Blocks.end(), pMsg->text) != m_Blocks.end()) {
+		m_BlocksRendered--;
 		m_RenderMenu	= MenuRenderer::BLOCK_NO;
 		m_Cache			= pMsg->text;
 		m_StrMsg		= "Shipping Address: Choose your Block No";
@@ -351,6 +383,7 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 
 	//	Get the Floor
 	else if(m_BlockNos.end() != (itr = m_BlockNos.find(pMsg->text))) {
+		m_BlockNosRendered--;
 		m_RenderMenu	= MenuRenderer::FLOOR;
 		//	Parse the block number & cache
 		std::string strBlockNo = std::get<0>(itr->second);
@@ -363,6 +396,7 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 
 	//	Get the Flat number
 	else if(m_Floors.end() != (itr  = m_Floors.find(pMsg->text))) {
+		m_FloorsRendered--;
 		m_RenderMenu	= MenuRenderer::FLAT_NO;
 		//	Parse the Floor number & cache
 		m_Cache 	= std::get<0>(itr->second);
@@ -372,6 +406,7 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 
 	//	Put the address in database & get contact
 	else if(m_Flats.end() != (itr = m_Flats.find(pMsg->text))) {
+		m_FlatsRendered--;
 		getDBHandle()->addFlatNoToShipping(pMsg->chat->id, std::get<1>(itr->second));
 		m_RenderMenu	= MenuRenderer::CONTACT;
 		m_StrMsg		= "Share your contact";
