@@ -15,6 +15,9 @@
 	std::string ShippingAddress::STR_BTN_GARUDA	= "Garuda Avenue";
 	std::string ShippingAddress::STR_BTN_CONTACT= "Contact";
 	std::string ShippingAddress::STR_BTN_BACK	= "Back to Apt";
+	std::string ShippingAddress::STR_BTN_PAYTM	= "Paytm to 98406 25165";
+	std::string ShippingAddress::STR_BTN_TEZ	= "Google Pay / Tez to 98406 25165";
+	std::string ShippingAddress::STR_BTN_ON_DELIVERY	= "Cash on Delivery";
 
 std::vector<TgBot::KeyboardButton::Ptr> ShippingAddress::getLastRow(
 			std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns,
@@ -37,6 +40,36 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::shareContactMenu(std::map<std::
 	pContactsMenu->keyboard.push_back(row);
 	pContactsMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
 	return pContactsMenu;
+}
+
+TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderCheckoutMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+	fprintf(fp, "AURA: \"ShippingAddress::renderConfirmMenu\" rendering\n"); fflush(fp);
+	TgBot::KeyboardButton::Ptr kbBtnPaytm, kbBtnTez, kbBtnOnDelivery;
+
+	kbBtnPaytm 			= std::make_shared<TgBot::KeyboardButton>();
+	kbBtnPaytm->text	= STR_BTN_PAYTM;
+	listAuraBtns[kbBtnPaytm->text] = shared_from_this();
+
+	kbBtnTez 			= std::make_shared<TgBot::KeyboardButton>();
+	kbBtnTez->text		= STR_BTN_TEZ;
+	listAuraBtns[kbBtnTez->text] = shared_from_this();
+
+	kbBtnOnDelivery 					= std::make_shared<TgBot::KeyboardButton>();
+	kbBtnOnDelivery->text				= STR_BTN_ON_DELIVERY;
+	listAuraBtns[kbBtnOnDelivery->text] = shared_from_this();
+
+	TgBot::ReplyKeyboardMarkup::Ptr pPayMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
+	std::vector<TgBot::KeyboardButton::Ptr> row;
+
+	row.clear(); row.push_back(kbBtnPaytm);
+	pPayMenu->keyboard.push_back(row);
+	row.clear(); row.push_back(kbBtnTez);
+	pPayMenu->keyboard.push_back(row);
+	row.clear(); row.push_back(kbBtnOnDelivery);
+	pPayMenu->keyboard.push_back(row);
+
+	pPayMenu->keyboard.push_back(getMainMenu());
+	return pPayMenu;
 }
 
 TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFlatMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
@@ -250,6 +283,9 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::prepareMenu(std::map<std::strin
 		case MenuRenderer::CONTACT:
 			pMenu = shareContactMenu(listAuraBtns, fp);
 		break;
+		case MenuRenderer::CONFIRM:
+			pMenu = renderCheckoutMenu(listAuraBtns, fp);
+		break;
 		case MenuRenderer::DONE:
 			pMenu = std::make_shared<TgBot::ReplyKeyboardMarkup>();
 			pMenu->keyboard.push_back(getMainMenu());
@@ -281,10 +317,12 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 	
 	if(m_PreDfnd.end() != (itrPreDfnd = m_PreDfnd.find(pMsg->text))) {
 		getDBHandle()->updateShippingFromPrevOrder(pMsg->chat->id, itrPreDfnd->second);
-		m_RenderMenu	= MenuRenderer::DONE;
-		m_StrMsg		= getPaymentString(pMsg->chat->id);
+		m_RenderMenu	= MenuRenderer::CONFIRM;
+		m_StrMsg		= "Checkout using one of the following methods \n" +
+						"<b>Pls mention Order No: " + std::to_string(getDBHandle()->getOrderNoForUser(chatId)) +
+						" while paying.</b>";
+		deletePOrder(pMsg->chat->id);
 		getDBHandle()->createPOrder(pMsg->chat->id);
-		getDBHandle()->updateOrderNoForUser(pMsg->chat->id);
 	}
 
 	//	Get the Apartment name first
@@ -342,11 +380,20 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 	}
 
 	// Put the mobile no in database & go to payments
-	else if(ShippingAddress::STR_BTN_CONTACT == pMsg->text) {
+	else if(STR_BTN_CONTACT == pMsg->text) {
 		if(pMsg->contact) getDBHandle()->updateMobileNo(pMsg->chat->id, pMsg->contact->phoneNumber);
+		m_RenderMenu	= MenuRenderer::CONFIRM;
+		m_StrMsg		= "Checkout using one of the following methods\n" +
+						"<b>Pls mention Order No: " + std::to_string(getDBHandle()->getOrderNoForUser(chatId)) +
+						" while paying.</b>";
+		deletePOrder(pMsg->chat->id);
+		getDBHandle()->createPOrder(pMsg->chat->id);
+	}
+
+	else if(STR_BTN_PAYTM == pMsg->text || STR_BTN_TEZ == pMsg->text || STR_BTN_ON_DELIVERY == pMsg->text) {
 		m_RenderMenu	= MenuRenderer::DONE;
 		m_StrMsg		= getPaymentString(pMsg->chat->id);
-		getDBHandle()->createPOrder(pMsg->chat->id);
+		updatePOrderPayGW(pMsg->chat->id, pMsg->text);
 		getDBHandle()->updateOrderNoForUser(pMsg->chat->id);
 	}
 }
@@ -368,12 +415,7 @@ std::string ShippingAddress::getPaymentString(unsigned int chatId) {
 		iTotal += (soap->m_Price * item->m_Qnty);
 	}
 	ss << std::setw(20) << "Total = Rs " << iTotal << "\n\n";
-	ss << "Paytm or Google Pay to 98406 25165.\n" <<
-				"<b>Pls mention Order No: " <<
-				getDBHandle()->getOrderNoForUser(chatId) <<
-				" while paying.</b>\n\n" <<
-				"You can choose to pay \"on delivery\" too.\n\n" <<
-				"Once we receive payment, you will get an OTP.\n" <<
+	ss << "Once we receive payment, you will get an OTP.\n" <<
 				"Give that OTP during delivery.\n\n";
 
 	ss << "<b>Shipping Address</b>\n" << std::get<0>(delAddr);

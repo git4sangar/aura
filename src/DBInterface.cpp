@@ -42,6 +42,7 @@
 	std::string POrder::DB_TABLE_PORDER_COLUMN_DATE	= "date";
 	std::string POrder::DB_TABLE_PORDER_COLUMN_TIME	= "time";
 	std::string POrder::DB_TABLE_PORDER_COLUMN_DATE_TIME	= "date_time";
+	std::string POrder::DB_TABLE_PORDER_COLUMN_PAY_GW	= "payment_gw";
 	std::string POrder::DB_TABLE_PORDER_COLUMN_STATUS	= "status";
 
 DBInterface::DBInterface(std::string dbFileName, FILE *fp) {
@@ -50,6 +51,26 @@ DBInterface::DBInterface(std::string dbFileName, FILE *fp) {
 }
 
 DBInterface::~DBInterface() {}
+
+void DBInterface::deletePOrder(unsigned int chatId) {
+	fprintf(m_Fp, "AURA: deletePOrder: %d\n", chatId); fflush(m_Fp);
+	unsigned int order_no	= getOrderNoForUser(chatId);
+	std::stringstream ss;
+	ss << "DELETE from POrder WHERE " << POrder::DB_TABLE_PORDER_COLUMN_ORDER_NO << " = " << order_no << ";";
+	SQLite::Transaction transaction(*m_hDB);
+	m_hDB->exec(ss.str());
+	transaction.commit();
+}
+
+void DBInterface::updatePOrderPayGW(unsigned int chatId, std::string payGw) {
+	fprintf(m_Fp, "AURA: updatePOrderPayGW: %d\n", chatId); fflush(m_Fp);
+	unsigned int order_no	= getOrderNoForUser(chatId);
+	std::stringstream ss;
+	ss << "UPDATE POrder set " << POrder::DB_TABLE_PORDER_COLUMN_PAY_GW << " = \"" << payGw << "\";";
+	SQLite::Transaction transaction(*m_hDB);
+	m_hDB->exec(ss.str());
+	transaction.commit();
+}
 
 void DBInterface::createPOrder(unsigned int chatId) {
 	fprintf(m_Fp, "AURA: createOrder: %d\n", chatId); fflush(m_Fp);

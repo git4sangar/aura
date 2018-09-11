@@ -56,6 +56,7 @@ public:
 	static std::string DB_TABLE_PORDER_COLUMN_DATE;
 	static std::string DB_TABLE_PORDER_COLUMN_TIME;
 	static std::string DB_TABLE_PORDER_COLUMN_DATE_TIME;
+	static std::string DB_TABLE_PORDER_COLUMN_PAY_GW;
 	static std::string DB_TABLE_PORDER_COLUMN_STATUS;
 };
 
@@ -97,6 +98,8 @@ public:
 	DBInterface(std::string dbFileName, FILE *fp);
 	~DBInterface();
 
+	void updatePOrderPayGW(unsigned int chatId, std::string payGw);
+	void deletePOrder(unsigned int chatId);
 	void createPOrder(unsigned int chatId);
 	void updateOrderNoForUser(unsigned int chatId);
 	Soap::Ptr getSoapById(unsigned int soapId);

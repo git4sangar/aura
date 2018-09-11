@@ -11,7 +11,7 @@
 #include <AuraButton.h>
 #include <DBInterface.h>
 
-enum class MenuRenderer {APARTMENT, BLOCK, BLOCK_NO, FLOOR, FLAT_NO, CONTACT, DONE};
+enum class MenuRenderer {APARTMENT, BLOCK, BLOCK_NO, FLOOR, FLAT_NO, CONTACT, CONFIRM, DONE};
 
 class ShippingAddress :
 		public AuraButton,
@@ -33,6 +33,7 @@ class ShippingAddress :
 	TgBot::ReplyKeyboardMarkup::Ptr renderFloorMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
 	TgBot::ReplyKeyboardMarkup::Ptr renderFlatMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
 	TgBot::ReplyKeyboardMarkup::Ptr shareContactMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
+	TgBot::ReplyKeyboardMarkup::Ptr renderCheckoutMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
 	std::string floorNoToString(int iFloorNo);
 	std::vector<TgBot::KeyboardButton::Ptr> getLastRow(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns,
 														std::vector<TgBot::KeyboardButton::Ptr>&& lastRow);
@@ -52,6 +53,9 @@ public:
 	static std::string STR_BTN_GARUDA;
 	static std::string STR_BTN_CONTACT;
 	static std::string STR_BTN_BACK;
+	static std::string STR_BTN_PAYTM;
+	static std::string STR_BTN_TEZ;
+	static std::string STR_BTN_ON_DELIVERY;
 };
 
 
