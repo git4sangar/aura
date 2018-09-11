@@ -20,10 +20,10 @@ TgBot::ReplyKeyboardMarkup::Ptr OrdersButton::prepareMenu(std::map<std::string, 
 		iTotal = 0;
 		for(auto &item : items) {
 			Soap::Ptr soap = getDBHandle()->getSoapById(item->m_SoapId);
-			ss << soap->m_Name << "-" << item->m_Qnty << "-" << (soap->m_Price * item->m_Qnty) << "\n";
+			ss << soap->m_Name << " - " << item->m_Qnty << " - ₹ " << (soap->m_Price * item->m_Qnty) << "\n";
 			iTotal += (soap->m_Price * item->m_Qnty);
 		}
-		ss << "Total = " << iTotal << "\n\n\n";
+		ss << "Total = ₹ " << iTotal << "\n\n\n";
 		iCount--;
 	}
 	m_StrOrder	= ss.str();

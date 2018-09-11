@@ -11,7 +11,8 @@
 std::string StartButton::STR_BTN_VIEW_SOAPS		= "View Soaps";
 std::string StartButton::STR_BTN_VIEW_CART		= "View Cart";
 std::string StartButton::STR_BTN_VIEW_ORDERS	= "View Orders";
-std::string StartButton::STR_MSG_DEFF_RELEASE	= "I am the AuraSoap Bot & am getting ready now..!\nBear with me for \"just a few more days\",\nI'll intimate you...";
+//std::string StartButton::STR_MSG_DEFF_RELEASE	= "I am the AuraSoap Bot & am getting ready now..!\nBear with me for \"just a few more days\",\nI'll intimate you...";
+std::string StartButton::STR_MSG_DEFF_RELEASE	= "I am the AURA Soap Bot. I help you View, Buy, Order the finest Home-Made-Organic-Soaps.";
 
 TgBot::ReplyKeyboardMarkup::Ptr StartButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	TgBot::KeyboardButton::Ptr btnView, btnCart, btnOrder;

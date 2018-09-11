@@ -11,6 +11,8 @@
 #include <FlavoursButton.h>
 #include <QuantityButton.h>
 
+std::string BuyButton::STR_BTN_OTHER_FLAVOURS = "Other Flvaours";
+
 int BuyButton::m_Rows = 3;
 int BuyButton::m_Cols = 2;
 
@@ -43,7 +45,8 @@ TgBot::ReplyKeyboardMarkup::Ptr BuyButton::prepareMenu(std::map<std::string, std
 	TgBot::KeyboardButton::Ptr kbBtnVwSoap, kbBtnVwCart;
 	row.clear();
 	kbBtnVwSoap 		= std::make_shared<TgBot::KeyboardButton>();
-	kbBtnVwSoap->text	= StartButton::STR_BTN_VIEW_SOAPS;
+	kbBtnVwSoap->text	= STR_BTN_OTHER_FLAVOURS;
+	listAuraBtns[kbBtnVwSoap->text] = listAuraBtns[StartButton::STR_BTN_VIEW_SOAPS];
 	row.push_back(kbBtnVwSoap);
 	kbBtnVwCart 		= std::make_shared<TgBot::KeyboardButton>();
 	kbBtnVwCart->text	= StartButton::STR_BTN_VIEW_CART;

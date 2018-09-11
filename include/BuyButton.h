@@ -27,6 +27,8 @@ class BuyButton :
 
 	std::string m_MsgToUser;
 
+	static std::string STR_BTN_OTHER_FLAVOURS;
+
 public:
 	BuyButton(std::shared_ptr<DBInterface> hDB) : AuraButton(hDB) { m_MsgToUser = "Choose quantity";}
 	virtual ~BuyButton() {}

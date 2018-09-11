@@ -447,11 +447,11 @@ std::string ShippingAddress::getPaymentString(unsigned int chatId) {
 		Soap::Ptr soap = getDBHandle()->getSoapById(item->m_SoapId);
 		ss << std::setw(15) << soap->m_Name << " - "
 			<< std::setw(2) << item->m_Qnty << " - "
-			<< std::setw(3) << "Rs "
+			<< std::setw(3) << "₹ "
 			<< std::setw(4)<< (soap->m_Price * item->m_Qnty) << "\n";
 		iTotal += (soap->m_Price * item->m_Qnty);
 	}
-	ss << std::setw(20) << "Total = Rs " << iTotal << "\n\n";
+	ss << std::setw(20) << "Total = ₹ " << iTotal << "\n\n";
 	ss << "Please use one of the following payment methods to pay.\n\n" <<
 			"<b>Please mention the Order number: " <<
 			getDBHandle()->getOrderNoForUser(chatId) <<

@@ -127,10 +127,13 @@ void DBInterface::createPOrder(unsigned int chatId) {
 		POrder::DB_TABLE_PORDER_COLUMN_CHAT_ID << ", " <<
 		POrder::DB_TABLE_PORDER_COLUMN_DATE << ", " <<
 		POrder::DB_TABLE_PORDER_COLUMN_TIME << ", " <<
+		POrder::DB_TABLE_PORDER_COLUMN_PAY_GW << ", " <<
 		POrder::DB_TABLE_PORDER_COLUMN_DATE_TIME << ", " <<
+		POrder::DB_TABLE_PORDER_COLUMN_OTP << ", " <<
 		POrder::DB_TABLE_PORDER_COLUMN_STATUS << ") VALUES (" <<
 		order_no << ", " << chatId << ", \"" << strDate << "\", \"" <<
-		strTime << "\", " << tnow << ", " << getIntStatus(CartStatus::PENDING) << ");";
+		strTime << "\", \"Unknown\"," << tnow << ", " << 0 << ", "
+		<< getIntStatus(CartStatus::PENDING) << ");";
 
 	SQLite::Transaction transaction(*m_hDB);
 	m_hDB->exec(ss.str());
