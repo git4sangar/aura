@@ -30,7 +30,7 @@ class Soap {
 public:
 	typedef std::shared_ptr<Soap> Ptr;
 	unsigned int m_SoapId, m_Weight, m_Price, m_PicId, m_Stock;
-	std::string m_Name, m_Desc;
+	std::string m_Name, m_Desc, m_PicFile;
 
 	static std::string DB_TABLE_SOAP_COLUMN_ID;
 	static std::string DB_TABLE_SOAP_COLUMN_NAME;
@@ -39,6 +39,7 @@ public:
 	static std::string DB_TABLE_SOAP_COLUMN_PIC_ID;
 	static std::string DB_TABLE_SOAP_COLUMN_STOCK;
 	static std::string DB_TABLE_SOAP_COLUMN_PRICE;
+	static std::string DB_TABLE_SOAP_COLUMN_PIC_FILE;
 };
 
 enum class CartStatus{PENDING, PAID, DELIVERED, NOTA};
@@ -119,6 +120,8 @@ public:
 	std::vector<Cart::Ptr> getUserCart(unsigned int chatId);
 	std::vector<Cart::Ptr> getCartForOrderNo(unsigned int order_no);
 	
+	std::vector<unsigned int> getNotifyUsers();
+
 	unsigned int generateOrderNo();
 	void addBlockNoToShipping(unsigned int chatId, std::string blkNo);
 	void addFlatNoToShipping(unsigned int chatId, unsigned int flatNo);
@@ -133,6 +136,8 @@ public:
 			std::string lname = "",
 			int64_t mobile = 0
 		);
+
+	static std::string DB_TABLE_NOTIFY_COLUMN_CHAT_ID;
 };
 
 #endif

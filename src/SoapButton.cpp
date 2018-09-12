@@ -17,14 +17,14 @@ TgBot::ReplyKeyboardMarkup::Ptr SoapButton::prepareMenu(std::map<std::string, st
 	std::vector<TgBot::KeyboardButton::Ptr>	kbBtnFlvrs, kbBuyBtns;
 	TgBot::KeyboardButton::Ptr 				kbBtnFlvr, kbBtnBuy;
 
-	std::shared_ptr<FlavoursButton> auraBtnFlvr	= std::make_shared<FlavoursButton>(getDBHandle());
 	std::shared_ptr<BuyButton> auraBtnBuy		= std::make_shared<BuyButton>(getDBHandle());
 
 	for(auto &flavour : m_SoapFlvrs) {
 		kbBtnFlvr 				= std::make_shared<TgBot::KeyboardButton>();
 		kbBtnFlvr->text			= "View " + flavour->m_Name + " soap";
 		kbBtnFlvrs.push_back(kbBtnFlvr);
-		listAuraBtns[kbBtnFlvr->text]	= auraBtnFlvr;
+		m_Soaps[kbBtnFlvr->text]		= flavour;
+		listAuraBtns[kbBtnFlvr->text]	= shared_from_this();
 
 		kbBtnBuy		= std::make_shared<TgBot::KeyboardButton>();
 		kbBtnBuy->text	= "Buy " + flavour->m_Name + " soap";
@@ -45,6 +45,17 @@ TgBot::ReplyKeyboardMarkup::Ptr SoapButton::prepareMenu(std::map<std::string, st
 	pFlavoursMenu->keyboard.push_back(getMainMenu());
 
 	return pFlavoursMenu;
+}
+
+TgBot::InputFile::Ptr SoapButton::getMedia(TgBot::Message::Ptr pMsg, FILE *fp) {
+	std::map<std::string, Soap::Ptr>::iterator itr;
+	TgBot::InputFile::Ptr pFile = nullptr;
+	if(m_Soaps.end() != (itr = m_Soaps.find(pMsg->text))) {
+		Soap::Ptr pSoap	= itr->second;
+		std::string filePath = std::string(ASSET_PATH) + pSoap->m_PicFile;
+		pFile = TgBot::InputFile::fromFile(filePath, "image/jpeg");
+	}
+	return pFile;
 }
 
 void SoapButton::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {

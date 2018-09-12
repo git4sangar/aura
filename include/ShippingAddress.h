@@ -16,7 +16,7 @@ enum class MenuRenderer {APARTMENT, BLOCK, BLOCK_NO, FLOOR, FLAT_NO, CONTACT, CO
 class ShippingAddress :
 		public AuraButton,
 		public std::enable_shared_from_this<ShippingAddress> {
-	std::string m_StrMsg, m_Cache;
+	std::string m_StrMsg, m_Cache, m_NotifyStr;
 	int m_Rows, m_Cols, m_FloorNo;
 	int m_FlatsRendered, m_FloorsRendered, m_BlockNosRendered, m_BlocksRendered;
 	std::vector<std::string> m_Apts;
@@ -49,6 +49,7 @@ public:
 	virtual ~ShippingAddress() {}
 
 	std::string getNotifyStr(unsigned int userParam);
+	std::string prepareNotifyStr(unsigned int chatId);
 	std::string getMsg() { return m_StrMsg;}
 	std::string getParseMode() {return "HTML";}
 	TgBot::ReplyKeyboardMarkup::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);

@@ -294,6 +294,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderAptMenu(std::map<std::str
 
 TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA: \"ShippingAddress::prepareMenu\" onClick\n"); fflush(fp);
+	m_NotifyStr.clear();
 	TgBot::ReplyKeyboardMarkup::Ptr pMenu;
 	switch(m_RenderMenu) {
 		case MenuRenderer::APARTMENT:
@@ -431,11 +432,16 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 			m_StrMsg = "You will receive a call in 24 hrs reg delivery.";
 			getDBHandle()->updatePOrderPayGW(pMsg->chat->id, "Cash");
 		}
+		m_NotifyStr = prepareNotifyStr(pMsg->chat->id);
 		getDBHandle()->updateOrderNoForUser(pMsg->chat->id);
 	}
 }
 
 std::string ShippingAddress::getNotifyStr(unsigned int chatId) {
+	return m_NotifyStr;
+}
+
+std::string ShippingAddress::prepareNotifyStr(unsigned int chatId) {
 	int iTotal;
 	std::tuple<std::string, int> delAddr = getDBHandle()->getShippingForUser(chatId);
 	User::Ptr user = getDBHandle()->getUserForChatId(chatId);

@@ -75,19 +75,32 @@ void AuraMainLoop(FILE *fp) {
          TgBot::ReplyKeyboardMarkup::Ptr pMenu;
          fprintf(fp, "AURA: Found \"%s\" button\n", pMsg->text.c_str()); fflush(fp);
 
-         if(ShippingAddress::STR_BTN_PAYTM == pMsg->text ||
+         /*if(ShippingAddress::STR_BTN_PAYTM == pMsg->text ||
             ShippingAddress::STR_BTN_TEZ == pMsg->text ||
             ShippingAddress::STR_BTN_ON_DELIVERY == pMsg->text) {
                pBot->getApi().sendMessage(303802126, itr->second->getNotifyStr(pMsg->chat->id),
                      false, 0, nullptr, itr->second->getParseMode());
-         }
+         }*/
          
+         // On Click
          itr->second->onClick(pMsg, fp);
 
-         pMenu = itr->second->prepareMenu(auraButtons, fp);
-         if(pMenu) {
-            pBot->getApi().sendMessage(pMsg->chat->id, itr->second->getMsg(), false, 0, pMenu, itr->second->getParseMode());
+         // On notifications
+         std::string strNotify = itr->second->getNotifyStr(pMsg->chat->id);
+         if(!strNotify.empty()) {
+            std::vector<unsigned int> chatIds   = itr->second->getNotifyUsers();
+            for(auto &chatId : chatIds) {
+               pBot->getApi().sendMessage(chatId, strNotify, false, 0, nullptr, itr->second->getParseMode());
+            }
          }
+
+         // Send Snaps if any
+         TgBot::InputFile::Ptr pFile = itr->second->getMedia(pMsg, fp);
+         if(pFile)   pBot->getApi().sendPhoto(pMsg->chat->id, pFile);
+
+         // Send the Keyboard
+         pMenu = itr->second->prepareMenu(auraButtons, fp);
+         if(pMenu) pBot->getApi().sendMessage(pMsg->chat->id, itr->second->getMsg(), false, 0, pMenu, itr->second->getParseMode());
       } else {
          fprintf(fp, "AURA: \"%s\" button missing\n", pMsg->text.c_str()); fflush(fp);
          itr = auraButtons.find("start");

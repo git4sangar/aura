@@ -13,6 +13,7 @@
 	std::string Soap::DB_TABLE_SOAP_COLUMN_PIC_ID	= "pic_id";
 	std::string Soap::DB_TABLE_SOAP_COLUMN_STOCK	= "stock";
 	std::string Soap::DB_TABLE_SOAP_COLUMN_PRICE	= "price";
+	std::string Soap::DB_TABLE_SOAP_COLUMN_PIC_FILE	= "pic_file";
 
 	std::string User::DB_TABLE_USER_COLUMN_ID 		= "user_id";
 	std::string User::DB_TABLE_USER_COLUMN_FNAME		= "first_name";
@@ -45,6 +46,8 @@
 	std::string POrder::DB_TABLE_PORDER_COLUMN_PAY_GW	= "payment_gw";
 	std::string POrder::DB_TABLE_PORDER_COLUMN_OTP = "otp";
 	std::string POrder::DB_TABLE_PORDER_COLUMN_STATUS	= "status";
+
+	std::string DBInterface::DB_TABLE_NOTIFY_COLUMN_CHAT_ID = "chat_id";
 
 DBInterface::DBInterface(std::string dbFileName, FILE *fp) {
 	m_hDB   = std::make_shared<SQLite::Database>(dbFileName, SQLite::OPEN_READWRITE);
@@ -219,6 +222,7 @@ Soap::Ptr DBInterface::getSoapById(unsigned int soapId) {
 		soap->m_Stock		= query.getColumn(Soap::DB_TABLE_SOAP_COLUMN_STOCK.c_str()).getUInt();
 		soap->m_Name		= query.getColumn(Soap::DB_TABLE_SOAP_COLUMN_NAME.c_str()).getString();
 		soap->m_Desc		= query.getColumn(Soap::DB_TABLE_SOAP_COLUMN_DESC.c_str()).getString();
+		soap->m_PicFile		= query.getColumn(Soap::DB_TABLE_SOAP_COLUMN_PIC_FILE.c_str()).getString();
 	}
 	return soap;
 }
@@ -362,6 +366,20 @@ void DBInterface::addAptNameToShipping(unsigned int chatId, std::string aptName)
 	}
 }
 
+std::vector<unsigned int> DBInterface::getNotifyUsers() {
+	fprintf(m_Fp, "AURA: getNotifyUsers\n"); fflush(m_Fp);
+	std::vector<unsigned int> chatIds;
+	unsigned int chatId;
+	std::stringstream ss;
+	ss << "SELECT * from Notify;";
+	SQLite::Statement query(*m_hDB, ss.str());
+	while(query.executeStep()) {
+		chatId = query.getColumn(DB_TABLE_NOTIFY_COLUMN_CHAT_ID.c_str()).getUInt();
+		chatIds.push_back(chatId);
+	}
+	return chatIds;
+}
+
 std::vector<Soap::Ptr> DBInterface::getFlavours() {
 	fprintf(m_Fp, "AURA: getFlavours\n"); fflush(m_Fp);
 	std::vector<Soap::Ptr> soaps;
@@ -377,6 +395,7 @@ std::vector<Soap::Ptr> DBInterface::getFlavours() {
 		soap->m_Stock		= query.getColumn(Soap::DB_TABLE_SOAP_COLUMN_STOCK.c_str()).getUInt();
 		soap->m_Name		= query.getColumn(Soap::DB_TABLE_SOAP_COLUMN_NAME.c_str()).getString();
 		soap->m_Desc		= query.getColumn(Soap::DB_TABLE_SOAP_COLUMN_DESC.c_str()).getString();
+		soap->m_PicFile		= query.getColumn(Soap::DB_TABLE_SOAP_COLUMN_PIC_FILE.c_str()).getString();
 		soaps.push_back(soap);
 	}
 	return soaps;

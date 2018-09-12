@@ -8,11 +8,16 @@
 
 #include <DBInterface.h>
 #include <AuraButton.h>
+#include <map>
 
+#define ASSET_PATH "/home/ezvaish/sgn/proj/sgnaura/git/aura/assets/"
 
-class SoapButton : public AuraButton {
+class SoapButton :
+	public AuraButton,
+	public std::enable_shared_from_this<SoapButton> {
 	std::vector<Soap::Ptr> m_SoapFlvrs;
 	static std::string STR_CHOOSE_A_SOAP;
+	std::map<std::string, Soap::Ptr> m_Soaps;
 
 public:
 	SoapButton(DBInterface::Ptr hDB) : AuraButton(hDB) {}
@@ -20,6 +25,8 @@ public:
 
 	std::string getMsg() { return STR_CHOOSE_A_SOAP;}
 	TgBot::ReplyKeyboardMarkup::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
+
+	TgBot::InputFile::Ptr getMedia(TgBot::Message::Ptr pMsg, FILE *fp);
 	void onClick(TgBot::Message::Ptr pMessage, FILE *fp);
 };
 
