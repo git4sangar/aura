@@ -10,7 +10,7 @@
 #include <AuraButton.h>
 #include <map>
 
-#define ASSET_PATH "/home/ezvaish/sgn/proj/sgnaura/git/aura/assets/"
+#define ASSET_PATH "/home/pi/sgn/dev/src/aura/assets/"
 
 class SoapButton :
 	public AuraButton,
