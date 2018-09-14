@@ -442,7 +442,7 @@ std::string ShippingAddress::getNotifyStr(unsigned int chatId) {
 }
 
 std::string ShippingAddress::prepareNotifyStr(unsigned int chatId) {
-	int iTotal;
+	int iTotal = 0;
 	std::tuple<std::string, int> delAddr = getDBHandle()->getShippingForUser(chatId);
 	User::Ptr user = getDBHandle()->getUserForChatId(chatId);
 	std::stringstream ss;
