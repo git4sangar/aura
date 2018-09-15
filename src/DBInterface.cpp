@@ -66,6 +66,21 @@ void DBInterface::deletePOrder(unsigned int chatId) {
 	transaction.commit();
 }
 
+void DBInterface::cancelPOrder(unsigned int order_no) {
+	fprintf(m_Fp, "AURA: cancelPOrder: %d\n", order_no); fflush(m_Fp);
+	SQLite::Transaction transaction(*m_hDB);
+	std::stringstream ss;
+
+	ss << "DELETE from Cart WHERE " << Cart::DB_TABLE_CART_COLUMN_ORDER_NO << " = " << order_no << ";";
+	m_hDB->exec(ss.str());
+
+	ss.str(std::string());
+	ss << "DELETE from POrder WHERE " << POrder::DB_TABLE_PORDER_COLUMN_ORDER_NO << " = " << order_no << ";";
+	m_hDB->exec(ss.str());
+
+	transaction.commit();
+}
+
 void DBInterface::updatePOrderPayGW(unsigned int chatId, std::string payGw) {
 	fprintf(m_Fp, "AURA: updatePOrderPayGW: %d\n", chatId); fflush(m_Fp);
 	unsigned int order_no	= getOrderNoForUser(chatId);

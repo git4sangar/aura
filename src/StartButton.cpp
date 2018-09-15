@@ -8,9 +8,9 @@
 #include "OrdersButton.h"
 
 
-std::string StartButton::STR_BTN_VIEW_SOAPS		= "View Soaps";
+std::string StartButton::STR_BTN_VIEW_SOAPS		= "View/Buy Soaps";
 std::string StartButton::STR_BTN_VIEW_CART		= "View Cart";
-std::string StartButton::STR_BTN_VIEW_ORDERS	= "View Orders";
+std::string StartButton::STR_BTN_VIEW_ORDERS	= "Your Orders";
 //std::string StartButton::STR_MSG_DEFF_RELEASE	= "I am the AuraSoap Bot & am getting ready now..!\nBear with me for \"just a few more days\",\nI'll intimate you...";
 std::string StartButton::STR_MSG_DEFF_RELEASE	= "I am the AURA Soap Bot. I help you View, Buy, Order the finest Home-Made-Organic-Soaps.";
 

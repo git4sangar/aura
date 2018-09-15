@@ -102,6 +102,7 @@ public:
 
 	void updatePOrderPayGW(unsigned int chatId, std::string payGw);
 	void deletePOrder(unsigned int chatId);
+	void cancelPOrder(unsigned int order_no);
 	void createPOrder(unsigned int chatId);
 	std::vector<POrder::Ptr> getPOrdersForUser(unsigned int chatId);
 

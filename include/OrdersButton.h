@@ -8,11 +8,14 @@
 
 #include <DBInterface.h>
 
-class OrdersButton : public AuraButton {
+class OrdersButton : public AuraButton,
+					public std::enable_shared_from_this<OrdersButton> {
 	std::string m_StrOrder;
 	std::vector<POrder::Ptr> m_Orders;
+	POrder::Ptr m_Order;
+	std::map<std::string, POrder::Ptr> m_VwOrders, m_CnclOrders;
 public:
-	OrdersButton(DBInterface::Ptr hDB) : AuraButton(hDB) {}
+	OrdersButton(DBInterface::Ptr hDB) : AuraButton(hDB) { m_Order = nullptr; }
 	virtual ~OrdersButton() {}
 
 	std::string getMsg() { return m_StrOrder;}
