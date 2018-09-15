@@ -38,6 +38,11 @@ void ShippingAddress::clearAuraButtons(std::map<std::string, std::shared_ptr<Aur
 			for(auto &flat : m_Flats) listAuraBtns.erase(flat.first);
 			m_Flats.clear();
 		break;
+		default:
+		case MenuRenderer::APARTMENT:
+		case MenuRenderer::CONTACT:
+		case MenuRenderer::CONFIRM:
+		break;
 	}
 	fprintf(fp, "AURA: ShippingAddress::clearAuraButtons size: %ld }\n", listAuraBtns.size()); fflush(fp);
 }
@@ -424,13 +429,18 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 
 	else if(STR_BTN_PAYTM == pMsg->text || STR_BTN_TEZ == pMsg->text || STR_BTN_ON_DELIVERY == pMsg->text) {
 		m_RenderMenu	= MenuRenderer::DONE;
-		m_StrMsg		= std::string("You will receive an OTP after the payment is received\n") +
+		m_StrMsg		= std::string("You will receive an OTP after the payment is received.\n") +
 						std::string("Provide the OTP during delivery.");
-		if(STR_BTN_PAYTM == pMsg->text) getDBHandle()->updatePOrderPayGW(pMsg->chat->id, "Paytm");
-		if(STR_BTN_TEZ == pMsg->text) getDBHandle()->updatePOrderPayGW(pMsg->chat->id, "Tez");
-		if(STR_BTN_ON_DELIVERY == pMsg->text) {
+		if(STR_BTN_PAYTM == pMsg->text) {
+			getDBHandle()->updatePOrderPayGW(pMsg->chat->id, "Paytm");
+			m_Cache = "Paytm";
+		} else if(STR_BTN_TEZ == pMsg->text) {
+			getDBHandle()->updatePOrderPayGW(pMsg->chat->id, "Tez");
+			m_Cache = "Tez";
+		} else if(STR_BTN_ON_DELIVERY == pMsg->text) {
 			m_StrMsg = "You will receive a call in 24 hrs reg delivery.";
 			getDBHandle()->updatePOrderPayGW(pMsg->chat->id, "Cash");
+			m_Cache = "Cash";
 		}
 		m_NotifyStr = prepareNotifyStr(pMsg->chat->id);
 		getDBHandle()->updateOrderNoForUser(pMsg->chat->id);
@@ -446,7 +456,8 @@ std::string ShippingAddress::prepareNotifyStr(unsigned int chatId) {
 	std::tuple<std::string, int> delAddr = getDBHandle()->getShippingForUser(chatId);
 	User::Ptr user = getDBHandle()->getUserForChatId(chatId);
 	std::stringstream ss;
-	ss << user->m_FName << " has made an Order No: " << user->m_OrderNo << "\n";
+	ss << user->m_FName << " has made an Order No: " << user->m_OrderNo
+		<< " via " << m_Cache << "\n";
 	std::vector<Cart::Ptr> items = getDBHandle()->getUserCart(chatId);
 	for(auto &item : items) {
 		Soap::Ptr soap = getDBHandle()->getSoapById(item->m_SoapId);

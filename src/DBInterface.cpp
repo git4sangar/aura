@@ -542,7 +542,7 @@ void DBInterface::updateOrderNoForUser(unsigned int chatId) {
 }
 
 bool DBInterface::addNewUser(int64_t chatId, std::string fname, std::string lname, int64_t mobile) {
-	fprintf(m_Fp, "AURA: addNewUser chatId: %ld, fname :%s\n", chatId, fname.c_str()); fflush(m_Fp);
+	fprintf(m_Fp, "AURA: addNewUser chatId: %lld, fname :%s\n", chatId, fname.c_str()); fflush(m_Fp);
 	unsigned int order_no = generateOrderNo();
 	std::stringstream ss;
 	ss << "SELECT * FROM User WHERE " << User::DB_TABLE_USER_COLUMN_CHAT_ID << " = " << chatId << ";";

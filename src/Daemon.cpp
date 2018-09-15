@@ -32,11 +32,6 @@
 
 #define AURA_BOT_TOKEN     "uPwIhbFxqA6avQhimCCNuHM9UohLrjB2voJXupoIngq y5ixTRdBGZL3oIMC"
 #define THRAYA_BOT_TOKEN   "uPAHhbp2qklEvQhiniGSu3DGA PdqbZRtHiDDspfuEagpnurxx1MGWqbBIm8"
-#define AURA_DB_FILE    "/home/ezvaish/sgn/proj/sgnaura/git/aura/sgn_uthra_01.db"
-#define AURA_LOG_FILE   "/home/ezvaish/sgn/proj/sgnaura/git/aura/build/aura_log.log"
-//#define AURA_DB_FILE    "/Users/shankarv/sgn/proj/sgnaura/git/aura/sgn_uthra_01.db"
-//#define AURA_LOG_FILE   "/Users/shankarv/sgn/proj/sgnaura/git/aura/build/aura_log.log"
-
 
 std::string decode_string(std::string enc_msg, std::string key) {
    return aura_decrypt(enc_msg, key);
@@ -45,7 +40,7 @@ std::string decode_string(std::string enc_msg, std::string key) {
 void AuraMainLoop(FILE *fp) {
    fprintf(fp, "AURA: Starting AuraMainLoop\n"); fflush(fp);
    std::shared_ptr<TgBot::Bot> pBot          = std::make_shared<TgBot::Bot>(decode_string(AURA_BOT_TOKEN, MAKE_STR(DECRYPT_KEY)));
-   DBInterface::Ptr hDB       = std::make_shared<DBInterface>(std::string(AURA_DB_FILE), fp);
+   DBInterface::Ptr hDB       = std::make_shared<DBInterface>(std::string(MAKE_STR(AURA_DB_FILE)), fp);
    std::map<std::string, std::shared_ptr<AuraButton>> auraButtons;
    time_t startSec = time(NULL);
 
@@ -153,7 +148,7 @@ void AuraMainLoop(FILE *fp) {
 
 
 int main(void) {
-   FILE *fp = fopen(AURA_LOG_FILE, "w");
+   FILE *fp = fopen(MAKE_STR(AURA_LOG_FILE), "w");
    // Define variables
    pid_t pid, sid;
 
