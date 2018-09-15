@@ -1,3 +1,4 @@
+#SGN
 cmake_minimum_required(VERSION 2.8.4)
 project(SoapSeller)
 
@@ -16,22 +17,31 @@ if(NOT AURA_KEY)
 	message( FATAL_ERROR "***** Pls provide value for AURA_KEY *****")
 endif(NOT AURA_KEY)
 
+add_definitions(-DAURA_DB_FILE=${PROJECT_SOURCE_DIR}/sgn_uthra_01.db)
+add_definitions(-DAURA_LOG_FILE=${PROJECT_SOURCE_DIR}/aura_log.log)
+add_definitions(-DASSET_PATH=${PROJECT_SOURCE_DIR}/assets)
+
 INCLUDE_DIRECTORIES(${AURA_DEPS_INCLUDE})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
+message("project source dir: ${PROJECT_SOURCE_DIR}")
+
+find_library(BOOST_SYSTEM NAMES boost_system HINTS "${AURA_DEPS_LIB}/boost")
+find_library(BOOST_CHRONO NAMES boost_chrono HINTS "${AURA_DEPS_LIB}/boost")
+find_library(BOOST_THREAD NAMES boost_thread HINTS "${AURA_DEPS_LIB}/boost")
 LINK_DIRECTORIES(${AURA_DEPS_LIB})
 
 add_executable(SoapSeller
-	src/Daemon.cpp
-	src/StartButton.cpp
-	src/SoapButton.cpp
-#	src/CartButton.cpp
-	src/OrdersButton.cpp
-	src/FlavoursButton.cpp
-	src/DBInterface.cpp
-	src/BuyButton.cpp
-	src/QuantityButton.cpp
-	src/ViewCart.cpp
-	src/ShippingAddress.cpp
+		src/Daemon.cpp
+		src/StartButton.cpp
+		src/SoapButton.cpp
+	#	src/CartButton.cpp
+		src/OrdersButton.cpp
+		src/FlavoursButton.cpp
+		src/DBInterface.cpp
+		src/BuyButton.cpp
+		src/QuantityButton.cpp
+		src/ViewCart.cpp
+		src/ShippingAddress.cpp
 	)
 
-target_link_libraries(SoapSeller ${AURA_DEPS_LIB}/libTgBot.a ${CMAKE_THREAD_LIBS_INIT} boost_system boost_thread boost_chrono ssl crypto curl ${AURA_DEPS_LIB}/libSQLiteCpp.a ${AURA_DEPS_LIB}/libsqlite3.a pthread dl)
+target_link_libraries(SoapSeller ${AURA_DEPS_LIB}/libTgBot.a ${CMAKE_THREAD_LIBS_INIT} ${BOOST_THREAD} ${BOOST_SYSTEM} ${BOOST_CHRONO} ssl crypto curl ${AURA_DEPS_LIB}/libSQLiteCpp.a ${AURA_DEPS_LIB}/libsqlite3.a pthread dl)

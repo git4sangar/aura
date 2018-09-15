@@ -10,8 +10,6 @@
 #include <AuraButton.h>
 #include <map>
 
-#define ASSET_PATH "/home/pi/sgn/dev/src/aura/assets/"
-
 class SoapButton :
 	public AuraButton,
 	public std::enable_shared_from_this<SoapButton> {

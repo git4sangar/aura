@@ -10,6 +10,11 @@
 #include <FlavoursButton.h>
 #include <BuyButton.h>
 
+// Stringify param x.
+// Step (01): Replaces the pattern MAKE_STR(x) with MAKE_STR(value-of-x)
+#define MAKE_STR(x)  _MAKE_STR(x)
+// Step (02): Replaces the pattern _MAKE_STR(value-of-x) with quotes-added-param, ie "value-of-x"
+#define _MAKE_STR(x) #x          // Adds quotes to the param
 
 std::string SoapButton::STR_CHOOSE_A_SOAP = "Choose a flavour from below list";
 
@@ -48,11 +53,12 @@ TgBot::ReplyKeyboardMarkup::Ptr SoapButton::prepareMenu(std::map<std::string, st
 }
 
 TgBot::InputFile::Ptr SoapButton::getMedia(TgBot::Message::Ptr pMsg, FILE *fp) {
+	fprintf(fp, "AURA: \"%s\" getMedia\n", pMsg->text.c_str()); fflush(fp);
 	std::map<std::string, Soap::Ptr>::iterator itr;
 	TgBot::InputFile::Ptr pFile = nullptr;
 	if(m_Soaps.end() != (itr = m_Soaps.find(pMsg->text))) {
 		Soap::Ptr pSoap	= itr->second;
-		std::string filePath = std::string(ASSET_PATH) + pSoap->m_PicFile;
+		std::string filePath = std::string(MAKE_STR(ASSET_PATH)) + std::string("/") + pSoap->m_PicFile;
 		pFile = TgBot::InputFile::fromFile(filePath, "image/jpeg");
 	}
 	return pFile;
