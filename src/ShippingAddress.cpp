@@ -10,6 +10,7 @@
 
 #include <SQLiteCpp/SQLiteCpp.h>
 
+#define MAX_NAVINS_BROOKFIELD_FLOORS 4
 	std::string ShippingAddress::STR_BTN_SSM	= "SSM Nagar";
 	std::string ShippingAddress::STR_BTN_BRKFLD	= "Navins Brookfield";
 	std::string ShippingAddress::STR_BTN_GARUDA	= "Garuda Avenue";
@@ -101,6 +102,43 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderCheckoutMenu(std::map<std
 	return pPayMenu;
 }
 
+TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFlatMenuNavins(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+	fprintf(fp, "AURA: \"ShippingAddress::renderFlatMenuNavins\" rendering\n"); fflush(fp);
+	std::vector<std::string> flrNames = {"G", "F", "S", "T", "L"};
+	if(0 == m_FloorsRendered) clearAuraButtons(listAuraBtns, MenuRenderer::FLOOR, fp);
+	TgBot::KeyboardButton::Ptr kbBtnFlat;
+	std::vector<TgBot::KeyboardButton::Ptr> kbBtnFlats;
+
+	m_Rows = 1;
+	m_Cols = 4;
+
+	int iLoop1 = 0, iLoop2 = 0, iRun = 0;
+	if(MAX_NAVINS_BROOKFIELD_FLOORS < m_FloorNo) m_FloorNo = MAX_NAVINS_BROOKFIELD_FLOORS;
+	for(iLoop1 = 0, iRun = 1; iLoop1 < (m_Rows*m_Cols); iLoop1++, iRun++) {
+		kbBtnFlat					= std::make_shared<TgBot::KeyboardButton>();
+		kbBtnFlat->text				= m_Cache + std::string(" ") + flrNames[m_FloorNo] +
+										std::to_string(iRun);
+		m_Flats[kbBtnFlat->text]	= std::make_tuple(m_Cache + std::string(" ") + flrNames[m_FloorNo], iRun);
+		listAuraBtns[kbBtnFlat->text]	= shared_from_this();
+		kbBtnFlats.push_back(kbBtnFlat);
+	}
+
+	TgBot::ReplyKeyboardMarkup::Ptr pFlatsMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
+	std::vector<TgBot::KeyboardButton::Ptr> row;
+
+	for(iLoop1 = 0, iRun = 0; iLoop1 < m_Rows; iLoop1++) {
+		row.clear();
+		for(iLoop2 = 0; iLoop2 < m_Cols; iLoop2++) {
+			if(iRun < (m_Rows*m_Cols)) row.push_back(kbBtnFlats[iRun++]);
+		}
+		pFlatsMenu->keyboard.push_back(row);
+	}
+
+	pFlatsMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
+	m_FlatsRendered++;
+	return pFlatsMenu;
+}
+
 TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFlatMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA: \"ShippingAddress::renderFlatMenu\" rendering\n"); fflush(fp);
 	if(0 == m_FloorsRendered) clearAuraButtons(listAuraBtns, MenuRenderer::FLOOR, fp);
@@ -173,7 +211,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFloorMenu(std::map<std::s
 
 TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderBlockNoMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA: \"ShippingAddress::renderBlockNoMenu\" rendering\n"); fflush(fp);
-	if(0 == m_BlocksRendered) clearAuraButtons(listAuraBtns, MenuRenderer::BLOCK, fp);
+	//if(0 == m_BlocksRendered) clearAuraButtons(listAuraBtns, MenuRenderer::BLOCK, fp);
 	TgBot::KeyboardButton::Ptr kbBtnBlockNo;
 	std::vector<TgBot::KeyboardButton::Ptr> kbBtnBlockNos;
 	std::stringstream ss;
@@ -315,7 +353,15 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::prepareMenu(std::map<std::strin
 			pMenu = renderFloorMenu(listAuraBtns, fp);
 		break;
 		case MenuRenderer::FLAT_NO:
-			pMenu = renderFlatMenu(listAuraBtns, fp);
+		{
+			auto tpl = getDBHandle()->getShippingForUser(m_ChatId);
+			std::string aptName = std::get<0>(tpl);
+			if(std::string::npos != aptName.find(STR_BTN_BRKFLD)) {
+				pMenu = renderFlatMenuNavins(listAuraBtns, fp);
+			} else {
+				pMenu = renderFlatMenu(listAuraBtns, fp);
+			}
+		}
 		break;
 		case MenuRenderer::CONTACT:
 			pMenu = shareContactMenu(listAuraBtns, fp);
@@ -407,12 +453,14 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 		//	Parse the Floor number & cache
 		m_Cache 	= std::get<0>(itr->second);
 		m_FloorNo	= std::get<1>(itr->second);
+		m_ChatId	= pMsg->chat->id;
 		m_StrMsg	= "Shipping Address: Choose your Flat No\nIf it's 3rd floor, flat no 6, Choose 306 & so on";
 	}
 
 	//	Put the address in database & get contact
 	else if(m_Flats.end() != (itr = m_Flats.find(pMsg->text))) {
 		m_FlatsRendered--;
+		getDBHandle()->addBlockNoToShipping(pMsg->chat->id, std::get<0>(itr->second));
 		getDBHandle()->addFlatNoToShipping(pMsg->chat->id, std::get<1>(itr->second));
 		m_RenderMenu	= MenuRenderer::CONTACT;
 		m_StrMsg		= "Share your contact";

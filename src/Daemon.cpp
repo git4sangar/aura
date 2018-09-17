@@ -39,7 +39,7 @@ std::string decode_string(std::string enc_msg, std::string key) {
 
 void AuraMainLoop(FILE *fp) {
    fprintf(fp, "AURA: Starting AuraMainLoop\n"); fflush(fp);
-   std::shared_ptr<TgBot::Bot> pBot          = std::make_shared<TgBot::Bot>(decode_string(AURA_BOT_TOKEN, MAKE_STR(DECRYPT_KEY)));
+   std::shared_ptr<TgBot::Bot> pBot          = std::make_shared<TgBot::Bot>(decode_string(THRAYA_BOT_TOKEN, MAKE_STR(DECRYPT_KEY)));
    DBInterface::Ptr hDB       = std::make_shared<DBInterface>(std::string(MAKE_STR(AURA_DB_FILE)), fp);
    std::map<std::string, std::shared_ptr<AuraButton>> auraButtons;
    time_t startSec = time(NULL);
