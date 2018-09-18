@@ -36,6 +36,18 @@ TgBot::ReplyKeyboardMarkup::Ptr OrdersButton::prepareMenu(std::map<std::string, 
 	std::stringstream ss;
 	int iLoop1 = 0, iRows	= 3, iTotal = 0;
 
+	fprintf(fp, "AURA: View/Cancel Orders, before clearing listAuraBtns size = \n", listAuraBtns.size());
+	for(auto& vwOrdr : m_VwOrders) {
+		listAuraBtns.erase(vwOrdr);
+	}
+	m_VwOrders.clear();
+
+	for(auto& cnclOrdr : m_CnclOrders) {
+		listAuraBtns.erase(cnclOrdr);
+	}
+	m_CnclOrders.clear();
+	fprintf(fp, "AURA: View/Cancel Orders, after clearing listAuraBtns size = \n", listAuraBtns.size());
+
 	TgBot::ReplyKeyboardMarkup::Ptr pOrdrMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
 	for(iLoop1 = 0; (iLoop1 < iRows) && (iLoop1 < m_Orders.size()); iLoop1++) {
 		row.clear();
