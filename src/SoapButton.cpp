@@ -7,7 +7,6 @@
 
 #include <SoapButton.h>
 #include <DBInterface.h>
-#include <FlavoursButton.h>
 #include <BuyButton.h>
 
 // Stringify param x.
