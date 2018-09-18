@@ -39,7 +39,7 @@ add_executable(SoapSeller
 #	src/FlavoursButton.cpp
 	src/DBInterface.cpp
 	src/BuyButton.cpp
-	src/QuantityButton.cpp
+#	src/QuantityButton.cpp
 	src/ViewCart.cpp
 	src/ShippingAddress.cpp
 	)

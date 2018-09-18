@@ -8,7 +8,6 @@
 
 #include <BuyButton.h>
 #include <DBInterface.h>
-#include <QuantityButton.h>
 
 std::string BuyButton::STR_BTN_OTHER_FLAVOURS = "Other Flvaours";
 
