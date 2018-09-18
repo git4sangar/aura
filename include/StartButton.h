@@ -6,7 +6,7 @@
 #include <iostream>
 #include "AuraButton.h"
 
-class StartButton : public AuraButton {
+class StartButton : public AuraButton, public std::enable_shared_from_this<StartButton> {
 public:
 	StartButton(DBInterface::Ptr hDB) : AuraButton(hDB) {}
 	virtual ~StartButton() {}
@@ -14,6 +14,7 @@ public:
 	std::string getMsg() { return STR_MSG_DEFF_RELEASE;}
 	TgBot::ReplyKeyboardMarkup::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listKBBtns, FILE *fp);
 	void onClick(TgBot::Message::Ptr pMessage, FILE *fp);
+	std::shared_ptr<AuraButton> getSharedPtr() {return shared_from_this();}
 
 	static std::string STR_BTN_VIEW_SOAPS;
 	static std::string STR_BTN_VIEW_CART;

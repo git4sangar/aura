@@ -16,8 +16,16 @@ std::string BuyButton::STR_BTN_OTHER_FLAVOURS = "Other Flvaours";
 int BuyButton::m_Rows = 3;
 int BuyButton::m_Cols = 2;
 
+void BuyButton::clearQntyEvents(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+	fprintf(fp, "AURA: \"BuyButton::clearQntyEvents\" onClick\n"); fflush(fp);
+	for(auto &event : m_QntyEvents) {
+		listAuraBtns.erase(event.first);
+	}
+}
+
 TgBot::ReplyKeyboardMarkup::Ptr BuyButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA: \"BuyButton::prepareMenu\" onClick\n"); fflush(fp);
+	if(0 == m_QntyRendered) clearQntyEvents(listAuraBtns, fp);
 	std::vector<TgBot::KeyboardButton::Ptr> qntyBtns;
 	TgBot::KeyboardButton::Ptr 				qntyBtn;
 
@@ -53,6 +61,7 @@ TgBot::ReplyKeyboardMarkup::Ptr BuyButton::prepareMenu(std::map<std::string, std
 	row.push_back(kbBtnVwCart);
 	pQntyMenu->keyboard.push_back(row);
 
+	m_QntyRendered++;
 	return pQntyMenu;
 }
 
@@ -70,6 +79,7 @@ void BuyButton::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 		fprintf(fp, "AURA: flavour selected %s\n", m_Soap->m_Name.c_str()); fflush(fp);
 	}
 	else if(m_QntyEvents.end() != m_QntyEvents.find(pMsg->text)) {
+		m_QntyRendered--;
 		fprintf(fp, "AURA: Getting Quantity %d\n", std::get<1>(m_QntyEvents[pMsg->text])); fflush(fp);
 		std::vector<Soap::Ptr> flvrs = getDBHandle()->getFlavours();
 		int iSoapId 	= std::get<0>(m_QntyEvents[pMsg->text]);

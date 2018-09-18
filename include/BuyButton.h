@@ -29,8 +29,12 @@ class BuyButton :
 
 	static std::string STR_BTN_OTHER_FLAVOURS;
 
+	int m_QntyRendered;
+
+	void clearQntyEvents(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
+
 public:
-	BuyButton(std::shared_ptr<DBInterface> hDB) : AuraButton(hDB) { m_MsgToUser = "Choose quantity";}
+	BuyButton(std::shared_ptr<DBInterface> hDB) : AuraButton{hDB}, m_QntyRendered{0} { m_MsgToUser = "Choose quantity";}
 	virtual ~BuyButton() {}
 
 	std::string getMsg() { return m_MsgToUser;}
@@ -38,6 +42,7 @@ public:
 	void onClick(TgBot::Message::Ptr pMessage, FILE *fp);
 
 	void setEvent(std::string clickMsg, int soapId);
+	std::shared_ptr<AuraButton> getSharedPtr() {return shared_from_this();}
 };
 
 
