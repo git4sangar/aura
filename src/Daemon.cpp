@@ -50,6 +50,8 @@ void AuraMainLoop(FILE *fp) {
 
    pBot->getEvents().onAnyMessage( [pBot, &auraButtons, fp, &startSec](TgBot::Message::Ptr pMsg) {
       static bool isSkipOver = false;
+      std::shared_ptr<AuraButton> pAuraBtn = nullptr;
+
       // Skip everything for a few secs
       if(!isSkipOver && (startSec + SKIP_INTERVAL) > time(NULL)) {
          fprintf(fp, "AURA: Skipping %s\n", pMsg->text.c_str()); fflush(fp);
@@ -68,41 +70,36 @@ void AuraMainLoop(FILE *fp) {
       itr = auraButtons.find(pMsg->text);
       if(auraButtons.end() != itr) {
          TgBot::ReplyKeyboardMarkup::Ptr pMenu;
+         pAuraBtn = itr->second->getSharedPtr();
          fprintf(fp, "AURA: Found \"%s\" button\n", pMsg->text.c_str()); fflush(fp);
 
-         /*if(ShippingAddress::STR_BTN_PAYTM == pMsg->text ||
-            ShippingAddress::STR_BTN_TEZ == pMsg->text ||
-            ShippingAddress::STR_BTN_ON_DELIVERY == pMsg->text) {
-               pBot->getApi().sendMessage(303802126, itr->second->getNotifyStr(pMsg->chat->id),
-                     false, 0, nullptr, itr->second->getParseMode());
-         }*/
-         
          // On Click
-         itr->second->onClick(pMsg, fp);
+         pAuraBtn->onClick(pMsg, fp);
 
          // On notifications
-         std::string strNotify = itr->second->getNotifyStr(pMsg->chat->id);
+         std::string strNotify = pAuraBtn->getNotifyStr(pMsg->chat->id);
          if(!strNotify.empty()) {
-            std::vector<unsigned int> chatIds   = itr->second->getNotifyUsers();
+            std::vector<unsigned int> chatIds   = pAuraBtn->getNotifyUsers();
             for(auto &chatId : chatIds) {
-               pBot->getApi().sendMessage(chatId, strNotify, false, 0, nullptr, itr->second->getParseMode());
+               pBot->getApi().sendMessage(chatId, strNotify, false, 0, nullptr, pAuraBtn->getParseMode());
             }
          }
 
          // Send Snaps if any
-         TgBot::InputFile::Ptr pFile = itr->second->getMedia(pMsg, fp);
+         TgBot::InputFile::Ptr pFile = pAuraBtn->getMedia(pMsg, fp);
          if(pFile)   pBot->getApi().sendPhoto(pMsg->chat->id, pFile);
 
          // Send the Keyboard
-         pMenu = itr->second->prepareMenu(auraButtons, fp);
-         if(pMenu) pBot->getApi().sendMessage(pMsg->chat->id, itr->second->getMsg(), false, 0, pMenu, itr->second->getParseMode());
+         pMenu = pAuraBtn->prepareMenu(auraButtons, fp);
+         if(pMenu) pBot->getApi().sendMessage(pMsg->chat->id, pAuraBtn->getMsg(), false, 0, pMenu, pAuraBtn->getParseMode());
       } else {
          fprintf(fp, "AURA: \"%s\" button missing\n", pMsg->text.c_str()); fflush(fp);
          itr = auraButtons.find("start");
-         itr->second->onClick(pMsg, fp);
+         pAuraBtn = itr->second->getSharedPtr();
+         pAuraBtn->onClick(pMsg, fp);
          pBot->getApi().sendMessage(pMsg->chat->id,
-                        "Hi " + pMsg->from->firstName + ",\n" + itr->second->getMsg(),
-                        false, 0, itr->second->prepareMenu(auraButtons, fp));
+                        "Hi " + pMsg->from->firstName + ",\n" + pAuraBtn->getMsg(),
+                        false, 0, pAuraBtn->prepareMenu(auraButtons, fp));
       }
    });
 

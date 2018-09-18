@@ -27,6 +27,7 @@ public:
 
 	TgBot::InputFile::Ptr getMedia(TgBot::Message::Ptr pMsg, FILE *fp);
 	void onClick(TgBot::Message::Ptr pMessage, FILE *fp);
+	std::shared_ptr<AuraButton> getSharedPtr() {return shared_from_this();}
 };
 
 

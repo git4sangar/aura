@@ -38,6 +38,7 @@ public:
 	void onClick(TgBot::Message::Ptr pMessage, FILE *fp);
 
 	void setEvent(std::string clickMsg, int soapId);
+	std::shared_ptr<AuraButton> getSharedPtr() {return shared_from_this();}
 };
 
 

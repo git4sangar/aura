@@ -22,6 +22,7 @@ public:
 	std::string getParseMode() {return "HTML";}
 	TgBot::ReplyKeyboardMarkup::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listKBBtns, FILE *fp);
 	void onClick(TgBot::Message::Ptr pMessage, FILE *fp);
+	std::shared_ptr<AuraButton> getSharedPtr() {return shared_from_this();}
 };
 
 
