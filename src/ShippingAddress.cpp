@@ -101,17 +101,26 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderCheckoutMenu(std::map<std
 	return pPayMenu;
 }
 
-TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFlatMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFlatMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, std::string aptName, FILE *fp) {
 	fprintf(fp, "AURA: \"ShippingAddress::renderFlatMenu\" rendering\n"); fflush(fp);
 	if(0 == m_FloorsRendered) clearAuraButtons(listAuraBtns, MenuRenderer::FLOOR, fp);
 	TgBot::KeyboardButton::Ptr kbBtnFlat;
 	std::vector<TgBot::KeyboardButton::Ptr> kbBtnFlats;
+	std::vector<std::string> flrLetters = {"G", "F", "S", "T", "L"};
 
 	m_Rows = 5;
 	m_Cols = 4;
 
 	int iLoop1 = 0, iLoop2 = 0, iRun = 0;
-	for(iLoop1 = 0, iRun = (m_FloorNo * 100)+1; iLoop1 < (m_Rows*m_Cols); iLoop1++, iRun++) {
+	fprintf(fp, "AURA: aptName %s\n", aptName.c_str());
+	if(std::string::npos != aptName.find(STR_BTN_BRKFLD)) {
+		m_FloorNo = (MAX_NAVINS_FLOORS < m_FloorNo) ? MAX_NAVINS_FLOORS : m_FloorNo;
+		m_Cache += flrLetters[m_FloorNo];
+		iRun = 1;
+	} else {
+		iRun = (m_FloorNo * 100)+1;
+	}
+	for(iLoop1 = 0; iLoop1 < (m_Rows*m_Cols); iLoop1++, iRun++) {
 		kbBtnFlat					= std::make_shared<TgBot::KeyboardButton>();
 		kbBtnFlat->text				= m_Cache + " " + std::to_string(iRun);
 		m_Flats[kbBtnFlat->text]	= std::make_tuple(m_Cache, iRun);
@@ -315,7 +324,10 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::prepareMenu(std::map<std::strin
 			pMenu = renderFloorMenu(listAuraBtns, fp);
 		break;
 		case MenuRenderer::FLAT_NO:
-			pMenu = renderFlatMenu(listAuraBtns, fp);
+		{
+			auto addr = getDBHandle()->getShippingForUser(m_ChatId);
+			pMenu = renderFlatMenu(listAuraBtns, std::get<0>(addr), fp);
+		}
 		break;
 		case MenuRenderer::CONTACT:
 			pMenu = shareContactMenu(listAuraBtns, fp);
@@ -407,15 +419,29 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 		//	Parse the Floor number & cache
 		m_Cache 	= std::get<0>(itr->second);
 		m_FloorNo	= std::get<1>(itr->second);
+		m_ChatId	= pMsg->chat->id;
 		m_StrMsg	= "Shipping Address: Choose your Flat No\nIf it's 3rd floor, flat no 6, Choose 306 & so on";
 	}
 
 	//	Put the address in database & get contact
 	else if(m_Flats.end() != (itr = m_Flats.find(pMsg->text))) {
 		m_FlatsRendered--;
+		getDBHandle()->addBlockNoToShipping(pMsg->chat->id, std::get<0>(itr->second));
 		getDBHandle()->addFlatNoToShipping(pMsg->chat->id, std::get<1>(itr->second));
-		m_RenderMenu	= MenuRenderer::CONTACT;
-		m_StrMsg		= "Share your contact";
+		User::Ptr user = getDBHandle()->getUserForChatId(pMsg->chat->id);
+		if(!user->m_Mobile) {
+			m_RenderMenu	= MenuRenderer::CONTACT;
+			m_StrMsg		= "Share your contact";
+		} else {
+			m_RenderMenu	= MenuRenderer::CONFIRM;
+			m_StrMsg		= getPaymentString(pMsg->chat->id);
+
+			//	delete the old details
+			getDBHandle()->deletePOrder(pMsg->chat->id);
+
+			//	create new one
+			getDBHandle()->createPOrder(pMsg->chat->id);
+		}
 	}
 
 	// Put the mobile no in database & go to payments

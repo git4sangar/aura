@@ -16,6 +16,7 @@ public:
 	unsigned int m_UserId, m_ChatId, m_OrderNo;
 	unsigned long long m_Mobile;
 	std::string m_FName, m_LName, m_Address;
+	User() : m_UserId {0}, m_ChatId {0}, m_OrderNo {0}, m_Mobile {0} {}
 
 	static std::string DB_TABLE_USER_COLUMN_ID;
 	static std::string DB_TABLE_USER_COLUMN_FNAME;
