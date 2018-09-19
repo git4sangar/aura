@@ -81,12 +81,44 @@ void DBInterface::cancelPOrder(unsigned int order_no) {
 	transaction.commit();
 }
 
+void DBInterface::updateOTP(unsigned int order_no, int otp) {
+	fprintf(m_Fp, "AURA: updateOTP: %d for order_no %d\n", otp, order_no); fflush(m_Fp);
+	SQLite::Transaction transaction(*m_hDB);
+	std::stringstream ss;
+
+	ss << "UPDATE POrder set "
+		<< POrder::DB_TABLE_PORDER_COLUMN_OTP << " = " << otp
+		<< " WHERE " << POrder::DB_TABLE_PORDER_COLUMN_ORDER_NO << " = " << order_no << ";";
+	m_hDB->exec(ss.str());
+
+	transaction.commit();
+}
+
+void DBInterface::updatePOrderStatus(unsigned int order_no, CartStatus status) {
+	fprintf(m_Fp, "AURA: updatePOrderStatus order_no: %d, status: %d\n", order_no, getIntStatus(status)); fflush(m_Fp);
+	SQLite::Transaction transaction(*m_hDB);
+	std::stringstream ss;
+
+	ss << "UPDATE POrder set "
+		<< POrder::DB_TABLE_PORDER_COLUMN_STATUS << " = " << getIntStatus(status)
+		<< " WHERE " << POrder::DB_TABLE_PORDER_COLUMN_ORDER_NO << " = " << order_no << ";";
+	m_hDB->exec(ss.str());
+
+	transaction.commit();
+}
+
 void DBInterface::updatePOrderPayGW(unsigned int chatId, std::string payGw) {
 	fprintf(m_Fp, "AURA: updatePOrderPayGW: %d\n", chatId); fflush(m_Fp);
 	unsigned int order_no	= getOrderNoForUser(chatId);
 	std::stringstream ss;
-	ss << "UPDATE POrder set " << POrder::DB_TABLE_PORDER_COLUMN_PAY_GW << " = \"" << payGw << "\" WHERE "
-		<< POrder::DB_TABLE_PORDER_COLUMN_ORDER_NO << " = " << order_no << ";";
+	if(std::string("Cash") == payGw) {
+		ss << "UPDATE POrder set " << POrder::DB_TABLE_PORDER_COLUMN_PAY_GW << " = \"" << payGw << "\", "
+			<< POrder::DB_TABLE_PORDER_COLUMN_STATUS << " = " << getIntStatus(CartStatus::READY_FOR_DELIVERY) << " WHERE "
+			<< POrder::DB_TABLE_PORDER_COLUMN_ORDER_NO << " = " << order_no << ";";
+	} else {
+		ss << "UPDATE POrder set " << POrder::DB_TABLE_PORDER_COLUMN_PAY_GW << " = \"" << payGw << "\" WHERE "
+			<< POrder::DB_TABLE_PORDER_COLUMN_ORDER_NO << " = " << order_no << ";";
+	}
 	SQLite::Transaction transaction(*m_hDB);
 	m_hDB->exec(ss.str());
 	transaction.commit();
@@ -249,7 +281,7 @@ CartStatus DBInterface::getCartStatus(int iStat) {
 			stat = CartStatus::PENDING;
 		break;
 		case 2:
-			stat = CartStatus::PAID;
+			stat = CartStatus::READY_FOR_DELIVERY;
 		break;
 		case 3:
 			stat = CartStatus::DELIVERED;
@@ -268,7 +300,7 @@ std::string DBInterface::getStrStatus(CartStatus stat) {
 		case CartStatus::PENDING:
 			srStat = "Pending Payment";
 			break;
-		case CartStatus::PAID:
+		case CartStatus::READY_FOR_DELIVERY:
 			srStat = "Payment Received, Delivery Pending";
 			break;
 		case CartStatus::DELIVERED:
@@ -287,7 +319,7 @@ int DBInterface::getIntStatus(CartStatus stat) {
 		case CartStatus::PENDING:
 			iStat = 1;
 			break;
-		case CartStatus::PAID:
+		case CartStatus::READY_FOR_DELIVERY:
 			iStat = 2;
 			break;
 		case CartStatus::DELIVERED:
@@ -520,9 +552,22 @@ std::vector<Cart::Ptr> DBInterface::getUserCart(unsigned int chatId) {
 	return items;*/
 }
 
+unsigned int DBInterface::getChatIdForOrderNo(unsigned int order_no) {
+	fprintf(m_Fp, "AURA: getChatIdForOrderNo order_no: %d\n", order_no); fflush(m_Fp);
+	unsigned int chatId = 0;
+	std::stringstream ss;
+	ss << "SELECT " << POrder::DB_TABLE_PORDER_COLUMN_CHAT_ID << " FROM POrder WHERE " <<
+		POrder::DB_TABLE_PORDER_COLUMN_ORDER_NO << " = " << order_no << ";";
+	SQLite::Statement query(*m_hDB, ss.str());
+	if(query.executeStep()) {
+		chatId = query.getColumn(POrder::DB_TABLE_PORDER_COLUMN_CHAT_ID.c_str()).getUInt();
+	}
+	return chatId;
+}
+
 unsigned int DBInterface::getOrderNoForUser(unsigned int chatId) {
 	fprintf(m_Fp, "AURA: getOrderNoForUser chatId: %d\n", chatId); fflush(m_Fp);
-	int order_no = 0;
+	unsigned int order_no = 0;
 	std::stringstream ss;
 	ss << "SELECT " << User::DB_TABLE_USER_COLUMN_ORDER_NO << " FROM User WHERE " <<
 		User::DB_TABLE_USER_COLUMN_CHAT_ID << " = " << chatId << ";";

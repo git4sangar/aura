@@ -43,7 +43,7 @@ public:
 	static std::string DB_TABLE_SOAP_COLUMN_PIC_FILE;
 };
 
-enum class CartStatus{PENDING, PAID, DELIVERED, NOTA};
+enum class CartStatus{PENDING, READY_FOR_DELIVERY, DELIVERED, NOTA};
 
 class POrder {
 public:
@@ -102,9 +102,11 @@ public:
 	~DBInterface();
 
 	void updatePOrderPayGW(unsigned int chatId, std::string payGw);
+	void updateOTP(unsigned int order_no, int otp);
 	void deletePOrder(unsigned int chatId);
 	void cancelPOrder(unsigned int order_no);
 	void createPOrder(unsigned int chatId);
+	void updatePOrderStatus(unsigned int order_no, CartStatus status);
 	std::vector<POrder::Ptr> getPOrdersForUser(unsigned int chatId);
 
 	void updateOrderNoForUser(unsigned int chatId);
@@ -131,6 +133,7 @@ public:
 	bool updateShippingFromPrevOrder(unsigned int chatId, unsigned int m_OrderNo);
 	bool emptyCartForUser(unsigned int chatId);
 	unsigned int getOrderNoForUser(unsigned int chatId);
+	unsigned int getChatIdForOrderNo(unsigned int order_no);
 	void updateMobileNo(unsigned int chatId, std::string mobileNo);
 	bool addNewUser(
 			int64_t chatId,

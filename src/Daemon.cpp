@@ -21,6 +21,7 @@
 #include <map>
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <ShippingAddress.h>
+#include <OTPButton.h>
 
 // Stringify param x.
 // Step (01): Replaces the pattern MAKE_STR(x) with MAKE_STR(value-of-x)
@@ -48,9 +49,13 @@ void AuraMainLoop(FILE *fp) {
    auraButtons["start"]                   = btnStart;
    auraButtons["Main Menu"]               = btnStart;
 
+   std::shared_ptr<OTPButton> btnOtp    = std::make_shared<OTPButton>(hDB);
+   auraButtons["/otp"]                    = btnOtp;
+
    pBot->getEvents().onAnyMessage( [pBot, &auraButtons, fp, &startSec](TgBot::Message::Ptr pMsg) {
       static bool isSkipOver = false;
       std::shared_ptr<AuraButton> pAuraBtn = nullptr;
+      std::string strCmd = pMsg->text;
 
       // Skip everything for a few secs
       if(!isSkipOver && (startSec + SKIP_INTERVAL) > time(NULL)) {
@@ -59,19 +64,30 @@ void AuraMainLoop(FILE *fp) {
       }
       isSkipOver = true;
 
-      fprintf(fp, "AURA: Received \"%s\" command\n",  pMsg->text.c_str()); fflush(fp);
+      fprintf(fp, "AURA: Received \"%s\" onAnyMessage\n",  pMsg->text.c_str()); fflush(fp);
       fprintf(fp, "AURA: AuraBtnList Size %ld \n",  auraButtons.size()); fflush(fp);
+
+      // Split the command string delimited by spaces
+      if(std::string::npos != pMsg->text.find("/otp")) {
+         std::istringstream iss(pMsg->text);
+         std::vector<std::string> words(std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>());
+         strCmd = words[0];
+      }
+
       if(pMsg->contact) {
-         pMsg->text = ShippingAddress::STR_BTN_CONTACT;
+         strCmd = ShippingAddress::STR_BTN_CONTACT;
       }
 
       std::map<std::string, std::shared_ptr<AuraButton>>::const_iterator itr;
 
-      itr = auraButtons.find(pMsg->text);
+      itr = auraButtons.find(strCmd);
       if(auraButtons.end() != itr) {
          TgBot::ReplyKeyboardMarkup::Ptr pMenu;
          pAuraBtn = itr->second->getSharedPtr();
          fprintf(fp, "AURA: Found \"%s\" button\n", pMsg->text.c_str()); fflush(fp);
+
+         // Initialize local data
+         pAuraBtn->init(pMsg, fp);
 
          // On Click
          pAuraBtn->onClick(pMsg, fp);
@@ -85,13 +101,20 @@ void AuraMainLoop(FILE *fp) {
             }
          }
 
+         // For user notifications
+         std::string strUserNotif = pAuraBtn->getNotifyStrForCustomer();
+         if(!strUserNotif.empty()) {
+            unsigned int chatId = pAuraBtn->getChatIdForNotification(pMsg, fp);
+            pBot->getApi().sendMessage(chatId, strUserNotif);
+         }
+
          // Send Snaps if any
          TgBot::InputFile::Ptr pFile = pAuraBtn->getMedia(pMsg, fp);
          if(pFile)   pBot->getApi().sendPhoto(pMsg->chat->id, pFile);
 
          // Send the Keyboard
          pMenu = pAuraBtn->prepareMenu(auraButtons, fp);
-         if(pMenu) pBot->getApi().sendMessage(pMsg->chat->id, pAuraBtn->getMsg(), false, 0, pMenu, pAuraBtn->getParseMode());
+         pBot->getApi().sendMessage(pMsg->chat->id, pAuraBtn->getMsg(), false, 0, pMenu, pAuraBtn->getParseMode());
       } else {
          fprintf(fp, "AURA: \"%s\" button missing\n", pMsg->text.c_str()); fflush(fp);
          itr = auraButtons.find("start");
