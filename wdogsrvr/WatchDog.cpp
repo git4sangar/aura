@@ -20,8 +20,8 @@
 
 using boost::asio::ip::udp;
 
-#define MAX_TIMEOUT_INTERVAL_SECS (120)
-#define MAX_WAKEUP_INTERVAL_SECS (60)
+#define MAX_TIMEOUT_INTERVAL_SECS (60)
+#define MAX_WAKEUP_INTERVAL_SECS (30)
 #define LISTEN_PORT (4950)
 
 // Stringify param x.
@@ -105,7 +105,12 @@ private:
   char data_[max_length];
 };
 
-int wdog_server(FILE *fp) {
+int main() {
+  std::string wdog_log_path = MAKE_STR(WATCHDOG_LOG_PATH);
+  std::string wdog_log_file = MAKE_STR(WATCHDOG_LOG_FILE);
+  std::string wdog_log_with_path  = wdog_log_path + std::string("/") + wdog_log_file;
+
+  FILE *fp = fopen(wdog_log_with_path.c_str(), "w");
 	last_time_stamp = time(0);
   try {
     boost::asio::io_service io_service;
@@ -119,7 +124,7 @@ int wdog_server(FILE *fp) {
   return 0;
 }
 
-int main(void) {
+/*int main(void) {
   std::string wdog_log_path = MAKE_STR(WATCHDOG_LOG_PATH);
   std::string wdog_log_file = MAKE_STR(WATCHDOG_LOG_FILE);
   std::string wdog_log_with_path  = wdog_log_path + std::string("/") + wdog_log_file;
@@ -187,4 +192,4 @@ int main(void) {
 
    // Terminate the child process when the daemon completes
    exit(EXIT_SUCCESS);
-}
+}*/
