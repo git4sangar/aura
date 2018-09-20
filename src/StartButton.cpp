@@ -15,6 +15,7 @@ std::string StartButton::STR_BTN_VIEW_ORDERS	= "Your Orders";
 std::string StartButton::STR_MSG_DEFF_RELEASE	= "I am the AURA Soap Bot. I help you View, Buy, Order the finest Home-Made-Organic-Soaps.";
 
 TgBot::ReplyKeyboardMarkup::Ptr StartButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+	fprintf(fp, "AURA %ld: StartButton::prepareMenu onClick\n", time(0)); fflush(fp);
 	TgBot::KeyboardButton::Ptr btnView, btnCart, btnOrder;
 	btnView		= std::make_shared<TgBot::KeyboardButton>();
 	btnCart		= std::make_shared<TgBot::KeyboardButton>();
@@ -42,6 +43,6 @@ TgBot::ReplyKeyboardMarkup::Ptr StartButton::prepareMenu(std::map<std::string, s
 }
 
 void StartButton::onClick(TgBot::Message::Ptr pMessage, FILE *fp) {
-	fprintf(fp, "AURA: StartButton onClick\n"); fflush(fp);
+	fprintf(fp, "AURA %ld: StartButton onClick\n", time(0)); fflush(fp);
 	getDBHandle()->addNewUser(pMessage->chat->id, pMessage->from->firstName, pMessage->from->lastName);
 }

@@ -29,14 +29,13 @@ std::string OrdersButton::getOrderString(DBInterface::Ptr hDB, POrder::Ptr pOrde
 }
 
 TgBot::ReplyKeyboardMarkup::Ptr OrdersButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
-	fprintf(fp, "AURA: \"OrdersButton::prepareMenu\" rendering\n"); fflush(fp);
+	fprintf(fp, "AURA %ld: \"OrdersButton::prepareMenu\" rendering\n", time(0)); fflush(fp);
 	TgBot::KeyboardButton::Ptr kbBtnVwOdr, kbBtnCnclOdr;
 	std::vector<TgBot::KeyboardButton::Ptr> row;
 	POrder::Ptr pOrder = nullptr;
 	std::stringstream ss;
 	int iLoop1 = 0, iRows	= 3, iTotal = 0;
 
-	fprintf(fp, "AURA: View/Cancel Orders, before clearing listAuraBtns size = %ld\n", listAuraBtns.size());
 	for(auto& vwOrdr : m_VwOrders) {
 		listAuraBtns.erase(vwOrdr.first);
 	}
@@ -46,7 +45,6 @@ TgBot::ReplyKeyboardMarkup::Ptr OrdersButton::prepareMenu(std::map<std::string, 
 		listAuraBtns.erase(cnclOrdr.first);
 	}
 	m_CnclOrders.clear();
-	fprintf(fp, "AURA: View/Cancel Orders, after clearing listAuraBtns size = %ld\n", listAuraBtns.size());
 
 	TgBot::ReplyKeyboardMarkup::Ptr pOrdrMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
 	for(iLoop1 = 0; (iLoop1 < iRows) && (iLoop1 < m_Orders.size()); iLoop1++) {
@@ -74,7 +72,7 @@ TgBot::ReplyKeyboardMarkup::Ptr OrdersButton::prepareMenu(std::map<std::string, 
 }
 
 void OrdersButton::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
-	fprintf(fp, "AURA: OrdersButton onClick\n"); fflush(fp);
+	fprintf(fp, "AURA %ld: OrdersButton onClick\n", time(0)); fflush(fp);
 
 	std::map<std::string, POrder::Ptr>::iterator itr;
 	m_StrOrder = "Choose an oder to View/Cancel.";

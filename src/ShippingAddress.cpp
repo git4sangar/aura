@@ -19,7 +19,7 @@
 	std::string ShippingAddress::STR_BTN_ON_DELIVERY	= "Cash on Delivery";
 
 void ShippingAddress::clearAuraButtons(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, MenuRenderer item, FILE *fp) {
-	fprintf(fp, "AURA: ShippingAddress::clearAuraButtons { size: %ld\n", listAuraBtns.size()); fflush(fp);
+	fprintf(fp, "AURA %ld: ShippingAddress::clearAuraButtons { size: %ld\n", time(0), listAuraBtns.size()); fflush(fp);
 	switch(item) {
 		case MenuRenderer::BLOCK:
 			for(auto &block : m_Blocks) listAuraBtns.erase(block);
@@ -43,7 +43,7 @@ void ShippingAddress::clearAuraButtons(std::map<std::string, std::shared_ptr<Aur
 		case MenuRenderer::CONFIRM:
 		break;
 	}
-	fprintf(fp, "AURA: ShippingAddress::clearAuraButtons size: %ld }\n", listAuraBtns.size()); fflush(fp);
+	fprintf(fp, "AURA %ld: ShippingAddress::clearAuraButtons size: %ld }\n", time(0), listAuraBtns.size()); fflush(fp);
 }
 
 std::vector<TgBot::KeyboardButton::Ptr> ShippingAddress::getLastRow(
@@ -70,7 +70,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::shareContactMenu(std::map<std::
 }
 
 TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderCheckoutMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
-	fprintf(fp, "AURA: \"ShippingAddress::renderConfirmMenu\" rendering\n"); fflush(fp);
+	fprintf(fp, "AURA %ld: \"ShippingAddress::renderConfirmMenu\" rendering\n", time(0)); fflush(fp);
 	if(0 == m_FlatsRendered) clearAuraButtons(listAuraBtns, MenuRenderer::FLAT_NO, fp);
 	TgBot::KeyboardButton::Ptr kbBtnPaytm, kbBtnTez, kbBtnOnDelivery;
 
@@ -101,7 +101,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderCheckoutMenu(std::map<std
 }
 
 TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFlatMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, std::string aptName, FILE *fp) {
-	fprintf(fp, "AURA: \"ShippingAddress::renderFlatMenu\" rendering\n"); fflush(fp);
+	fprintf(fp, "AURA %ld: \"ShippingAddress::renderFlatMenu\" rendering\n", time(0)); fflush(fp);
 	if(0 == m_FloorsRendered) clearAuraButtons(listAuraBtns, MenuRenderer::FLOOR, fp);
 	TgBot::KeyboardButton::Ptr kbBtnFlat;
 	std::vector<TgBot::KeyboardButton::Ptr> kbBtnFlats;
@@ -111,7 +111,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFlatMenu(std::map<std::st
 	m_Cols = 4;
 
 	int iLoop1 = 0, iLoop2 = 0, iRun = 0;
-	fprintf(fp, "AURA: aptName %s\n", aptName.c_str());
+	fprintf(fp, "AURA %ld: aptName %s\n", time(0), aptName.c_str());
 	if(std::string::npos != aptName.find(STR_BTN_BRKFLD)) {
 		m_FloorNo = (MAX_NAVINS_FLOORS < m_FloorNo) ? MAX_NAVINS_FLOORS : m_FloorNo;
 		m_Cache += flrLetters[m_FloorNo];
@@ -144,7 +144,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFlatMenu(std::map<std::st
 }
 
 TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFloorMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
-	fprintf(fp, "AURA: \"ShippingAddress::renderFloorMenu\" rendering\n"); fflush(fp);
+	fprintf(fp, "AURA %ld: \"ShippingAddress::renderFloorMenu\" rendering\n", time(0)); fflush(fp);
 	if(0 == m_BlockNosRendered) clearAuraButtons(listAuraBtns, MenuRenderer::BLOCK_NO, fp);
 	TgBot::KeyboardButton::Ptr kbBtnFloor;
 	std::vector<TgBot::KeyboardButton::Ptr> kbBtnFloors;
@@ -180,7 +180,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFloorMenu(std::map<std::s
 }
 
 TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderBlockNoMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
-	fprintf(fp, "AURA: \"ShippingAddress::renderBlockNoMenu\" rendering\n"); fflush(fp);
+	fprintf(fp, "AURA %ld: \"ShippingAddress::renderBlockNoMenu\" rendering\n", time(0)); fflush(fp);
 	if(0 == m_BlocksRendered) clearAuraButtons(listAuraBtns, MenuRenderer::BLOCK, fp);
 	TgBot::KeyboardButton::Ptr kbBtnBlockNo;
 	std::vector<TgBot::KeyboardButton::Ptr> kbBtnBlockNos;
@@ -226,7 +226,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderBlockNoMenu(std::map<std:
 }
 
 TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderBlockMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
-	fprintf(fp, "AURA: \"ShippingAddress::renderBlockMenu\" rendering\n"); fflush(fp);
+	fprintf(fp, "AURA %ld: \"ShippingAddress::renderBlockMenu\" rendering\n", time(0)); fflush(fp);
 	TgBot::KeyboardButton::Ptr kbBtnBlock;
 	std::vector<TgBot::KeyboardButton::Ptr> kbBtnBlocks;
 	std::stringstream ss;
@@ -262,7 +262,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderBlockMenu(std::map<std::s
 }
 
 TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderAptMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
-	fprintf(fp, "AURA: \"ShippingAddress::renderAptMenu\" rendering\n"); fflush(fp);
+	fprintf(fp, "AURA %ld: \"ShippingAddress::renderAptMenu\" rendering\n", time(0)); fflush(fp);
 	TgBot::KeyboardButton::Ptr kbBtnSSM = nullptr, kbBtnBrkFld = nullptr, kbBtnGaruda = nullptr, kbBtnPrev = nullptr;
 
 	//	m_Addr is Full-address-string & order-no paid.
@@ -306,7 +306,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderAptMenu(std::map<std::str
 }
 
 TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
-	fprintf(fp, "AURA: \"ShippingAddress::prepareMenu\" onClick\n"); fflush(fp);
+	fprintf(fp, "AURA %ld: \"ShippingAddress::prepareMenu\" onClick\n", time(0)); fflush(fp);
 	m_NotifyStr.clear();
 	TgBot::ReplyKeyboardMarkup::Ptr pMenu;
 	switch(m_RenderMenu) {
@@ -358,7 +358,7 @@ std::string ShippingAddress::floorNoToString(int iFloorNo) {
 }
 
 void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
-	fprintf(fp, "AURA: \"%s\" onClick\n", pMsg->text.c_str()); fflush(fp);
+	fprintf(fp, "AURA %ld: \"%s\" onClick\n", time(0), pMsg->text.c_str()); fflush(fp);
 	std::map<std::string, std::tuple<std::string, int>>::iterator itr;
 	std::map<std::string, unsigned int>::iterator itrPreDfnd;
 	
@@ -524,8 +524,7 @@ std::string ShippingAddress::getPaymentString(unsigned int chatId, std::string f
 			", Please choose a payment method to <b>CONFIRM your order</b>" <<
 			" and mention Order number: " <<
 			getDBHandle()->getOrderNoForUser(chatId) <<
-			" while paying\n\n<b>FYI:</b>\n" <<
-			"It's <b>not</b> integrated with Paytm or Tez.\n\n" <<
+			" while paying\n\n<b>FYI:</b> It's <b>not</b> integrated with Paytm or Tez.\n\n" <<
 			"Pls manually transfer ₹ " << iTotal <<
 			" to 98406 25165 via respective apps.\nA confirmation reaches you in 24hrs after your payment.\n\n";
 

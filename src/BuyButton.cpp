@@ -15,7 +15,7 @@ int BuyButton::m_Rows = 3;
 int BuyButton::m_Cols = 2;
 
 TgBot::ReplyKeyboardMarkup::Ptr BuyButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
-	fprintf(fp, "AURA: \"BuyButton::prepareMenu\" onClick\n"); fflush(fp);
+	fprintf(fp, "AURA %ld: \"BuyButton::prepareMenu\" onClick\n", time(0)); fflush(fp);
 	std::vector<TgBot::KeyboardButton::Ptr> qntyBtns;
 	TgBot::KeyboardButton::Ptr 				qntyBtn;
 
@@ -55,7 +55,7 @@ TgBot::ReplyKeyboardMarkup::Ptr BuyButton::prepareMenu(std::map<std::string, std
 }
 
 void BuyButton::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
-	fprintf(fp, "AURA: \"%s\" onClick\n", pMsg->text.c_str()); fflush(fp);
+	fprintf(fp, "AURA %ld: \"%s\" onClick\n", time(0), pMsg->text.c_str()); fflush(fp);
 	std::map<std::string, int>::iterator itBuy = m_BuyEvents.find(pMsg->text);
 	if(m_BuyEvents.end() != itBuy) {
 		std::vector<Soap::Ptr> flvrs = getDBHandle()->getFlavours();
@@ -65,10 +65,10 @@ void BuyButton::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 				m_Soap = flvr;
 		}
 		m_MsgToUser		= "Choose quantity";
-		fprintf(fp, "AURA: flavour selected %s\n", m_Soap->m_Name.c_str()); fflush(fp);
+		fprintf(fp, "AURA %ld: flavour selected %s\n", time(0), m_Soap->m_Name.c_str()); fflush(fp);
 	}
 	else if(m_QntyEvents.end() != m_QntyEvents.find(pMsg->text)) {
-		fprintf(fp, "AURA: Getting Quantity %d\n", std::get<1>(m_QntyEvents[pMsg->text])); fflush(fp);
+		fprintf(fp, "AURA %ld: Getting Quantity %d\n", time(0), std::get<1>(m_QntyEvents[pMsg->text])); fflush(fp);
 		std::vector<Soap::Ptr> flvrs = getDBHandle()->getFlavours();
 		int iSoapId 	= std::get<0>(m_QntyEvents[pMsg->text]);
 		for(auto &flvr : flvrs) {

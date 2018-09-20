@@ -27,7 +27,7 @@ TgBot::ReplyKeyboardMarkup::Ptr OTPButton::prepareMenu(std::map<std::string, std
 }
 
 void OTPButton::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
-	fprintf(fp, "AURA: OTPButton onClick\n"); fflush(fp);
+	fprintf(fp, "AURA %ld: OTPButton onClick\n", time(0)); fflush(fp);
 
 	std::vector<unsigned int> chatIds	= getDBHandle()->getNotifyUsers();
 	if(chatIds.end() == std::find(chatIds.begin(), chatIds.end(), pMsg->chat->id)) {

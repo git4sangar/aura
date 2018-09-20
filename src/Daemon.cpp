@@ -39,8 +39,8 @@ std::string decode_string(std::string enc_msg, std::string key) {
 }
 
 void AuraMainLoop(FILE *fp) {
-   fprintf(fp, "AURA: Starting AuraMainLoop\n"); fflush(fp);
-   std::shared_ptr<TgBot::Bot> pBot          = std::make_shared<TgBot::Bot>(decode_string(AURA_BOT_TOKEN, MAKE_STR(DECRYPT_KEY)));
+   fprintf(fp, "AURA %ld: Starting AuraMainLoop\n", time(0)); fflush(fp);
+   std::shared_ptr<TgBot::Bot> pBot          = std::make_shared<TgBot::Bot>(decode_string(THRAYA_BOT_TOKEN, MAKE_STR(DECRYPT_KEY)));
    DBInterface::Ptr hDB       = std::make_shared<DBInterface>(std::string(MAKE_STR(AURA_DB_FILE)), fp);
    std::map<std::string, std::shared_ptr<AuraButton>> auraButtons;
    time_t startSec = time(NULL);
@@ -54,14 +54,14 @@ void AuraMainLoop(FILE *fp) {
    auraButtons["/otp"]                    = btnOtp;
 
    pBot->getEvents().onAnyMessage( [pBot, &auraButtons, fp, &startSec](TgBot::Message::Ptr pMsg) {
-      fprintf(fp, "AURA: Received \"%s\" onAnyMessage as it arrived\n",  pMsg->text.c_str()); fflush(fp);
+      fprintf(fp, "AURA %ld: Received \"%s\" onAnyMessage as it arrived\n", time(0),  pMsg->text.c_str()); fflush(fp);
       static bool isSkipOver = false;
       std::shared_ptr<AuraButton> pAuraBtn = nullptr;
       std::string strCmd = pMsg->text;
 
       // Skip everything for a few secs
       if(!isSkipOver && (startSec + SKIP_INTERVAL) > time(NULL)) {
-         fprintf(fp, "AURA: Skipping %s\n", pMsg->text.c_str()); fflush(fp);
+         fprintf(fp, "AURA %ld: Skipping %s\n", time(0), pMsg->text.c_str()); fflush(fp);
          return;
       }
       isSkipOver = true;
@@ -80,15 +80,15 @@ void AuraMainLoop(FILE *fp) {
          pMsg->text  = strCmd = ShippingAddress::STR_BTN_CONTACT;
       }
 
-      fprintf(fp, "AURA: Received \"%s\" onAnyMessage after processing\n",  strCmd.c_str()); fflush(fp);
-      fprintf(fp, "AURA: AuraBtnList Size %ld \n",  auraButtons.size()); fflush(fp);
+      fprintf(fp, "AURA %ld: Received \"%s\" onAnyMessage after processing\n", time(0),  strCmd.c_str()); fflush(fp);
+      fprintf(fp, "AURA %ld: AuraBtnList Size %ld \n", time(0),  auraButtons.size()); fflush(fp);
 
       std::map<std::string, std::shared_ptr<AuraButton>>::const_iterator itr;
       itr = auraButtons.find(strCmd);
       if(auraButtons.end() != itr) {
          TgBot::ReplyKeyboardMarkup::Ptr pMenu;
          pAuraBtn = itr->second->getSharedPtr();
-         fprintf(fp, "AURA: Found \"%s\" button\n", pMsg->text.c_str()); fflush(fp);
+         fprintf(fp, "AURA %ld: Found \"%s\" button\n", time(0), pMsg->text.c_str()); fflush(fp);
 
          // Initialize local data
          pAuraBtn->init(pMsg, fp);
@@ -120,7 +120,7 @@ void AuraMainLoop(FILE *fp) {
          pMenu = pAuraBtn->prepareMenu(auraButtons, fp);
          pBot->getApi().sendMessage(pMsg->chat->id, pAuraBtn->getMsg(), false, 0, pMenu, pAuraBtn->getParseMode());
       } else {
-         fprintf(fp, "AURA: \"%s\" button missing\n", pMsg->text.c_str()); fflush(fp);
+         fprintf(fp, "AURA %ld: \"%s\" button missing\n", time(0), pMsg->text.c_str()); fflush(fp);
          std::stringstream ss;
          ss << "Hi " << pMsg->from->firstName
               << ",a sudden network connectivity issue brought you back to main menu.\nRegret the inconvenience caused.";
@@ -129,17 +129,16 @@ void AuraMainLoop(FILE *fp) {
       }
    });
 
-   std::string strMsg = "AURA: Bot username " + pBot->getApi().getMe()->username;
-   fprintf(fp, "AURA: Bot username %s\n", pBot->getApi().getMe()->username.c_str()); fflush(fp);
+   fprintf(fp, "AURA %ld: Bot username %s\n", time(0), pBot->getApi().getMe()->username.c_str()); fflush(fp);
 
    TgBot::TgLongPoll longPoll(*pBot);
    while (true) {
       try {
          pBot->getApi().deleteWebhook();
-         fprintf(fp, "AURA: Long poll started\n"); fflush(fp);
+         fprintf(fp, "AURA %ld: Long poll started\n", time(0)); fflush(fp);
          longPoll.start();
       } catch (std::exception& e) {
-         fprintf(fp, "AURA: An exception occured at longPoll %s\n", e.what()); fflush(fp);
+         fprintf(fp, "AURA %ld: An exception occured at longPoll %s\n", time(0), e.what()); fflush(fp);
       }
    }
 }

@@ -18,7 +18,7 @@
 std::string SoapButton::STR_CHOOSE_A_SOAP = "Choose a flavour from below list";
 
 TgBot::ReplyKeyboardMarkup::Ptr SoapButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
-	fprintf(fp, "AURA: SoapButton prepareMenu\n"); fflush(fp);
+	fprintf(fp, "AURA %ld:SoapButton prepareMenu\n", time(0)); fflush(fp);
 	std::vector<TgBot::KeyboardButton::Ptr>	kbBtnFlvrs, kbBuyBtns;
 	TgBot::KeyboardButton::Ptr 				kbBtnFlvr, kbBtnBuy;
 
@@ -54,7 +54,7 @@ TgBot::ReplyKeyboardMarkup::Ptr SoapButton::prepareMenu(std::map<std::string, st
 }
 
 TgBot::InputFile::Ptr SoapButton::getMedia(TgBot::Message::Ptr pMsg, FILE *fp) {
-	fprintf(fp, "AURA: \"%s\" getMedia\n", pMsg->text.c_str()); fflush(fp);
+	fprintf(fp, "AURA %ld:\"%s\" getMedia\n", time(0), pMsg->text.c_str()); fflush(fp);
 	std::map<std::string, Soap::Ptr>::iterator itr;
 	TgBot::InputFile::Ptr pFile = nullptr;
 	if(m_Soaps.end() != (itr = m_Soaps.find(pMsg->text))) {
@@ -67,5 +67,5 @@ TgBot::InputFile::Ptr SoapButton::getMedia(TgBot::Message::Ptr pMsg, FILE *fp) {
 }
 
 void SoapButton::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
-	fprintf(fp, "AURA: \"%s\" onClick\n", pMsg->text.c_str()); fflush(fp);
+	fprintf(fp, "AURA %ld:\"%s\" onClick\n", time(0), pMsg->text.c_str()); fflush(fp);
 }
