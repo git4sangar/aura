@@ -46,6 +46,7 @@ void AuraMainLoop(FILE *fp) {
    time_t startSec = time(NULL);
 
    std::shared_ptr<StartButton> btnStart  = std::make_shared<StartButton>(hDB);
+   auraButtons["/start"]                  = btnStart;
    auraButtons["start"]                   = btnStart;
    auraButtons["Main Menu"]               = btnStart;
 
@@ -53,6 +54,7 @@ void AuraMainLoop(FILE *fp) {
    auraButtons["/otp"]                    = btnOtp;
 
    pBot->getEvents().onAnyMessage( [pBot, &auraButtons, fp, &startSec](TgBot::Message::Ptr pMsg) {
+      fprintf(fp, "AURA: Received \"%s\" onAnyMessage as it arrived\n",  pMsg->text.c_str()); fflush(fp);
       static bool isSkipOver = false;
       std::shared_ptr<AuraButton> pAuraBtn = nullptr;
       std::string strCmd = pMsg->text;
@@ -64,10 +66,9 @@ void AuraMainLoop(FILE *fp) {
       }
       isSkipOver = true;
 
-      fprintf(fp, "AURA: Received \"%s\" onAnyMessage\n",  pMsg->text.c_str()); fflush(fp);
-      fprintf(fp, "AURA: AuraBtnList Size %ld \n",  auraButtons.size()); fflush(fp);
-
-      // Split the command string delimited by spaces
+      // When /otp command arrives, it cotains order_no as param
+      // As the order_no varies everytime it cannot be checked against auraButtons.
+      // Split the command string delimited by spaces so that we can check.
       if(std::string::npos != pMsg->text.find("/otp")) {
          std::istringstream iss(pMsg->text);
          std::vector<std::string> words(std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>());
@@ -75,11 +76,14 @@ void AuraMainLoop(FILE *fp) {
       }
 
       if(pMsg->contact) {
-         strCmd = ShippingAddress::STR_BTN_CONTACT;
+         // pMsg->text will be empty in this case. So assign to it too.
+         pMsg->text  = strCmd = ShippingAddress::STR_BTN_CONTACT;
       }
 
-      std::map<std::string, std::shared_ptr<AuraButton>>::const_iterator itr;
+      fprintf(fp, "AURA: Received \"%s\" onAnyMessage after processing\n",  strCmd.c_str()); fflush(fp);
+      fprintf(fp, "AURA: AuraBtnList Size %ld \n",  auraButtons.size()); fflush(fp);
 
+      std::map<std::string, std::shared_ptr<AuraButton>>::const_iterator itr;
       itr = auraButtons.find(strCmd);
       if(auraButtons.end() != itr) {
          TgBot::ReplyKeyboardMarkup::Ptr pMenu;
@@ -117,37 +121,11 @@ void AuraMainLoop(FILE *fp) {
          pBot->getApi().sendMessage(pMsg->chat->id, pAuraBtn->getMsg(), false, 0, pMenu, pAuraBtn->getParseMode());
       } else {
          fprintf(fp, "AURA: \"%s\" button missing\n", pMsg->text.c_str()); fflush(fp);
-         itr = auraButtons.find("start");
-         pAuraBtn = itr->second->getSharedPtr();
-         pAuraBtn->onClick(pMsg, fp);
-         pBot->getApi().sendMessage(pMsg->chat->id,
-                        "Hi " + pMsg->from->firstName + ",\n" + pAuraBtn->getMsg(),
-                        false, 0, pAuraBtn->prepareMenu(auraButtons, fp));
-      }
-   });
-
-   pBot->getEvents().onCommand("start", [pBot, &auraButtons, fp, &startSec](TgBot::Message::Ptr pMsg) {
-      static bool isSkipOver = false;
-      // Skip everything for a few secs
-      if(!isSkipOver && (startSec + SKIP_INTERVAL) > time(NULL)) {
-         fprintf(fp, "AURA: Skipping %s\n", pMsg->text.c_str()); fflush(fp);
-         return;
-      }
-      isSkipOver = true;
-
-      fprintf(fp, "AURA: Received start command\n"); fflush(fp);
-      std::map<std::string, std::shared_ptr<AuraButton>>::const_iterator itr;
-
-      itr = auraButtons.find("start");
-
-      if(auraButtons.end() != itr) {
-         fprintf(fp, "AURA: Found start button\n"); fflush(fp);
-         itr->second->onClick(pMsg, fp);
-         pBot->getApi().sendMessage(pMsg->chat->id,
-                        "Hi " + pMsg->from->firstName + ",\n" + itr->second->getMsg(),
-                        false, 0, itr->second->prepareMenu(auraButtons, fp));
-      } else {
-         fprintf(fp, "AURA: Start button missing\n"); fflush(fp);
+         std::stringstream ss;
+         ss << "Hi " << pMsg->from->firstName
+              << ",a sudden network connectivity issue brought you back to main menu.\nRegret the inconvenience caused.";
+         pBot->getApi().sendMessage(pMsg->chat->id, ss.str(),
+                        false, 0, auraButtons["Main Menu"]->prepareMenu(auraButtons, fp));
       }
    });
 

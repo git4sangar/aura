@@ -2,6 +2,14 @@ sgn
 
 Detailed Design
 
+Description (on first start of Bot)
+	What acn this bot do?
+
+OLD:	I'm Aura Soap Bot, I help you buy Aura Soaps.
+
+20-Sep	I'm AURA Soap Bot. I help you View, Buy, Order the finest Home Made and Hand Made Organic Soaps.
+	
+
 Profile Text
 	Aura Organic Soap Bot:
 	You can Browse, Buy, Track orders & Get updates.

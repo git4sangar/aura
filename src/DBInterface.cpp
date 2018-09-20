@@ -453,7 +453,6 @@ User::Ptr DBInterface::getUserForChatId(unsigned int chatId) {
 	std::stringstream ss;
 	ss << "SELECT * FROM User WHERE " << User::DB_TABLE_USER_COLUMN_CHAT_ID << " = " <<
 		chatId << ";";
-	fprintf(m_Fp, "AURA: getUserForChatId %s\n", ss.str().c_str()); fflush(m_Fp);
 	User::Ptr user = std::make_shared<User>();
 	SQLite::Statement   query(*m_hDB, ss.str());
 	if(query.executeStep()) {
