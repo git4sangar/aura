@@ -50,7 +50,7 @@ TgBot::ReplyKeyboardMarkup::Ptr BuyButton::prepareMenu(std::map<std::string, std
 	kbBtnVwCart->text	= StartButton::STR_BTN_VIEW_CART;
 	row.push_back(kbBtnVwCart);
 	pQntyMenu->keyboard.push_back(row);
-
+	fprintf(fp, "AURA %ld: Finishing prepareMenu\n", time(0)); fflush(fp);
 	return pQntyMenu;
 }
 

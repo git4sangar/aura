@@ -36,6 +36,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ViewCart::prepareMenu(std::map<std::string, std:
 		pViewCartMenu = listAuraBtns[StartButton::STR_BTN_VIEW_SOAPS]->prepareMenu(listAuraBtns, fp);
 	}
 
+	fprintf(fp, "AURA %ld: Finishing ViewCart::prepareMenu::onClick\n", time(0)); fflush(fp);
 	return pViewCartMenu;
 }
 

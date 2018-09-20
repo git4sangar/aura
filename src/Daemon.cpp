@@ -22,6 +22,9 @@
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <ShippingAddress.h>
 #include <OTPButton.h>
+#include <boost/asio.hpp>
+
+using boost::asio::ip::udp;
 
 // Stringify param x.
 // Step (01): Replaces the pattern MAKE_STR(x) with MAKE_STR(value-of-x)
@@ -30,12 +33,32 @@
 #define _MAKE_STR(x) #x          // Adds quotes to the param
 
 #define SKIP_INTERVAL   (5)
+#define MYPORT (2048)
 
 #define AURA_BOT_TOKEN     "uPwIhbFxqA6avQhimCCNuHM9UohLrjB2voJXupoIngq y5ixTRdBGZL3oIMC"
 #define THRAYA_BOT_TOKEN   "uPAHhbp2qklEvQhiniGSu3DGA PdqbZRtHiDDspfuEagpnurxx1MGWqbBIm8"
 
 std::string decode_string(std::string enc_msg, std::string key) {
    return aura_decrypt(enc_msg, key);
+}
+
+void petWatchDog(FILE *fp) {
+   int sockfd = 0;
+   struct hostent *he;
+   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+   struct sockaddr_in their_addr;
+   std::stringstream ss;
+   ss << time(0);
+
+   he=gethostbyname("localhost");
+   their_addr.sin_family = AF_INET;      /* host byte order */
+   their_addr.sin_port = htons(MYPORT);  /* short, network byte order */
+   their_addr.sin_addr = *((struct in_addr *)he->h_addr);
+   bzero(&(their_addr.sin_zero), 8);     /* zero the rest of the struct */
+   sendto(sockfd, ss.str().c_str(), ss.str().size(), 0, 
+             (struct sockaddr *)&their_addr, sizeof(struct sockaddr));
+   close(sockfd);
+   fprintf(fp, "AURA %ld: Petting WatchDog\n", time(0)); fflush(fp);
 }
 
 void AuraMainLoop(FILE *fp) {
@@ -134,6 +157,7 @@ void AuraMainLoop(FILE *fp) {
    TgBot::TgLongPoll longPoll(*pBot);
    while (true) {
       try {
+         //petWatchDog(fp);
          pBot->getApi().deleteWebhook();
          fprintf(fp, "AURA %ld: Long poll started\n", time(0)); fflush(fp);
          longPoll.start();

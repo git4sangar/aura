@@ -49,7 +49,7 @@ TgBot::ReplyKeyboardMarkup::Ptr SoapButton::prepareMenu(std::map<std::string, st
 		row.clear();
 	}
 	pFlavoursMenu->keyboard.push_back(getMainMenu());
-
+	fprintf(fp, "AURA %ld: Finishing SoapButton::prepareMenu::onClick\n", time(0)); fflush(fp);
 	return pFlavoursMenu;
 }
 

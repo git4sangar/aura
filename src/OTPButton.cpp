@@ -23,6 +23,7 @@ std::string OTPButton::getNotifyStrForCustomer() {
 
 TgBot::ReplyKeyboardMarkup::Ptr OTPButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	m_StrOTP = "Notification sent to user.";
+	fprintf(fp, "AURA %ld: Finishing prepareMenu\n", time(0)); fflush(fp);
 	return nullptr;
 }
 

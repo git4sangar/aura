@@ -68,6 +68,7 @@ TgBot::ReplyKeyboardMarkup::Ptr OrdersButton::prepareMenu(std::map<std::string, 
 	}
 
 	pOrdrMenu->keyboard.push_back(getMainMenu());
+	fprintf(fp, "AURA %ld: Finishing prepareMenu\n", time(0)); fflush(fp);
 	return pOrdrMenu;
 }
 

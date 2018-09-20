@@ -97,6 +97,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderCheckoutMenu(std::map<std
 	pPayMenu->keyboard.push_back(row);
 
 	pPayMenu->keyboard.push_back(getMainMenu());
+	fprintf(fp, "AURA %ld: Finishing renderCheckoutMenu\n", time(0)); fflush(fp);
 	return pPayMenu;
 }
 
@@ -140,6 +141,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFlatMenu(std::map<std::st
 
 	pFlatsMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
 	m_FlatsRendered++;
+	fprintf(fp, "AURA %ld: Finishing renderFlatMenu\n", time(0)); fflush(fp);
 	return pFlatsMenu;
 }
 
@@ -176,6 +178,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFloorMenu(std::map<std::s
 
 	pFloorsMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
 	m_FloorsRendered++;
+	fprintf(fp, "AURA %ld: Finishing renderFloorMenu\n", time(0)); fflush(fp);
 	return pFloorsMenu;
 }
 
@@ -222,6 +225,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderBlockNoMenu(std::map<std:
 
 	pBlockNosMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
 	m_BlockNosRendered++;
+	fprintf(fp, "AURA %ld: Finishing renderBlockNoMenu\n", time(0)); fflush(fp);
 	return pBlockNosMenu;
 }
 
@@ -258,6 +262,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderBlockMenu(std::map<std::s
 	}
 	pBlockMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
 	m_BlocksRendered++;
+	fprintf(fp, "AURA %ld: Finishing renderBlockMenu\n", time(0)); fflush(fp);
 	return pBlockMenu;
 }
 
@@ -302,6 +307,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderAptMenu(std::map<std::str
 	pAptMenu->keyboard.push_back(row3);
 
 	pAptMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
+	fprintf(fp, "AURA %ld: Finishing renderAptMenu\n", time(0)); fflush(fp);
 	return pAptMenu;
 }
 
@@ -475,6 +481,7 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 		m_NotifyStr = prepareNotifyStr(pMsg->chat->id);
 		getDBHandle()->updateOrderNoForUser(pMsg->chat->id);
 	}
+	fprintf(fp, "AURA %ld: Finishing ShippingAddress::onClick\n", time(0)); fflush(fp);
 }
 
 std::string ShippingAddress::getNotifyStr(unsigned int chatId) {

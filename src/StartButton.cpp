@@ -39,6 +39,7 @@ TgBot::ReplyKeyboardMarkup::Ptr StartButton::prepareMenu(std::map<std::string, s
 	pMainMenu->keyboard.push_back(row0);
 	pMainMenu->keyboard.push_back(row1);
 	pMainMenu->keyboard.push_back(row2);
+	fprintf(fp, "AURA %ld: Finishing StartButton::prepareMenu::onClick\n", time(0)); fflush(fp);
 	return pMainMenu;
 }
 
