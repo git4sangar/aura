@@ -7,7 +7,6 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
-
 #include <SQLiteCpp/SQLiteCpp.h>
 
 	std::string ShippingAddress::STR_BTN_SSM	= "SSM Nagar";
@@ -90,11 +89,11 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderCheckoutMenu(std::map<std
 	TgBot::ReplyKeyboardMarkup::Ptr pPayMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
 	std::vector<TgBot::KeyboardButton::Ptr> row;
 
+	row.clear(); row.push_back(kbBtnOnDelivery);
+	pPayMenu->keyboard.push_back(row);
 	row.clear(); row.push_back(kbBtnPaytm);
 	pPayMenu->keyboard.push_back(row);
 	row.clear(); row.push_back(kbBtnTez);
-	pPayMenu->keyboard.push_back(row);
-	row.clear(); row.push_back(kbBtnOnDelivery);
 	pPayMenu->keyboard.push_back(row);
 
 	pPayMenu->keyboard.push_back(getMainMenu());
@@ -336,8 +335,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::prepareMenu(std::map<std::strin
 			pMenu = renderCheckoutMenu(listAuraBtns, fp);
 		break;
 		case MenuRenderer::DONE:
-			pMenu = std::make_shared<TgBot::ReplyKeyboardMarkup>();
-			pMenu->keyboard.push_back(getMainMenu());
+			pMenu = listAuraBtns["Main Menu"]->prepareMenu(listAuraBtns, fp);
 		break;
 	}
 	return pMenu;
@@ -367,7 +365,7 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 	if(m_PreDfnd.end() != (itrPreDfnd = m_PreDfnd.find(pMsg->text))) {
 		getDBHandle()->updateShippingFromPrevOrder(pMsg->chat->id, itrPreDfnd->second);
 		m_RenderMenu	= MenuRenderer::CONFIRM;
-		m_StrMsg		= getPaymentString(pMsg->chat->id);
+		m_StrMsg		= getPaymentString(pMsg->chat->id, pMsg->from->firstName);
 		getDBHandle()->deletePOrder(pMsg->chat->id);
 		getDBHandle()->createPOrder(pMsg->chat->id);
 	}
@@ -376,7 +374,7 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 	else if(ViewCart::STR_BTN_PURCHASE == pMsg->text || STR_BTN_BACK == pMsg->text) {
 		std::vector<Cart::Ptr> items = getDBHandle()->getUserCart(pMsg->chat->id);
 		if(items.size() == 0) {
-			m_StrMsg		= "Your Cart is empty! Pls add to cart before purchase";
+			m_StrMsg		= "Your Cart is empty! Pls buy Soap to get that into Cart before purchase.";
 		} else {
 			m_Addr			= getDBHandle()->getShippingForUser(pMsg->chat->id);
 			m_RenderMenu	= MenuRenderer::APARTMENT;
@@ -428,13 +426,13 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 		m_FlatsRendered--;
 		getDBHandle()->addBlockNoToShipping(pMsg->chat->id, std::get<0>(itr->second));
 		getDBHandle()->addFlatNoToShipping(pMsg->chat->id, std::get<1>(itr->second));
-		User::Ptr user = getDBHandle()->getUserForChatId(pMsg->chat->id);
+		/*User::Ptr user = getDBHandle()->getUserForChatId(pMsg->chat->id);
 		if(!user->m_Mobile) {
 			m_RenderMenu	= MenuRenderer::CONTACT;
 			m_StrMsg		= "Share your contact";
-		} else {
+		} else*/ {
 			m_RenderMenu	= MenuRenderer::CONFIRM;
-			m_StrMsg		= getPaymentString(pMsg->chat->id);
+			m_StrMsg		= getPaymentString(pMsg->chat->id, pMsg->from->firstName);
 
 			//	delete the old details
 			getDBHandle()->deletePOrder(pMsg->chat->id);
@@ -448,26 +446,32 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 	else if(STR_BTN_CONTACT == pMsg->text) {
 		if(pMsg->contact) getDBHandle()->updateMobileNo(pMsg->chat->id, pMsg->contact->phoneNumber);
 		m_RenderMenu	= MenuRenderer::CONFIRM;
-		m_StrMsg		= getPaymentString(pMsg->chat->id);
+		m_StrMsg		= getPaymentString(pMsg->chat->id, pMsg->from->firstName);
 		getDBHandle()->deletePOrder(pMsg->chat->id);
 		getDBHandle()->createPOrder(pMsg->chat->id);
 	}
 
 	else if(STR_BTN_PAYTM == pMsg->text || STR_BTN_TEZ == pMsg->text || STR_BTN_ON_DELIVERY == pMsg->text) {
+		std::stringstream ss;
 		m_RenderMenu	= MenuRenderer::DONE;
-		m_StrMsg		= std::string("You will receive an OTP after the payment is received.\n") +
-						std::string("Provide the OTP during delivery.");
 		if(STR_BTN_PAYTM == pMsg->text) {
+			ss << "Please go to paytm app and transfer above mentioned amount to 98406 25615."
+				<< "\n\nYou will receive an OTP from AURA bot with delivery details after the payment is received."
+				<<"\nProvide the OTP during delivery.";
 			getDBHandle()->updatePOrderPayGW(pMsg->chat->id, "Paytm");
 			m_Cache = "Paytm";
 		} else if(STR_BTN_TEZ == pMsg->text) {
+			ss << "Please go to Google Pay/Tez app and transfer above mentioned amount to 98406 25615."
+				<< "\n\nYou will receive an OTP from AURA bot with delivery details after the payment is received."
+				<<"\nProvide the OTP during delivery.";
 			getDBHandle()->updatePOrderPayGW(pMsg->chat->id, "Tez");
 			m_Cache = "Tez";
 		} else if(STR_BTN_ON_DELIVERY == pMsg->text) {
-			m_StrMsg = "You will receive a call in 24 hrs reg delivery.";
+			ss << "You will receive a call in 24 hrs reg delivery.";
 			getDBHandle()->updatePOrderPayGW(pMsg->chat->id, "Cash");
 			m_Cache = "Cash";
 		}
+		m_StrMsg	= ss.str();
 		m_NotifyStr = prepareNotifyStr(pMsg->chat->id);
 		getDBHandle()->updateOrderNoForUser(pMsg->chat->id);
 	}
@@ -498,7 +502,7 @@ std::string ShippingAddress::prepareNotifyStr(unsigned int chatId) {
 	return ss.str();
 }
 
-std::string ShippingAddress::getPaymentString(unsigned int chatId) {
+std::string ShippingAddress::getPaymentString(unsigned int chatId, std::string fname) {
 	std::stringstream ss;
 	int iTotal = 0;
 	std::tuple<std::string, int> delAddr = getDBHandle()->getShippingForUser(chatId);
@@ -514,12 +518,16 @@ std::string ShippingAddress::getPaymentString(unsigned int chatId) {
 			<< std::setw(4)<< (soap->m_Price * item->m_Qnty) << "\n";
 		iTotal += (soap->m_Price * item->m_Qnty);
 	}
-	ss << std::setw(20) << "Total = ₹ " << iTotal << "\n\n";
-	ss << "Please use one of the following payment methods to pay.\n\n" <<
-			"<b>Please mention the Order number: " <<
-			getDBHandle()->getOrderNoForUser(chatId) <<
-			" while paying</b>\n\n";
-
+	ss << std::setw(20) << "Total = ₹ " << iTotal << "\n";
 	ss << "<b>Shipping Address</b>\n" << std::get<0>(delAddr);
+	ss << "\n\nHi " << fname <<
+			", Please choose a payment method to <b>CONFIRM your order</b>" <<
+			" and mention Order number: " <<
+			getDBHandle()->getOrderNoForUser(chatId) <<
+			" while paying\n\n<b>FYI:</b>\n" <<
+			"It's <b>not</b> integrated with Paytm or Tez.\n\n" <<
+			"Pls manually transfer ₹ " << iTotal <<
+			" to 98406 25165 via respective apps.\nA confirmation reaches you in 24hrs after your payment.\n\n";
+
 	return ss.str();
 }

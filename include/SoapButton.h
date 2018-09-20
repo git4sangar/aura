@@ -14,7 +14,6 @@
 class SoapButton :
 	public AuraButton,
 	public std::enable_shared_from_this<SoapButton> {
-	std::vector<Soap::Ptr> m_SoapFlvrs;
 	static std::string STR_CHOOSE_A_SOAP;
 	std::map<std::string, Soap::Ptr> m_Soaps;
 

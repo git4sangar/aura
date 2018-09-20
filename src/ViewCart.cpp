@@ -31,9 +31,11 @@ TgBot::ReplyKeyboardMarkup::Ptr ViewCart::prepareMenu(std::map<std::string, std:
 
 		pViewCartMenu->keyboard.push_back(row0);
 		pViewCartMenu->keyboard.push_back(row1);
+		pViewCartMenu->keyboard.push_back(getMainMenu());
+	} else {
+		pViewCartMenu = listAuraBtns[StartButton::STR_BTN_VIEW_SOAPS]->prepareMenu(listAuraBtns, fp);
 	}
 
-	pViewCartMenu->keyboard.push_back(getMainMenu());
 	return pViewCartMenu;
 }
 
@@ -51,7 +53,7 @@ void ViewCart::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 			iTotal += (soap->m_Price * item->m_Qnty);
 		}
 		if(0 == items.size()) {
-			ss << "Your cart is empty";
+			ss << "Your cart is empty! Pls buy Soap to get that into Cart.";
 		} else {
 			ss << std::setw(18) << "Total = ₹ " << iTotal << "\n";
 		}

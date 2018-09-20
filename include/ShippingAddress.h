@@ -41,7 +41,7 @@ class ShippingAddress :
 	std::vector<TgBot::KeyboardButton::Ptr> getLastRow(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns,
 														std::vector<TgBot::KeyboardButton::Ptr>&& lastRow);
 	void clearAuraButtons(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, MenuRenderer item, FILE *fp);
-	std::string getPaymentString(unsigned int chatId);
+	std::string getPaymentString(unsigned int chatId, std::string fname);
 public:
 	typedef std::shared_ptr<ShippingAddress> Ptr;
 	ShippingAddress(std::shared_ptr<DBInterface> hDB) : AuraButton(hDB) {
