@@ -157,7 +157,7 @@ void AuraMainLoop(FILE *fp) {
    TgBot::TgLongPoll longPoll(*pBot);
    while (true) {
       try {
-         //petWatchDog(fp);
+         petWatchDog(fp);
          pBot->getApi().deleteWebhook();
          fprintf(fp, "AURA %ld: Long poll started\n", time(0)); fflush(fp);
          longPoll.start();
