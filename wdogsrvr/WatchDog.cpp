@@ -20,8 +20,8 @@
 
 using boost::asio::ip::udp;
 
-#define MAX_TIMEOUT_INTERVAL_SECS (60)
-#define MAX_WAKEUP_INTERVAL_SECS (30)
+#define MAX_TIMEOUT_INTERVAL_SECS (120)
+#define MAX_WAKEUP_INTERVAL_SECS (60)
 #define LISTEN_PORT (4950)
 
 // Stringify param x.
