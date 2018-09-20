@@ -17,11 +17,14 @@ if(NOT AURA_KEY)
 	message( FATAL_ERROR "***** Pls provide value for AURA_KEY *****")
 endif(NOT AURA_KEY)
 
+add_definitions(-DAURA_LOG_PATH=${AURA_DEPS}/logs)
+add_definitions(-DAURA_LOG_FILE=aura_log.log)
+
 set(CMAKE_INSTALL_PREFIX ${AURA_DEPS})
 message ("CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
 add_definitions(-DAURA_DB_FILE=${PROJECT_SOURCE_DIR}/sgn_uthra_01.db)
-add_definitions(-DAURA_LOG_FILE=${PROJECT_SOURCE_DIR}/aura_log.log)
+#add_definitions(-DAURA_LOG_FILE=${PROJECT_SOURCE_DIR}/aura_log.log)
 add_definitions(-DASSET_PATH=${PROJECT_SOURCE_DIR}/assets)
 
 INCLUDE_DIRECTORIES(${AURA_DEPS_INCLUDE})

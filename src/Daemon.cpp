@@ -33,7 +33,7 @@ using boost::asio::ip::udp;
 #define _MAKE_STR(x) #x          // Adds quotes to the param
 
 #define SKIP_INTERVAL   (5)
-#define MYPORT (2048)
+#define MYPORT (4950)
 
 #define AURA_BOT_TOKEN     "uPwIhbFxqA6avQhimCCNuHM9UohLrjB2voJXupoIngq y5ixTRdBGZL3oIMC"
 #define THRAYA_BOT_TOKEN   "uPAHhbp2qklEvQhiniGSu3DGA PdqbZRtHiDDspfuEagpnurxx1MGWqbBIm8"
@@ -169,7 +169,10 @@ void AuraMainLoop(FILE *fp) {
 
 
 int main(void) {
-   FILE *fp = fopen(MAKE_STR(AURA_LOG_FILE), "w");
+   std::string aura_log_path = MAKE_STR(AURA_LOG_PATH);
+   std::string aura_log_file = MAKE_STR(AURA_LOG_FILE);
+   std::string aura_log_with_path  = aura_log_path + std::string("/") + aura_log_file;
+   FILE *fp = fopen(aura_log_with_path.c_str(), "w");
    // Define variables
    pid_t pid, sid;
 

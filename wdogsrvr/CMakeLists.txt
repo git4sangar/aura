@@ -13,6 +13,10 @@ message ("AURA_DEPS: ${AURA_DEPS}")
 
 add_definitions(-DAURA_BIN_PATH=${AURA_DEPS}/bin)
 add_definitions(-DAURA_BIN_FILE=SoapSeller)
+
+add_definitions(-DWATCHDOG_LOG_PATH=${AURA_DEPS}/logs)
+add_definitions(-DWATCHDOG_LOG_FILE=wdog_log.log)
+
 set(CMAKE_INSTALL_PREFIX ${AURA_DEPS})
 message ("CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
