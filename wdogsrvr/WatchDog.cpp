@@ -118,6 +118,8 @@ int main(void) {
    FILE *fp = fopen(wdog_log_with_path.c_str(), "w");
 
    fprintf(fp, "WatchDogServer: Successfully started\n"); fflush(fp);
+
+   last_time_stamp = time(0);
    std::thread recv_thread(&sock_receive_thread, fp);
    std::thread wdog_thread(&watch_dog_thread, fp);
 
