@@ -124,15 +124,9 @@ void DBInterface::updatePOrderPayGW(unsigned int chatId, std::string payGw) {
 	transaction.commit();
 }
 
-std::vector<POrder::Ptr> DBInterface::getPOrdersForUser(unsigned int chatId) {
-	fprintf(m_Fp, "AURA %ld: getPOrdersForUser: %d\n", time(0), chatId); fflush(m_Fp);
+std::vector<POrder::Ptr> DBInterface::getPOrdersForQuery(SQLite::Statement& query) {
 	POrder::Ptr pOrder;
 	std::vector<POrder::Ptr> pOrders;
-	std::stringstream ss;
-
-	ss << "SELECT * from POrder WHERE " << POrder::DB_TABLE_PORDER_COLUMN_CHAT_ID << " = " << chatId <<
-		" ORDER BY " << POrder::DB_TABLE_PORDER_COLUMN_DATE_TIME << " DESC;";
-	SQLite::Statement query(*m_hDB, ss.str());
 	while(query.executeStep()) {
 		pOrder = std::make_shared<POrder>();
 		pOrder->m_OrderId	= query.getColumn(POrder::DB_TABLE_PORDER_COLUMN_ORDER_ID.c_str()).getUInt();
@@ -148,6 +142,19 @@ std::vector<POrder::Ptr> DBInterface::getPOrdersForUser(unsigned int chatId) {
 		pOrders.push_back(pOrder);
 	}
 	return pOrders;
+}
+
+std::vector<POrder::Ptr> DBInterface::getPOrdersForUser(unsigned int chatId) {
+	fprintf(m_Fp, "AURA %ld: getPOrdersForUser: %d\n", time(0), chatId); fflush(m_Fp);
+	POrder::Ptr pOrder;
+	std::vector<POrder::Ptr> pOrders;
+	std::stringstream ss;
+
+	ss << "SELECT * from POrder WHERE " << POrder::DB_TABLE_PORDER_COLUMN_CHAT_ID << " = " << chatId <<
+		" ORDER BY " << POrder::DB_TABLE_PORDER_COLUMN_DATE_TIME << " DESC;";
+
+	SQLite::Statement query(*m_hDB, ss.str());
+	return getPOrdersForQuery(query);
 }
 
 void DBInterface::createPOrder(unsigned int chatId) {
@@ -505,6 +512,17 @@ void DBInterface::addToCart(unsigned int soapId, unsigned int chatId, unsigned i
 		m_hDB->exec(ss.str());
 		transaction.commit();
 	}
+}
+
+std::vector<POrder::Ptr> DBInterface::getPendingOrders() {
+	fprintf(m_Fp, "AURA %ld: getPendingOrders\n", time(0)); fflush(m_Fp);
+	std::stringstream ss;
+	ss << "SELECT * from POrder WHERE "
+		<< POrder::DB_TABLE_PORDER_COLUMN_STATUS << " = " << getIntStatus(CartStatus::PENDING)
+		<< " ORDER BY " << POrder::DB_TABLE_PORDER_COLUMN_DATE_TIME << " DESC;"";";
+
+	SQLite::Statement query(*m_hDB, ss.str());
+	return getPOrdersForQuery(query);
 }
 
 std::vector<Cart::Ptr> DBInterface::getCartForOrderNo(unsigned int order_no) {

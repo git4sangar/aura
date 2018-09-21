@@ -61,6 +61,7 @@ public:
 	static std::string STR_BTN_SSM;
 	static std::string STR_BTN_BRKFLD;
 	static std::string STR_BTN_GARUDA;
+	static std::string STR_BTN_PURVA;
 	static std::string STR_BTN_CONTACT;
 	static std::string STR_BTN_BACK;
 	static std::string STR_BTN_PAYTM;

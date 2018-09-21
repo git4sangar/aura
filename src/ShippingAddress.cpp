@@ -10,10 +10,11 @@
 #include <SQLiteCpp/SQLiteCpp.h>
 
 	std::string ShippingAddress::STR_BTN_SSM	= "SSM Nagar";
-	std::string ShippingAddress::STR_BTN_BRKFLD	= "Navins Brookfield";
-	std::string ShippingAddress::STR_BTN_GARUDA	= "Garuda Avenue";
+	std::string ShippingAddress::STR_BTN_BRKFLD	= "Brookfield";
+	std::string ShippingAddress::STR_BTN_GARUDA	= "Garuda Ave";
+	std::string ShippingAddress::STR_BTN_PURVA	= "Fountain SQ";
 	std::string ShippingAddress::STR_BTN_CONTACT= "Contact";
-	std::string ShippingAddress::STR_BTN_BACK	= "Back to Apt";
+	std::string ShippingAddress::STR_BTN_BACK	= "Apartments";
 	std::string ShippingAddress::STR_BTN_PAYTM	= "Paytm to 98406 25165";
 	std::string ShippingAddress::STR_BTN_TEZ	= "Google Pay / Tez to 98406 25165";
 	std::string ShippingAddress::STR_BTN_ON_DELIVERY	= "Cash on Delivery";
@@ -268,7 +269,11 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderBlockMenu(std::map<std::s
 
 TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderAptMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA %ld: \"ShippingAddress::renderAptMenu\" rendering\n", time(0)); fflush(fp);
-	TgBot::KeyboardButton::Ptr kbBtnSSM = nullptr, kbBtnBrkFld = nullptr, kbBtnGaruda = nullptr, kbBtnPrev = nullptr;
+	TgBot::KeyboardButton::Ptr kbBtnSSM = nullptr,
+								kbBtnBrkFld = nullptr,
+								kbBtnGaruda = nullptr,
+								kbBtnPurva = nullptr,
+								kbBtnPrev = nullptr;
 
 	//	m_Addr is Full-address-string & order-no paid.
 	if(!std::get<0>(m_Addr).empty()) {
@@ -281,30 +286,32 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderAptMenu(std::map<std::str
 	kbBtnSSM		= std::make_shared<TgBot::KeyboardButton>();
 	kbBtnBrkFld		= std::make_shared<TgBot::KeyboardButton>();
 	kbBtnGaruda		= std::make_shared<TgBot::KeyboardButton>();
+	kbBtnPurva		= std::make_shared<TgBot::KeyboardButton>();
 
 	kbBtnSSM->text		= STR_BTN_SSM;
 	kbBtnBrkFld->text	= STR_BTN_BRKFLD;
 	kbBtnGaruda->text	= STR_BTN_GARUDA;
+	kbBtnPurva->text	= STR_BTN_PURVA;
 
 	listAuraBtns[kbBtnSSM->text]	= shared_from_this();
 	listAuraBtns[kbBtnBrkFld->text]	= shared_from_this();
 	listAuraBtns[kbBtnGaruda->text]	= shared_from_this();
+	listAuraBtns[kbBtnPurva->text]	= shared_from_this();
 
 	m_Apts.push_back(kbBtnSSM->text);
 	m_Apts.push_back(kbBtnBrkFld->text);
 	m_Apts.push_back(kbBtnGaruda->text);
+	m_Apts.push_back(kbBtnPurva->text);
 
 	TgBot::ReplyKeyboardMarkup::Ptr pAptMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
-	std::vector<TgBot::KeyboardButton::Ptr> row0, row1, row2, row3;
+	std::vector<TgBot::KeyboardButton::Ptr> row0, row1, row2;
 	if(!std::get<0>(m_Addr).empty()) row0.push_back(kbBtnPrev);
-	row1.push_back(kbBtnSSM);
-	row2.push_back(kbBtnBrkFld);
-	row3.push_back(kbBtnGaruda);
+	row1.push_back(kbBtnSSM); row1.push_back(kbBtnBrkFld);
+	row2.push_back(kbBtnGaruda); row2.push_back(kbBtnPurva);
 
 	if(!std::get<0>(m_Addr).empty()) pAptMenu->keyboard.push_back(row0);
 	pAptMenu->keyboard.push_back(row1);
 	pAptMenu->keyboard.push_back(row2);
-	pAptMenu->keyboard.push_back(row3);
 
 	pAptMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
 	fprintf(fp, "AURA %ld: Finishing renderAptMenu\n", time(0)); fflush(fp);

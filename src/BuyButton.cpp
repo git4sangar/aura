@@ -9,7 +9,7 @@
 #include <BuyButton.h>
 #include <DBInterface.h>
 
-std::string BuyButton::STR_BTN_OTHER_FLAVOURS = "Other Flvaours";
+std::string BuyButton::STR_BTN_OTHER_FLAVOURS = "Other Soaps";
 
 int BuyButton::m_Rows = 3;
 int BuyButton::m_Cols = 2;

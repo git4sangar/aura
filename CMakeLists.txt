@@ -49,6 +49,7 @@ add_executable(SoapSeller
 	src/ViewCart.cpp
 	src/ShippingAddress.cpp
 	src/OTPButton.cpp
+	src/ReminderButton.cpp
 	)
 
 target_link_libraries(SoapSeller ${AURA_DEPS_LIB}/libTgBot.a ${CMAKE_THREAD_LIBS_INIT} ${BOOST_THREAD} ${BOOST_SYSTEM} ${BOOST_CHRONO} ssl crypto curl ${AURA_DEPS_LIB}/libSQLiteCpp.a ${AURA_DEPS_LIB}/libsqlite3.a pthread dl)

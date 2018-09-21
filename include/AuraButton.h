@@ -32,12 +32,12 @@ public:
 
 	virtual void init(TgBot::Message::Ptr pMsg, FILE *fp) {}
 	virtual std::string getNotifyStr(unsigned int userParam) {return std::string();}
-	virtual std::string getNotifyStrForCustomer() {return std::string();}
+	virtual std::string getNotifyStrForCustomer(unsigned int chatId) {return std::string();}
 
 	virtual std::string getParseMode() {return std::string();}
 	virtual TgBot::ReplyKeyboardMarkup::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) = 0;
 	virtual TgBot::InputFile::Ptr getMedia(TgBot::Message::Ptr pMsg, FILE *fp) {return nullptr;}
-	virtual unsigned int getChatIdForNotification(TgBot::Message::Ptr pMessage, FILE *fp) {return 0;}
+	virtual std::vector<unsigned int> getChatIdsForNotification(TgBot::Message::Ptr pMessage, FILE *fp) {return std::vector<unsigned int>();}
 	std::vector<unsigned int> getNotifyUsers() {return m_hDB->getNotifyUsers();}
 
 	virtual void onClick(TgBot::Message::Ptr pMessage, FILE *fp) = 0;

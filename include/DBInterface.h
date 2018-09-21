@@ -95,6 +95,7 @@ class DBInterface {
 	std::shared_ptr<SQLite::Database> m_hDB;
 	FILE *m_Fp;
 
+	std::vector<POrder::Ptr> getPOrdersForQuery(SQLite::Statement& query);
 public:
 	typedef std::shared_ptr<DBInterface> Ptr;
 
@@ -123,6 +124,7 @@ public:
 
 	std::vector<Cart::Ptr> getUserCart(unsigned int chatId);
 	std::vector<Cart::Ptr> getCartForOrderNo(unsigned int order_no);
+	std::vector<POrder::Ptr> getPendingOrders();
 	
 	std::vector<unsigned int> getNotifyUsers();
 

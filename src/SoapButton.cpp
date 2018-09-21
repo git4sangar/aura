@@ -15,7 +15,7 @@
 // Step (02): Replaces the pattern _MAKE_STR(value-of-x) with quotes-added-param, ie "value-of-x"
 #define _MAKE_STR(x) #x          // Adds quotes to the param
 
-std::string SoapButton::STR_CHOOSE_A_SOAP = "Choose a flavour from below list";
+std::string SoapButton::STR_CHOOSE_A_SOAP = "Choose a soap from below list";
 
 TgBot::ReplyKeyboardMarkup::Ptr SoapButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA %ld:SoapButton prepareMenu\n", time(0)); fflush(fp);

@@ -22,6 +22,7 @@
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <ShippingAddress.h>
 #include <OTPButton.h>
+#include <ReminderButton.h>
 #include <boost/asio.hpp>
 
 using boost::asio::ip::udp;
@@ -73,8 +74,8 @@ void AuraMainLoop(FILE *fp) {
    auraButtons["start"]                   = btnStart;
    auraButtons["Main Menu"]               = btnStart;
 
-   std::shared_ptr<OTPButton> btnOtp    = std::make_shared<OTPButton>(hDB);
-   auraButtons["/otp"]                    = btnOtp;
+   auraButtons["/otp"]     = std::make_shared<OTPButton>(hDB);
+   auraButtons["/remind"]  = std::make_shared<ReminderButton>(hDB);
 
    pBot->getEvents().onAnyMessage( [pBot, &auraButtons, fp, &startSec](TgBot::Message::Ptr pMsg) {
       fprintf(fp, "AURA %ld: Received \"%s\" onAnyMessage as it arrived\n", time(0),  pMsg->text.c_str()); fflush(fp);
@@ -119,7 +120,7 @@ void AuraMainLoop(FILE *fp) {
          // On Click
          pAuraBtn->onClick(pMsg, fp);
 
-         // On notifications
+         // Notification to moderators
          std::string strNotify = pAuraBtn->getNotifyStr(pMsg->chat->id);
          if(!strNotify.empty()) {
             std::vector<unsigned int> chatIds   = pAuraBtn->getNotifyUsers();
@@ -128,11 +129,11 @@ void AuraMainLoop(FILE *fp) {
             }
          }
 
-         // For user notifications
-         std::string strUserNotif = pAuraBtn->getNotifyStrForCustomer();
-         if(!strUserNotif.empty()) {
-            unsigned int chatId = pAuraBtn->getChatIdForNotification(pMsg, fp);
-            pBot->getApi().sendMessage(chatId, strUserNotif);
+         // For end-user notifications
+         std::vector<unsigned int> chatIds = pAuraBtn->getChatIdsForNotification(pMsg, fp);
+         for(auto& chatId : chatIds) {
+            std::string strUserNotif = pAuraBtn->getNotifyStrForCustomer(chatId);
+            if(!strUserNotif.empty()) pBot->getApi().sendMessage(chatId, strUserNotif, false, 0, pMenu, pAuraBtn->getParseMode());
          }
 
          // Send Snaps if any
@@ -146,7 +147,7 @@ void AuraMainLoop(FILE *fp) {
          fprintf(fp, "AURA %ld: \"%s\" button missing\n", time(0), pMsg->text.c_str()); fflush(fp);
          std::stringstream ss;
          ss << "Hi " << pMsg->from->firstName
-              << ",a sudden network connectivity issue brought you back to main menu.\nRegret the inconvenience caused.";
+              << ", internet fluctuation brought you back to main menu.\nRegret the inconvenience caused.";
          pBot->getApi().sendMessage(pMsg->chat->id, ss.str(),
                         false, 0, auraButtons["Main Menu"]->prepareMenu(auraButtons, fp));
       }
