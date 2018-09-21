@@ -301,7 +301,7 @@ std::string DBInterface::getStrStatus(CartStatus stat) {
 			srStat = "Pending Payment";
 			break;
 		case CartStatus::READY_FOR_DELIVERY:
-			srStat = "Payment Received, Delivery Pending";
+			srStat = "Delivery Pending";
 			break;
 		case CartStatus::DELIVERED:
 			srStat = "Delivered";

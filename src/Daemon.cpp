@@ -63,7 +63,7 @@ void petWatchDog(FILE *fp) {
 
 void AuraMainLoop(FILE *fp) {
    fprintf(fp, "AURA %ld: Starting AuraMainLoop\n", time(0)); fflush(fp);
-   std::shared_ptr<TgBot::Bot> pBot          = std::make_shared<TgBot::Bot>(decode_string(THRAYA_BOT_TOKEN, MAKE_STR(DECRYPT_KEY)));
+   std::shared_ptr<TgBot::Bot> pBot          = std::make_shared<TgBot::Bot>(decode_string(AURA_BOT_TOKEN, MAKE_STR(DECRYPT_KEY)));
    DBInterface::Ptr hDB       = std::make_shared<DBInterface>(std::string(MAKE_STR(AURA_DB_FILE)), fp);
    std::map<std::string, std::shared_ptr<AuraButton>> auraButtons;
    time_t startSec = time(NULL);
@@ -192,13 +192,13 @@ int main(void) {
    // The parent process has now terminated, and the forked child process will continue
    // (the pid of the child process was 0)
 
+   fprintf(fp, "AURA: Successfully started Bot daemon\n"); fflush(fp);
    // Since the child process is a daemon, the umask needs to be set so files and logs can be written
-   umask(0);
+   /*umask(0);
 
    // Open system logs for the child process
    //openlog("daemon-named", LOG_NOWAIT | LOG_PID, LOG_USER);
    //syslog(LOG_NOTICE, "AURA: Successfully started daemon-name");
-   fprintf(fp, "AURA: Successfully started Bot daemon\n"); fflush(fp);
 
    // Generate a session ID for the child process
    sid = setsid();
@@ -227,7 +227,7 @@ int main(void) {
    // A daemon cannot use the terminal, so close standard file descriptors for security reasons
    close(STDIN_FILENO);
    close(STDOUT_FILENO);
-   close(STDERR_FILENO);
+   close(STDERR_FILENO);*/
 
    AuraMainLoop(fp);
 
