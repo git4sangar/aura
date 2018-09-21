@@ -539,8 +539,8 @@ std::string ShippingAddress::getPaymentString(unsigned int chatId, std::string f
 			" and mention Order number: " <<
 			getDBHandle()->getOrderNoForUser(chatId) <<
 			" while paying\n\n<b>FYI:</b> It's <b>not</b> integrated with Paytm or Tez.\n\n" <<
-			"Pls manually transfer ₹ " << iTotal <<
-			" to 98406 25165 via respective apps.\nA confirmation reaches you in 24hrs after your payment.\n\n";
+			"So pls transfer ₹ " << iTotal <<
+			" to 98406 25165 using Paytm/Tez apps or their web-sites.\nA confirmation reaches you in 24hrs after your payment.\n\n";
 
 	return ss.str();
 }
