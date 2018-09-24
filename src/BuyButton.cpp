@@ -6,6 +6,7 @@
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <StartButton.h>
 
+#include <ViewCart.h>
 #include <BuyButton.h>
 #include <DBInterface.h>
 
@@ -40,7 +41,7 @@ TgBot::ReplyKeyboardMarkup::Ptr BuyButton::prepareMenu(std::map<std::string, std
 		pQntyMenu->keyboard.push_back(row);
 	}
 
-	TgBot::KeyboardButton::Ptr kbBtnVwSoap, kbBtnVwCart;
+	TgBot::KeyboardButton::Ptr kbBtnVwSoap, kbBtnVwCart, kbBtnChkOut;
 	row.clear();
 	kbBtnVwSoap 		= std::make_shared<TgBot::KeyboardButton>();
 	kbBtnVwSoap->text	= STR_BTN_OTHER_FLAVOURS;
@@ -49,6 +50,10 @@ TgBot::ReplyKeyboardMarkup::Ptr BuyButton::prepareMenu(std::map<std::string, std
 	kbBtnVwCart 		= std::make_shared<TgBot::KeyboardButton>();
 	kbBtnVwCart->text	= StartButton::STR_BTN_VIEW_CART;
 	row.push_back(kbBtnVwCart);
+	pQntyMenu->keyboard.push_back(row);
+	kbBtnChkOut 		= std::make_shared<TgBot::KeyboardButton>();
+	kbBtnChkOut->text	= ViewCart::STR_BTN_PURCHASE;
+	row.push_back(kbBtnChkOut);
 	pQntyMenu->keyboard.push_back(row);
 	fprintf(fp, "AURA %ld: Finishing prepareMenu\n", time(0)); fflush(fp);
 	return pQntyMenu;
@@ -81,7 +86,7 @@ void BuyButton::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 							std::to_string(std::get<1>(m_QntyEvents[pMsg->text])) +
 							std::string(" ") +
 							m_Soap->m_Name +
-							" Soap(s). Choose again to change.";
+							" Soap(s). To change quantity, choose again.";
 	}
 }
 
