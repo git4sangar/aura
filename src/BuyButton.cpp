@@ -5,6 +5,7 @@
 #include <vector>
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <StartButton.h>
+#include <ShippingAddress.h>
 
 #include <ViewCart.h>
 #include <BuyButton.h>
@@ -50,9 +51,11 @@ TgBot::ReplyKeyboardMarkup::Ptr BuyButton::prepareMenu(std::map<std::string, std
 	kbBtnVwCart 		= std::make_shared<TgBot::KeyboardButton>();
 	kbBtnVwCart->text	= StartButton::STR_BTN_VIEW_CART;
 	row.push_back(kbBtnVwCart);
-	pQntyMenu->keyboard.push_back(row);
 	kbBtnChkOut 		= std::make_shared<TgBot::KeyboardButton>();
 	kbBtnChkOut->text	= ViewCart::STR_BTN_PURCHASE;
+	if(listAuraBtns.end() == listAuraBtns.find(ViewCart::STR_BTN_PURCHASE)) {
+		listAuraBtns[ViewCart::STR_BTN_PURCHASE]	= std::make_shared<ShippingAddress>(getDBHandle());
+	}
 	row.push_back(kbBtnChkOut);
 	pQntyMenu->keyboard.push_back(row);
 	fprintf(fp, "AURA %ld: Finishing prepareMenu\n", time(0)); fflush(fp);

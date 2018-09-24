@@ -147,7 +147,7 @@ void AuraMainLoop(FILE *fp) {
          fprintf(fp, "AURA %ld: \"%s\" button missing\n", time(0), pMsg->text.c_str()); fflush(fp);
          std::stringstream ss;
          ss << "Hi " << pMsg->from->firstName
-              << ", internet fluctuation brought you back to main menu.\nRegret the inconvenience caused.";
+              << ", could not recognize what you say, pls use the buttons below.\nRegret the inconvenience caused.";
          pBot->getApi().sendMessage(pMsg->chat->id, ss.str(),
                         false, 0, auraButtons["Main Menu"]->prepareMenu(auraButtons, fp));
       }

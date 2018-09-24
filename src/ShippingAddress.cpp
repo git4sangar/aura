@@ -540,6 +540,6 @@ std::string ShippingAddress::getPaymentString(unsigned int chatId, std::string f
 				getDBHandle()->getOrderNoForUser(chatId) <<
 				" while paying.\n\nPls use Paytm or GPay/Tez app to transfer ₹ " << iTotal <<
 				" to 98406 25165. A confirmation \"telegram msg\" reaches you in 24hrs after your payment." <<
-				"\n\n<b>*</b> I'm <b>not</b> integrated with Paytm, GPay/Tez or any such payment banks.\n";
+				"\n\n<b>*</b> AURA bot is <b>not</b> integrated with payment banks like Paytm, GPay/Tez, etc...\n";
 	return ss.str();
 }
