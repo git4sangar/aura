@@ -14,7 +14,7 @@
 	std::string ShippingAddress::STR_BTN_GARUDA	= "Garuda Ave";
 	std::string ShippingAddress::STR_BTN_PURVA	= "Fountain SQ";
 	std::string ShippingAddress::STR_BTN_CONTACT= "Contact";
-	std::string ShippingAddress::STR_BTN_BACK	= "Apartments";
+	std::string ShippingAddress::STR_BTN_BACK	= "<-Apartments";
 	std::string ShippingAddress::STR_BTN_PAYTM	= "Paytm to 98406 25165";
 	std::string ShippingAddress::STR_BTN_TEZ	= "Google Pay / Tez to 98406 25165";
 	std::string ShippingAddress::STR_BTN_ON_DELIVERY	= "Cash on Delivery";
@@ -51,7 +51,7 @@ std::vector<TgBot::KeyboardButton::Ptr> ShippingAddress::getLastRow(
 			std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns,
 			std::vector<TgBot::KeyboardButton::Ptr>&& lastRow) {
 	TgBot::KeyboardButton::Ptr kbBtnBack	= std::make_shared<TgBot::KeyboardButton>();
-	kbBtnBack->text	= "Back to Apt";
+	kbBtnBack->text	= STR_BTN_BACK;
 	listAuraBtns[kbBtnBack->text]	= shared_from_this();
 	lastRow.push_back(kbBtnBack);
 	return lastRow;
@@ -535,12 +535,11 @@ std::string ShippingAddress::getPaymentString(unsigned int chatId, std::string f
 	ss << std::setw(20) << "Total = ₹ " << iTotal << "\n";
 	ss << "<b>Shipping Address</b>\n" << std::get<0>(delAddr);
 	ss << "\n\nHi " << fname <<
-			", Please choose a payment method to <b>CONFIRM your order</b>" <<
-			" and mention Order number: " <<
-			getDBHandle()->getOrderNoForUser(chatId) <<
-			" while paying\n\n<b>FYI:</b> It's <b>not</b> integrated with Paytm or Tez.\n\n" <<
-			"So pls transfer ₹ " << iTotal <<
-			" to 98406 25165 using Paytm/Tez apps or their web-sites.\nA confirmation reaches you in 24hrs after your payment.\n\n";
-
+				", Please choose a payment method to <b>CONFIRM your order</b>" <<
+				" and mention Order number: " <<
+				getDBHandle()->getOrderNoForUser(chatId) <<
+				" while paying.\n\nPls use Paytm or GPay/Tez app to transfer ₹ " << iTotal <<
+				" to 98406 25165. A confirmation \"telegram msg\" reaches you in 24hrs after your payment." <<
+				"\n\n<b>*</b> I'm <b>not</b> integrated with Paytm, GPay/Tez or any such payment banks.\n";
 	return ss.str();
 }

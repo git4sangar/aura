@@ -9,7 +9,7 @@
 #include <StartButton.h>
 
 std::string ViewCart::STR_BTN_EMPTY_CART	= "Empty Cart";
-std::string ViewCart::STR_BTN_PURCHASE		= "Purchase";
+std::string ViewCart::STR_BTN_PURCHASE		= "Checkout";
 
 TgBot::ReplyKeyboardMarkup::Ptr ViewCart::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA %ld: \"ViewCart::prepareMenu\" onClick\n", time(0)); fflush(fp);
