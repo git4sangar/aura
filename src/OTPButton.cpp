@@ -54,7 +54,12 @@ void OTPButton::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 			m_OrderNo	= std::stoul(words[1]);
 			getDBHandle()->updatePOrderStatus(m_OrderNo, CartStatus::READY_FOR_DELIVERY);
 
-			m_OTP = 1234;
+			srand(time(0)); m_OTP = rand() % 9999;
+			// Check if 4 digits
+			while(999 > m_OTP) {
+				srand(time(0)); m_OTP = rand() % 9999;
+				usleep(100);
+			}
 			getDBHandle()->updateOTP(m_OrderNo, m_OTP);
 		}
 		if(2 < words.size()) {
