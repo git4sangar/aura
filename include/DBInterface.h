@@ -81,12 +81,13 @@ class Shipping {
 public:
 	typedef std::shared_ptr<Shipping> Ptr;
 	unsigned int m_ShippingId, m_ChatId, m_FlatNo, m_OrderNo;
-	std::string m_AptName, m_BlockNo;
+	std::string m_AptName, m_BlockNo, m_Address;
 
 	static std::string DB_TABLE_SHIPPING_COLUMN_SHIP_ID;
 	static std::string DB_TABLE_SHIPPING_COLUMN_CHAT_ID;
 	static std::string DB_TABLE_SHIPPING_COLUMN_APT_NAME;
 	static std::string DB_TABLE_SHIPPING_COLUMN_BLOCK_NO;
+	static std::string DB_TABLE_SHIPPING_COLUMN_ADDRESS;
 	static std::string DB_TABLE_SHIPPING_COLUMN_FLAT_NO;
 	static std::string DB_TABLE_SHIPPING_COLUMN_ORDER_NO;
 };
@@ -132,6 +133,9 @@ public:
 	void addBlockNoToShipping(unsigned int chatId, std::string blkNo);
 	void addFlatNoToShipping(unsigned int chatId, unsigned int flatNo);
 	void addAptNameToShipping(unsigned int chatId, std::string aptName);
+	void addAddressToShipping(unsigned int chatId, std::string address);
+	void addColumnToShipping(unsigned int chatId, std::string colName, std::string colValue);
+
 	bool updateShippingFromPrevOrder(unsigned int chatId, unsigned int m_OrderNo);
 	bool emptyCartForUser(unsigned int chatId);
 	unsigned int getOrderNoForUser(unsigned int chatId);

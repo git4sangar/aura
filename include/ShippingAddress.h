@@ -12,7 +12,9 @@
 #include <DBInterface.h>
 
 #define MAX_NAVINS_FLOORS (4)
-enum class MenuRenderer {APARTMENT, BLOCK, BLOCK_NO, FLOOR, FLAT_NO, CONTACT, CONFIRM, DONE};
+enum class MenuRenderer {APARTMENT, BLOCK, BLOCK_NO, FLOOR, FLAT_NO, CONTACT, CONFIRM, ADDRESS, DONE, NOTA};
+
+enum class UserContext {ADDRESS, REVIEW, NOTA};
 
 class ShippingAddress :
 		public AuraButton,
@@ -27,6 +29,7 @@ class ShippingAddress :
 	std::map<std::string, std::tuple<std::string,int>> m_Floors;
 	std::map<std::string, std::tuple<std::string,int>> m_Flats;
 	std::map<std::string, unsigned int> m_PreDfnd;
+	std::map<unsigned int, UserContext> m_Context;
 	std::tuple<std::string,unsigned int> m_Addr;
 	MenuRenderer m_RenderMenu;
 
@@ -44,12 +47,14 @@ class ShippingAddress :
 	std::string getPaymentString(unsigned int chatId, std::string fname);
 public:
 	typedef std::shared_ptr<ShippingAddress> Ptr;
+
 	ShippingAddress(std::shared_ptr<DBInterface> hDB) : AuraButton(hDB) {
 		m_Rows = m_Cols = m_FloorNo = m_ChatId = 0;
 		m_FlatsRendered = m_FloorsRendered = m_BlockNosRendered = m_BlocksRendered = 0;
 	}
 	virtual ~ShippingAddress() {}
 
+	void init(TgBot::Message::Ptr pMsg, FILE *fp);
 	std::string getNotifyStr(unsigned int userParam);
 	std::string prepareNotifyStr(unsigned int chatId);
 	std::string getMsg() { return m_StrMsg;}

@@ -108,8 +108,8 @@ void AuraMainLoop(FILE *fp) {
       fprintf(fp, "AURA %ld: AuraBtnList Size %ld \n", time(0),  auraButtons.size()); fflush(fp);
 
       std::map<std::string, std::shared_ptr<AuraButton>>::const_iterator itr;
-      itr = auraButtons.find(strCmd);
-      if(auraButtons.end() != itr) {
+      if(auraButtons.end() != (itr = auraButtons.find(strCmd)) ||
+         auraButtons.end() != (itr = auraButtons.find(std::to_string(pMsg->chat->id)))) {
          TgBot::GenericReply::Ptr pMenu;
          pAuraBtn = itr->second->getSharedPtr();
          fprintf(fp, "AURA %ld: Found \"%s\" button\n", time(0), pMsg->text.c_str()); fflush(fp);

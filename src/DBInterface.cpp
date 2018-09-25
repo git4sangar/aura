@@ -35,6 +35,7 @@
 	std::string Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME	= "apt_name";
 	std::string Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO	= "block_no";
 	std::string Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO	= "flat_no";
+	std::string Shipping::DB_TABLE_SHIPPING_COLUMN_ADDRESS	= "address";
 	std::string Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO	= "order_no";
 
 	std::string POrder::DB_TABLE_PORDER_COLUMN_ORDER_ID	= "order_id";
@@ -213,12 +214,14 @@ bool DBInterface::updateShippingFromPrevOrder(unsigned int chatId, unsigned int 
 			Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME << ", " <<
 			Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO << ", " <<
 			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << ", " <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_ADDRESS << ", " <<
 			Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO << ")" <<
 		" SELECT " <<
 			Shipping::DB_TABLE_SHIPPING_COLUMN_CHAT_ID << ", " <<
 			Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME << ", " <<
 			Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO << ", " <<
 			newOrderNo << ", " <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_ADDRESS << ", " <<
 			Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO << " FROM Shipping WHERE " <<
 			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << order_no << ";";
 	SQLite::Transaction transaction(*m_hDB);
@@ -239,9 +242,12 @@ std::tuple<std::string, unsigned int> DBInterface::getShippingForUser(unsigned i
 	SQLite::Statement query(*m_hDB, ss.str());
 	if(query.executeStep()) {
 		order_no = query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO.c_str()).getUInt();
-		strAddr = query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO.c_str()).getString() + "-";
-		strAddr += std::to_string(query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO.c_str()).getUInt()) + ", ";
-		strAddr += query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME.c_str()).getString();
+		strAddr = query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_ADDRESS.c_str()).getString();
+		if(strAddr.empty()) {
+			strAddr = query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_BLOCK_NO.c_str()).getString() + "-";
+			strAddr += std::to_string(query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_FLAT_NO.c_str()).getUInt()) + ", ";
+			strAddr += query.getColumn(Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME.c_str()).getString();
+		}
 		tplShip = std::make_tuple(strAddr, order_no);
 	}
 	return tplShip;
@@ -393,9 +399,42 @@ void DBInterface::addFlatNoToShipping(unsigned int chatId, unsigned int flatNo) 
 	}
 }
 
+void DBInterface::addColumnToShipping(unsigned int chatId, std::string colName, std::string colValue) {
+	fprintf(m_Fp, "AURA %ld: addColumnToShipping colValue: %s\n", time(0), colValue.c_str()); fflush(m_Fp);
+	int order_no = getOrderNoForUser(chatId);
+	std::stringstream ss;
+	ss << "SELECT * from Shipping WHERE " <<
+			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << order_no << ";";
+	SQLite::Statement   query(*m_hDB, ss.str());
+	if(query.executeStep()) {
+		SQLite::Transaction transaction(*m_hDB);
+		ss.str(std::string());
+		ss << "UPDATE Shipping set " <<
+				colName << " = \"" << colValue << "\" WHERE "<<
+				Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << order_no << ";";
+		m_hDB->exec(ss.str());
+		transaction.commit();
+	} else {
+		SQLite::Transaction transaction(*m_hDB);
+		ss.str(std::string());
+		ss << " INSERT INTO Shipping (" << colName << ", " <<
+				Shipping::DB_TABLE_SHIPPING_COLUMN_CHAT_ID << ", " <<
+				Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO <<  ") VALUES (\"" <<
+				colValue << "\", " << chatId << ", " << order_no << ");";
+		m_hDB->exec(ss.str());
+		transaction.commit();
+	}
+}
+
+void DBInterface::addAddressToShipping(unsigned int chatId, std::string address) {
+	fprintf(m_Fp, "AURA %ld: addAddressToShipping aptName: %s\n", time(0), address.c_str()); fflush(m_Fp);
+	addColumnToShipping(chatId, Shipping::DB_TABLE_SHIPPING_COLUMN_ADDRESS, address);
+}
+
 void DBInterface::addAptNameToShipping(unsigned int chatId, std::string aptName) {
 	fprintf(m_Fp, "AURA %ld: addAptNameToShipping aptName: %s\n", time(0), aptName.c_str()); fflush(m_Fp);
-	int order_no = getOrderNoForUser(chatId);
+	addColumnToShipping(chatId, Shipping::DB_TABLE_SHIPPING_COLUMN_APT_NAME, aptName);
+	/*int order_no = getOrderNoForUser(chatId);
 	std::stringstream ss;
 	ss << "SELECT * from Shipping WHERE " <<
 			Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << order_no << ";";
@@ -417,7 +456,7 @@ void DBInterface::addAptNameToShipping(unsigned int chatId, std::string aptName)
 				aptName << "\", " << chatId << ", " << order_no << ");";
 		m_hDB->exec(ss.str());
 		transaction.commit();
-	}
+	}*/
 }
 
 std::vector<unsigned int> DBInterface::getNotifyUsers() {

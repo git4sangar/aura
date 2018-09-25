@@ -11,13 +11,19 @@
 
 	std::string ShippingAddress::STR_BTN_SSM	= "SSM Nagar";
 	std::string ShippingAddress::STR_BTN_BRKFLD	= "Brookfield";
-	std::string ShippingAddress::STR_BTN_GARUDA	= "Garuda Ave";
+	std::string ShippingAddress::STR_BTN_GARUDA	= "Other";
 	std::string ShippingAddress::STR_BTN_PURVA	= "Fountain SQ";
 	std::string ShippingAddress::STR_BTN_CONTACT= "Contact";
-	std::string ShippingAddress::STR_BTN_BACK	= "<-Apartments";
+	std::string ShippingAddress::STR_BTN_BACK	= "<-Address";
 	std::string ShippingAddress::STR_BTN_PAYTM	= "Paytm to 98406 25165";
 	std::string ShippingAddress::STR_BTN_TEZ	= "Google Pay / Tez to 98406 25165";
 	std::string ShippingAddress::STR_BTN_ON_DELIVERY	= "Cash on Delivery";
+
+void ShippingAddress::init(TgBot::Message::Ptr pMsg, FILE *fp) {
+	m_RenderMenu = MenuRenderer::NOTA;
+	m_ChatId = m_Rows = m_Cols = m_FloorNo = 0;
+	m_StrMsg.clear(); m_Cache.clear(); m_NotifyStr.clear(); 
+}
 
 void ShippingAddress::clearAuraButtons(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, MenuRenderer item, FILE *fp) {
 	fprintf(fp, "AURA %ld: ShippingAddress::clearAuraButtons { size: %ld\n", time(0), listAuraBtns.size()); fflush(fp);
@@ -97,7 +103,7 @@ TgBot::GenericReply::Ptr ShippingAddress::renderCheckoutMenu(std::map<std::strin
 	row.clear(); row.push_back(kbBtnTez);
 	pPayMenu->keyboard.push_back(row);
 
-	pPayMenu->keyboard.push_back(getMainMenu());
+	pPayMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
 	fprintf(fp, "AURA %ld: Finishing renderCheckoutMenu\n", time(0)); fflush(fp);
 	return pPayMenu;
 }
@@ -285,42 +291,41 @@ TgBot::GenericReply::Ptr ShippingAddress::renderAptMenu(std::map<std::string, st
 
 	kbBtnSSM		= std::make_shared<TgBot::KeyboardButton>();
 	kbBtnBrkFld		= std::make_shared<TgBot::KeyboardButton>();
-	kbBtnGaruda		= std::make_shared<TgBot::KeyboardButton>();
 	kbBtnPurva		= std::make_shared<TgBot::KeyboardButton>();
+	kbBtnGaruda		= std::make_shared<TgBot::KeyboardButton>();
 
 	kbBtnSSM->text		= STR_BTN_SSM;
 	kbBtnBrkFld->text	= STR_BTN_BRKFLD;
-	kbBtnGaruda->text	= STR_BTN_GARUDA;
 	kbBtnPurva->text	= STR_BTN_PURVA;
+	kbBtnGaruda->text	= STR_BTN_GARUDA;
 
 	listAuraBtns[kbBtnSSM->text]	= shared_from_this();
 	listAuraBtns[kbBtnBrkFld->text]	= shared_from_this();
-	listAuraBtns[kbBtnGaruda->text]	= shared_from_this();
 	listAuraBtns[kbBtnPurva->text]	= shared_from_this();
+	listAuraBtns[kbBtnGaruda->text]	= shared_from_this();
 
 	m_Apts.push_back(kbBtnSSM->text);
 	m_Apts.push_back(kbBtnBrkFld->text);
-	m_Apts.push_back(kbBtnGaruda->text);
 	m_Apts.push_back(kbBtnPurva->text);
+	m_Apts.push_back(kbBtnGaruda->text);
 
 	TgBot::ReplyKeyboardMarkup::Ptr pAptMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
 	std::vector<TgBot::KeyboardButton::Ptr> row0, row1, row2;
 	if(!std::get<0>(m_Addr).empty()) row0.push_back(kbBtnPrev);
 	row1.push_back(kbBtnSSM); row1.push_back(kbBtnBrkFld);
-	row2.push_back(kbBtnGaruda); row2.push_back(kbBtnPurva);
+	row2.push_back(kbBtnPurva); row2.push_back(kbBtnGaruda);
 
 	if(!std::get<0>(m_Addr).empty()) pAptMenu->keyboard.push_back(row0);
 	pAptMenu->keyboard.push_back(row1);
 	pAptMenu->keyboard.push_back(row2);
 
-	pAptMenu->keyboard.push_back(getLastRow(listAuraBtns,getMainMenu()));
+	pAptMenu->keyboard.push_back(getMainMenu());
 	fprintf(fp, "AURA %ld: Finishing renderAptMenu\n", time(0)); fflush(fp);
 	return pAptMenu;
 }
 
 TgBot::GenericReply::Ptr ShippingAddress::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA %ld: \"ShippingAddress::prepareMenu\" onClick\n", time(0)); fflush(fp);
-	m_NotifyStr.clear();
 	TgBot::GenericReply::Ptr pMenu;
 	switch(m_RenderMenu) {
 		case MenuRenderer::APARTMENT:
@@ -349,6 +354,11 @@ TgBot::GenericReply::Ptr ShippingAddress::prepareMenu(std::map<std::string, std:
 		break;
 		case MenuRenderer::DONE:
 			pMenu = listAuraBtns["Main Menu"]->prepareMenu(listAuraBtns, fp);
+		break;
+		case MenuRenderer::ADDRESS:
+			listAuraBtns[std::to_string(m_ChatId)] = shared_from_this();
+			m_Context[m_ChatId] = UserContext::ADDRESS;
+			pMenu = std::make_shared<TgBot::ReplyKeyboardRemove>();
 		break;
 	}
 	return pMenu;
@@ -397,9 +407,15 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 
 	//	Get the Block Letter
 	else if(std::find(m_Apts.begin(), m_Apts.end(), pMsg->text) != m_Apts.end()) {
-		getDBHandle()->addAptNameToShipping(pMsg->chat->id, pMsg->text);
-		m_RenderMenu	= MenuRenderer::BLOCK;
-		m_StrMsg		= "Shipping Address: Choose your Block Letter\nEg: For C13, Choose C";
+		if(pMsg->text == STR_BTN_GARUDA) {
+			m_RenderMenu	= MenuRenderer::ADDRESS;
+			m_ChatId		= pMsg->chat->id;
+			m_StrMsg		= "Type your address in a single line & send.";
+		} else {
+			getDBHandle()->addAptNameToShipping(pMsg->chat->id, pMsg->text);
+			m_RenderMenu	= MenuRenderer::BLOCK;
+			m_StrMsg		= "Shipping Address: Choose your Block Letter\nEg: For C13, Choose C";
+		}
 	}
 
 	//	Get the Block number
@@ -487,6 +503,18 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 		m_StrMsg	= ss.str();
 		m_NotifyStr = prepareNotifyStr(pMsg->chat->id);
 		getDBHandle()->updateOrderNoForUser(pMsg->chat->id);
+	}
+
+	else {
+		switch(m_Context[pMsg->chat->id]) {
+			case UserContext::ADDRESS:
+				fprintf(fp, "AURA %ld: Address is %s\n", time(0), pMsg->text.c_str());
+				getDBHandle()->addAddressToShipping(pMsg->chat->id, pMsg->text);
+				m_RenderMenu	= MenuRenderer::CONFIRM;
+				m_StrMsg		= getPaymentString(pMsg->chat->id, pMsg->from->firstName);
+				m_Context.erase(pMsg->chat->id);
+			break;
+		}
 	}
 	fprintf(fp, "AURA %ld: Finishing ShippingAddress::onClick\n", time(0)); fflush(fp);
 }
