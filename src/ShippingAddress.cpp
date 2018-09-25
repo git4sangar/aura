@@ -57,7 +57,7 @@ std::vector<TgBot::KeyboardButton::Ptr> ShippingAddress::getLastRow(
 	return lastRow;
 }
 
-TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::shareContactMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+TgBot::GenericReply::Ptr ShippingAddress::shareContactMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	TgBot::KeyboardButton::Ptr btnContact	= std::make_shared<TgBot::KeyboardButton>();
 	btnContact->requestContact	= true;
 	btnContact->text	= "Your Mobile no pls...";
@@ -70,7 +70,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::shareContactMenu(std::map<std::
 	return pContactsMenu;
 }
 
-TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderCheckoutMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+TgBot::GenericReply::Ptr ShippingAddress::renderCheckoutMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA %ld: \"ShippingAddress::renderConfirmMenu\" rendering\n", time(0)); fflush(fp);
 	if(0 == m_FlatsRendered) clearAuraButtons(listAuraBtns, MenuRenderer::FLAT_NO, fp);
 	TgBot::KeyboardButton::Ptr kbBtnPaytm, kbBtnTez, kbBtnOnDelivery;
@@ -102,7 +102,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderCheckoutMenu(std::map<std
 	return pPayMenu;
 }
 
-TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFlatMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, std::string aptName, FILE *fp) {
+TgBot::GenericReply::Ptr ShippingAddress::renderFlatMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, std::string aptName, FILE *fp) {
 	fprintf(fp, "AURA %ld: \"ShippingAddress::renderFlatMenu\" rendering\n", time(0)); fflush(fp);
 	if(0 == m_FloorsRendered) clearAuraButtons(listAuraBtns, MenuRenderer::FLOOR, fp);
 	TgBot::KeyboardButton::Ptr kbBtnFlat;
@@ -146,7 +146,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFlatMenu(std::map<std::st
 	return pFlatsMenu;
 }
 
-TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFloorMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+TgBot::GenericReply::Ptr ShippingAddress::renderFloorMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA %ld: \"ShippingAddress::renderFloorMenu\" rendering\n", time(0)); fflush(fp);
 	if(0 == m_BlockNosRendered) clearAuraButtons(listAuraBtns, MenuRenderer::BLOCK_NO, fp);
 	TgBot::KeyboardButton::Ptr kbBtnFloor;
@@ -183,7 +183,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderFloorMenu(std::map<std::s
 	return pFloorsMenu;
 }
 
-TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderBlockNoMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+TgBot::GenericReply::Ptr ShippingAddress::renderBlockNoMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA %ld: \"ShippingAddress::renderBlockNoMenu\" rendering\n", time(0)); fflush(fp);
 	if(0 == m_BlocksRendered) clearAuraButtons(listAuraBtns, MenuRenderer::BLOCK, fp);
 	TgBot::KeyboardButton::Ptr kbBtnBlockNo;
@@ -230,7 +230,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderBlockNoMenu(std::map<std:
 	return pBlockNosMenu;
 }
 
-TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderBlockMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+TgBot::GenericReply::Ptr ShippingAddress::renderBlockMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA %ld: \"ShippingAddress::renderBlockMenu\" rendering\n", time(0)); fflush(fp);
 	TgBot::KeyboardButton::Ptr kbBtnBlock;
 	std::vector<TgBot::KeyboardButton::Ptr> kbBtnBlocks;
@@ -267,7 +267,7 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderBlockMenu(std::map<std::s
 	return pBlockMenu;
 }
 
-TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderAptMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+TgBot::GenericReply::Ptr ShippingAddress::renderAptMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA %ld: \"ShippingAddress::renderAptMenu\" rendering\n", time(0)); fflush(fp);
 	TgBot::KeyboardButton::Ptr kbBtnSSM = nullptr,
 								kbBtnBrkFld = nullptr,
@@ -318,10 +318,10 @@ TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::renderAptMenu(std::map<std::str
 	return pAptMenu;
 }
 
-TgBot::ReplyKeyboardMarkup::Ptr ShippingAddress::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+TgBot::GenericReply::Ptr ShippingAddress::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA %ld: \"ShippingAddress::prepareMenu\" onClick\n", time(0)); fflush(fp);
 	m_NotifyStr.clear();
-	TgBot::ReplyKeyboardMarkup::Ptr pMenu;
+	TgBot::GenericReply::Ptr pMenu;
 	switch(m_RenderMenu) {
 		case MenuRenderer::APARTMENT:
 			pMenu = renderAptMenu(listAuraBtns, fp);

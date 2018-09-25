@@ -20,7 +20,7 @@ public:
 	ReminderButton(DBInterface::Ptr hDB) : AuraButton(hDB), m_IsAuthorized{false} {}
 	virtual ~ReminderButton() {}
 
-	TgBot::ReplyKeyboardMarkup::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listKBBtns, FILE *fp);
+	TgBot::GenericReply::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listKBBtns, FILE *fp);
 	void onClick(TgBot::Message::Ptr pMessage, FILE *fp);
 
 	std::string getMsg() { return m_StrReminder;}

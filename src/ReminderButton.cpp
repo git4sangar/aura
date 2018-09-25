@@ -5,7 +5,7 @@
 #include <DBInterface.h>
 #include <sstream>
 
-TgBot::ReplyKeyboardMarkup::Ptr ReminderButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listKBBtns, FILE *fp) {
+TgBot::GenericReply::Ptr ReminderButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listKBBtns, FILE *fp) {
 	//	Dont allow access if unauthorized
 	if(!m_IsAuthorized) m_StrReminder = "Unauthorized access";
 	else m_StrReminder = "Notification sent to user.";

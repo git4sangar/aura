@@ -17,7 +17,7 @@
 
 std::string SoapButton::STR_CHOOSE_A_SOAP = "Choose a soap from below list";
 
-TgBot::ReplyKeyboardMarkup::Ptr SoapButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+TgBot::GenericReply::Ptr SoapButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA %ld:SoapButton prepareMenu\n", time(0)); fflush(fp);
 	std::vector<TgBot::KeyboardButton::Ptr>	kbBtnFlvrs, kbBuyBtns;
 	TgBot::KeyboardButton::Ptr 				kbBtnFlvr, kbBtnBuy;

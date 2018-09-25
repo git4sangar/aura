@@ -11,8 +11,9 @@
 std::string ViewCart::STR_BTN_EMPTY_CART	= "Empty Cart";
 std::string ViewCart::STR_BTN_PURCHASE		= "Checkout";
 
-TgBot::ReplyKeyboardMarkup::Ptr ViewCart::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+TgBot::GenericReply::Ptr ViewCart::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA %ld: \"ViewCart::prepareMenu\" onClick\n", time(0)); fflush(fp);
+	TgBot::GenericReply::Ptr pRet = nullptr;
 	TgBot::ReplyKeyboardMarkup::Ptr pViewCartMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
 	if(!m_IsCartEmpty) {
 		TgBot::KeyboardButton::Ptr kbBtnEmpty, kbBtnChkOut;
@@ -32,12 +33,13 @@ TgBot::ReplyKeyboardMarkup::Ptr ViewCart::prepareMenu(std::map<std::string, std:
 		pViewCartMenu->keyboard.push_back(row0);
 		pViewCartMenu->keyboard.push_back(row1);
 		pViewCartMenu->keyboard.push_back(getMainMenu());
+		pRet = pViewCartMenu;
 	} else {
-		pViewCartMenu = listAuraBtns[StartButton::STR_BTN_VIEW_SOAPS]->prepareMenu(listAuraBtns, fp);
+		pRet = listAuraBtns[StartButton::STR_BTN_VIEW_SOAPS]->prepareMenu(listAuraBtns, fp);
 	}
 
 	fprintf(fp, "AURA %ld: Finishing ViewCart::prepareMenu::onClick\n", time(0)); fflush(fp);
-	return pViewCartMenu;
+	return pRet;
 }
 
 void ViewCart::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {

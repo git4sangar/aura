@@ -28,7 +28,7 @@ std::string OrdersButton::getOrderString(DBInterface::Ptr hDB, POrder::Ptr pOrde
 	return ss.str();
 }
 
-TgBot::ReplyKeyboardMarkup::Ptr OrdersButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+TgBot::GenericReply::Ptr OrdersButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
 	fprintf(fp, "AURA %ld: \"OrdersButton::prepareMenu\" rendering\n", time(0)); fflush(fp);
 	TgBot::KeyboardButton::Ptr kbBtnVwOdr, kbBtnCnclOdr;
 	std::vector<TgBot::KeyboardButton::Ptr> row;

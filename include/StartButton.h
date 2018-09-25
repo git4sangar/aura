@@ -12,7 +12,7 @@ public:
 	virtual ~StartButton() {}
 
 	std::string getMsg() { return STR_MSG_DEFF_RELEASE;}
-	TgBot::ReplyKeyboardMarkup::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listKBBtns, FILE *fp);
+	TgBot::GenericReply::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listKBBtns, FILE *fp);
 	void onClick(TgBot::Message::Ptr pMessage, FILE *fp);
 	std::shared_ptr<AuraButton> getSharedPtr() {return shared_from_this();}
 
