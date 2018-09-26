@@ -121,7 +121,7 @@ void AuraMainLoop(FILE *fp) {
          pAuraBtn->onClick(pMsg, fp);
 
          // Notification to moderators
-         std::string strNotify = pAuraBtn->getNotifyStr(pMsg->chat->id);
+         std::string strNotify = pAuraBtn->getStr4Admins(pMsg->chat->id);
          if(!strNotify.empty()) {
             std::vector<unsigned int> chatIds   = pAuraBtn->getNotifyUsers();
             for(auto &chatId : chatIds) {

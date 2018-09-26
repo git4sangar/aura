@@ -61,6 +61,11 @@ public:
 	static std::string DB_TABLE_PORDER_COLUMN_PAY_GW;
 	static std::string DB_TABLE_PORDER_COLUMN_OTP;
 	static std::string DB_TABLE_PORDER_COLUMN_STATUS;
+
+	static std::string PORDER_PAYGW_VAL_PAYTM;
+	static std::string PORDER_PAYGW_VAL_TEZ;
+	static std::string PORDER_PAYGW_VAL_CASH;
+	static std::string PORDER_PAYGW_VAL_NOTA;
 };
 
 class Cart {

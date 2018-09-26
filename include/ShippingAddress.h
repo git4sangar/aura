@@ -55,7 +55,7 @@ public:
 	virtual ~ShippingAddress() {}
 
 	void init(TgBot::Message::Ptr pMsg, FILE *fp);
-	std::string getNotifyStr(unsigned int userParam);
+	std::string getStr4Admins(unsigned int userParam);
 	std::string prepareNotifyStr(unsigned int chatId);
 	std::string getMsg() { return m_StrMsg;}
 	std::string getParseMode() {return "HTML";}

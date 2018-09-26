@@ -487,17 +487,17 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 			ss << "Please go to paytm app and transfer above mentioned amount to 98406 25615."
 				<< "\n\nYou will receive an OTP from AURA bot with delivery details after the payment is received."
 				<<"\nProvide the OTP during delivery.";
-			getDBHandle()->updatePOrderPayGW(pMsg->chat->id, "Paytm");
+			getDBHandle()->updatePOrderPayGW(pMsg->chat->id, POrder::PORDER_PAYGW_VAL_PAYTM);
 			m_Cache = "Paytm";
 		} else if(STR_BTN_TEZ == pMsg->text) {
 			ss << "Please go to Google Pay/Tez app and transfer above mentioned amount to 98406 25615."
 				<< "\n\nYou will receive an OTP from AURA bot with delivery details after the payment is received."
 				<<"\nProvide the OTP during delivery.";
-			getDBHandle()->updatePOrderPayGW(pMsg->chat->id, "Tez");
+			getDBHandle()->updatePOrderPayGW(pMsg->chat->id, POrder::PORDER_PAYGW_VAL_TEZ);
 			m_Cache = "Tez";
 		} else if(STR_BTN_ON_DELIVERY == pMsg->text) {
 			ss << "You will receive a call in 24 hrs reg delivery.";
-			getDBHandle()->updatePOrderPayGW(pMsg->chat->id, "Cash");
+			getDBHandle()->updatePOrderPayGW(pMsg->chat->id, POrder::PORDER_PAYGW_VAL_CASH);
 			m_Cache = "Cash";
 		}
 		m_StrMsg	= ss.str();
@@ -519,7 +519,7 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 	fprintf(fp, "AURA %ld: Finishing ShippingAddress::onClick\n", time(0)); fflush(fp);
 }
 
-std::string ShippingAddress::getNotifyStr(unsigned int chatId) {
+std::string ShippingAddress::getStr4Admins(unsigned int chatId) {
 	return m_NotifyStr;
 }
 

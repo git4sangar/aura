@@ -48,6 +48,11 @@
 	std::string POrder::DB_TABLE_PORDER_COLUMN_OTP = "otp";
 	std::string POrder::DB_TABLE_PORDER_COLUMN_STATUS	= "status";
 
+	std::string POrder::PORDER_PAYGW_VAL_PAYTM	= "Paytm";
+	std::string POrder::PORDER_PAYGW_VAL_TEZ	= "Tez";
+	std::string POrder::PORDER_PAYGW_VAL_CASH	= "Cash";
+	std::string POrder::PORDER_PAYGW_VAL_NOTA	= "Unknown";
+
 	std::string DBInterface::DB_TABLE_NOTIFY_COLUMN_CHAT_ID = "chat_id";
 
 DBInterface::DBInterface(std::string dbFileName, FILE *fp) {
@@ -152,7 +157,8 @@ std::vector<POrder::Ptr> DBInterface::getPOrdersForUser(unsigned int chatId) {
 	std::stringstream ss;
 
 	ss << "SELECT * from POrder WHERE " << POrder::DB_TABLE_PORDER_COLUMN_CHAT_ID << " = " << chatId <<
-		" ORDER BY " << POrder::DB_TABLE_PORDER_COLUMN_DATE_TIME << " DESC;";
+		" AND " << POrder::DB_TABLE_PORDER_COLUMN_PAY_GW << " <> \"" << POrder::PORDER_PAYGW_VAL_NOTA <<
+		"\" ORDER BY " << POrder::DB_TABLE_PORDER_COLUMN_ORDER_NO << " DESC;";
 
 	SQLite::Statement query(*m_hDB, ss.str());
 	return getPOrdersForQuery(query);
@@ -190,7 +196,7 @@ void DBInterface::createPOrder(unsigned int chatId) {
 		POrder::DB_TABLE_PORDER_COLUMN_OTP << ", " <<
 		POrder::DB_TABLE_PORDER_COLUMN_STATUS << ") VALUES (" <<
 		order_no << ", " << chatId << ", \"" << strDate << "\", \"" <<
-		strTime << "\", \"Unknown\"," << tnow << ", " << 0 << ", "
+		strTime << "\", \"" << POrder::PORDER_PAYGW_VAL_NOTA << "\", " << tnow << ", " << 0 << ", "
 		<< getIntStatus(CartStatus::PENDING) << ");";
 
 	SQLite::Transaction transaction(*m_hDB);
@@ -558,7 +564,7 @@ std::vector<POrder::Ptr> DBInterface::getPendingOrders() {
 	std::stringstream ss;
 	ss << "SELECT * from POrder WHERE "
 		<< POrder::DB_TABLE_PORDER_COLUMN_STATUS << " = " << getIntStatus(CartStatus::PENDING)
-		<< " ORDER BY " << POrder::DB_TABLE_PORDER_COLUMN_DATE_TIME << " DESC;"";";
+		<< " ORDER BY " << POrder::DB_TABLE_PORDER_COLUMN_DATE_TIME << " DESC;";
 
 	SQLite::Statement query(*m_hDB, ss.str());
 	return getPOrdersForQuery(query);

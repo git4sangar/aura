@@ -31,7 +31,7 @@ public:
 	}
 
 	virtual void init(TgBot::Message::Ptr pMsg, FILE *fp) {}
-	virtual std::string getNotifyStr(unsigned int userParam) {return std::string();}
+	virtual std::string getStr4Admins(unsigned int userParam) {return std::string();}
 	virtual std::string getNotifyStrForCustomer(unsigned int chatId) {return std::string();}
 
 	virtual std::string getParseMode() {return std::string();}
