@@ -132,7 +132,7 @@ void AuraMainLoop(FILE *fp) {
          // For end-user notifications
          std::vector<unsigned int> chatIds = pAuraBtn->getChatIdsForNotification(pMsg, fp);
          for(auto& chatId : chatIds) {
-            std::string strUserNotif = pAuraBtn->getNotifyStrForCustomer(chatId);
+            std::string strUserNotif = pAuraBtn->getStrForUser(pMsg);
             if(!strUserNotif.empty()) pBot->getApi().sendMessage(chatId, strUserNotif, false, 0, pMenu, pAuraBtn->getParseMode());
          }
 

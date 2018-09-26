@@ -563,11 +563,11 @@ std::string ShippingAddress::getPaymentString(unsigned int chatId, std::string f
 	ss << std::setw(20) << "Total = ₹ " << iTotal << "\n";
 	ss << "<b>Shipping Address</b>\n" << std::get<0>(delAddr);
 	ss << "\n\nHi " << fname <<
-				", Please choose a payment method to <b>CONFIRM your order</b>" <<
-				" and mention Order number: " <<
+				", Choose a payment bank to <b>CONFIRM</b> Order" <<
+				" & mention Order no: " <<
 				getDBHandle()->getOrderNoForUser(chatId) <<
 				" while paying.\n\nPls use Paytm or GPay/Tez app to transfer ₹ " << iTotal <<
-				" to 98406 25165. A confirmation \"telegram msg\" reaches you in 24hrs after your payment." <<
-				"\n\n<b>*</b> AURA bot is <b>not</b> integrated with payment banks like Paytm, GPay/Tez, etc...\n";
+				" to 98406 25165. I send you a \"telegram msg\" after your payment." <<
+				"\n\n<b>*</b> I'm <b>not</b> integrated with payment banks like Paytm, GPay/Tez, etc...\n";
 	return ss.str();
 }

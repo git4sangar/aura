@@ -32,7 +32,7 @@ public:
 
 	virtual void init(TgBot::Message::Ptr pMsg, FILE *fp) {}
 	virtual std::string getStr4Admins(unsigned int userParam) {return std::string();}
-	virtual std::string getNotifyStrForCustomer(unsigned int chatId) {return std::string();}
+	virtual std::string getStrForUser(TgBot::Message::Ptr pMsg) {return std::string();}
 
 	virtual std::string getParseMode() {return std::string();}
 	virtual TgBot::GenericReply::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) = 0;

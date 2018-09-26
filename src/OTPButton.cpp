@@ -28,7 +28,7 @@ std::vector<unsigned int> OTPButton::getChatIdsForNotification(TgBot::Message::P
 	return chatIds;
 }
 
-std::string OTPButton::getNotifyStrForCustomer(unsigned int chatId) {
+std::string OTPButton::getStrForUser(TgBot::Message::Ptr pMsg) {
 	std::stringstream ss;
 
 	//	Dont allow access if unauthorized

@@ -27,7 +27,7 @@ std::vector<unsigned int> ReminderButton::getChatIdsForNotification(TgBot::Messa
 	return chatIds;
 }
 
-std::string ReminderButton::getNotifyStrForCustomer(unsigned int chatId) {
+std::string ReminderButton::getStrForUser(TgBot::Message::Ptr pMsg) {
 	std::stringstream ss;
 	std::vector<POrder::Ptr>::iterator itr;
 
@@ -36,8 +36,8 @@ std::string ReminderButton::getNotifyStrForCustomer(unsigned int chatId) {
 
 	int iTotal = 0;
 	for(itr = m_Orders.begin(); itr != m_Orders.end(); iTotal = 0) {
-		if( (*itr)->m_ChatId == chatId ) {
-			User::Ptr user = getDBHandle()->getUserForChatId(chatId);
+		if( (*itr)->m_ChatId == pMsg->chat->id ) {
+			User::Ptr user = getDBHandle()->getUserForChatId(pMsg->chat->id);
 			ss << "\n\nHi " << user->m_FName << ", a polite reminder to make payment against your order number: "
 				<< (*itr)->m_OrderNo << " via " << (*itr)->m_PayGW;
 			std::vector<Cart::Ptr> items = getDBHandle()->getCartForOrderNo((*itr)->m_OrderNo);

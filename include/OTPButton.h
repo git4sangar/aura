@@ -26,7 +26,7 @@ public:
 	void init(TgBot::Message::Ptr pMessage, FILE *fp);
 	std::string getParseMode() {return "HTML";}
 	std::vector<unsigned int> getChatIdsForNotification(TgBot::Message::Ptr pMessage, FILE *fp);
-	std::string getNotifyStrForCustomer(unsigned int chatId);
+	std::string getStrForUser(TgBot::Message::Ptr pMsg);
 };
 
 
