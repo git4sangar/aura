@@ -34,7 +34,7 @@ public:
 	virtual ~BuyButton() {}
 
 	std::string getMsg() { return m_MsgToUser;}
-	TgBot::GenericReply::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
+	TgBot::GenericReply::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, TgBot::Message::Ptr pMsg, FILE *fp);
 	void onClick(TgBot::Message::Ptr pMessage, FILE *fp);
 
 	void setEvent(std::string clickMsg, int soapId);

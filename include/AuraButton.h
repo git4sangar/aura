@@ -35,7 +35,8 @@ public:
 	virtual std::string getStrForUser(TgBot::Message::Ptr pMsg) {return std::string();}
 
 	virtual std::string getParseMode() {return std::string();}
-	virtual TgBot::GenericReply::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) = 0;
+	virtual TgBot::GenericReply::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns,
+				TgBot::Message::Ptr pMsg, FILE *fp) = 0;
 	virtual TgBot::InputFile::Ptr getMedia(TgBot::Message::Ptr pMsg, FILE *fp) {return nullptr;}
 	virtual std::vector<unsigned int> getChatIdsForNotification(TgBot::Message::Ptr pMessage, FILE *fp) {return std::vector<unsigned int>();}
 	std::vector<unsigned int> getNotifyUsers() {return m_hDB->getNotifyUsers();}

@@ -16,7 +16,7 @@ std::string BuyButton::STR_BTN_OTHER_FLAVOURS = "Other Soaps";
 int BuyButton::m_Rows = 3;
 int BuyButton::m_Cols = 2;
 
-TgBot::GenericReply::Ptr BuyButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+TgBot::GenericReply::Ptr BuyButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, TgBot::Message::Ptr pMsg, FILE *fp) {
 	fprintf(fp, "AURA %ld: \"BuyButton::prepareMenu\" onClick\n", time(0)); fflush(fp);
 	std::vector<TgBot::KeyboardButton::Ptr> qntyBtns;
 	TgBot::KeyboardButton::Ptr 				qntyBtn;

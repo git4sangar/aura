@@ -14,7 +14,7 @@ std::string StartButton::STR_BTN_VIEW_ORDERS	= "Your Orders";
 //std::string StartButton::STR_MSG_DEFF_RELEASE	= "I am the AuraSoap Bot & am getting ready now..!\nBear with me for \"just a few more days\",\nI'll intimate you...";
 std::string StartButton::STR_MSG_DEFF_RELEASE	= "I am the AURA Soap Bot. I help you View, Buy, Order the finest Home-Made-Organic-Soaps.";
 
-TgBot::GenericReply::Ptr StartButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+TgBot::GenericReply::Ptr StartButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, TgBot::Message::Ptr pMsg, FILE *fp) {
 	fprintf(fp, "AURA %ld: StartButton::prepareMenu onClick\n", time(0)); fflush(fp);
 	TgBot::KeyboardButton::Ptr btnView, btnCart, btnOrder;
 	btnView		= std::make_shared<TgBot::KeyboardButton>();

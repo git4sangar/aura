@@ -22,7 +22,7 @@ public:
 	virtual ~SoapButton() {}
 
 	std::string getMsg() { return STR_CHOOSE_A_SOAP;}
-	TgBot::GenericReply::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
+	TgBot::GenericReply::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, TgBot::Message::Ptr pMsg, FILE *fp);
 
 	TgBot::InputFile::Ptr getMedia(TgBot::Message::Ptr pMsg, FILE *fp);
 	void onClick(TgBot::Message::Ptr pMessage, FILE *fp);

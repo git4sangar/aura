@@ -19,7 +19,7 @@ public:
 	OTPButton(DBInterface::Ptr hDB) : AuraButton(hDB), m_ChatId{0}, m_Amount{0}, m_OTP{0}, m_OrderNo{0}, m_IsAuthorized{false} {}
 	virtual ~OTPButton() {}
 
-	TgBot::GenericReply::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listKBBtns, FILE *fp);
+	TgBot::GenericReply::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listKBBtns, TgBot::Message::Ptr pMsg, FILE *fp);
 	void onClick(TgBot::Message::Ptr pMessage, FILE *fp);
 
 	std::string getMsg() { return m_StrOTP;}

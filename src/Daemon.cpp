@@ -141,7 +141,7 @@ void AuraMainLoop(FILE *fp) {
          if(pFile)   pBot->getApi().sendPhoto(pMsg->chat->id, pFile);
 
          // Send the Keyboard
-         pMenu = pAuraBtn->prepareMenu(auraButtons, fp);
+         pMenu = pAuraBtn->prepareMenu(auraButtons, pMsg, fp);
          pBot->getApi().sendMessage(pMsg->chat->id, pAuraBtn->getMsg(), false, 0, pMenu, pAuraBtn->getParseMode());
       } else {
          fprintf(fp, "AURA %ld: \"%s\" button missing\n", time(0), pMsg->text.c_str()); fflush(fp);
@@ -149,7 +149,7 @@ void AuraMainLoop(FILE *fp) {
          ss << "Hi " << pMsg->from->firstName
               << ", could not recognize what you say, pls use the buttons below.\nRegret the inconvenience caused.";
          pBot->getApi().sendMessage(pMsg->chat->id, ss.str(),
-                        false, 0, auraButtons["Main Menu"]->prepareMenu(auraButtons, fp));
+                        false, 0, auraButtons["Main Menu"]->prepareMenu(auraButtons, pMsg, fp));
       }
    });
 

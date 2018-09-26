@@ -10,7 +10,7 @@ void OTPButton::init(TgBot::Message::Ptr pMessage, FILE *fp) {
 	m_IsAuthorized = false;
 }
 
-TgBot::GenericReply::Ptr OTPButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+TgBot::GenericReply::Ptr OTPButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, TgBot::Message::Ptr pMsg, FILE *fp) {
 	if(!m_IsAuthorized) m_StrOTP = "Unauthorized access";
 	else m_StrOTP = "Notification sent to user.";
 

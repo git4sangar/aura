@@ -17,37 +17,27 @@
 
 std::string SoapButton::STR_CHOOSE_A_SOAP = "Choose a soap from below list";
 
-TgBot::GenericReply::Ptr SoapButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp) {
+TgBot::GenericReply::Ptr SoapButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, TgBot::Message::Ptr pMsg, FILE *fp) {
 	fprintf(fp, "AURA %ld:SoapButton prepareMenu\n", time(0)); fflush(fp);
-	std::vector<TgBot::KeyboardButton::Ptr>	kbBtnFlvrs, kbBuyBtns;
-	TgBot::KeyboardButton::Ptr 				kbBtnFlvr, kbBtnBuy;
-
-	std::shared_ptr<BuyButton> auraBtnBuy		= std::make_shared<BuyButton>(getDBHandle());
-
-	std::vector<Soap::Ptr> soapFlvrs = getDBHandle()->getFlavours();
-	for(auto &flavour : soapFlvrs) {
-		kbBtnFlvr 				= std::make_shared<TgBot::KeyboardButton>();
-		kbBtnFlvr->text			= "View " + flavour->m_Name + " soap";
-		kbBtnFlvrs.push_back(kbBtnFlvr);
-		m_Soaps[kbBtnFlvr->text]		= flavour;
-		listAuraBtns[kbBtnFlvr->text]	= shared_from_this();
-
-		kbBtnBuy		= std::make_shared<TgBot::KeyboardButton>();
-		kbBtnBuy->text	= "Buy " + flavour->m_Name + " soap";
-		kbBuyBtns.push_back(kbBtnBuy);
-		auraBtnBuy->setEvent(kbBtnBuy->text, flavour->m_SoapId);
-		listAuraBtns[kbBtnBuy->text]	= auraBtnBuy;
-	}
+	std::vector<TgBot::KeyboardButton::Ptr>	kbBtnFlvrs;
+	TgBot::KeyboardButton::Ptr 				kbBtnFlvr;
 
 	TgBot::ReplyKeyboardMarkup::Ptr pFlavoursMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
 	std::vector<TgBot::KeyboardButton::Ptr> row;
+
 	int iLoop = 0;
-	for(auto &kbBtn : kbBtnFlvrs) {
-		row.push_back(kbBtn);
-		row.push_back(kbBuyBtns[iLoop++]);
-		pFlavoursMenu->keyboard.push_back(row);
-		row.clear();
+	std::vector<Soap::Ptr> soapFlvrs = getDBHandle()->getFlavours();
+	for(auto &flavour : soapFlvrs) {
+		kbBtnFlvr 					= std::make_shared<TgBot::KeyboardButton>();
+		kbBtnFlvr->text				= std::string("View ") + flavour->m_Name;
+		m_Soaps[kbBtnFlvr->text]	= flavour;
+		listAuraBtns[kbBtnFlvr->text]= shared_from_this();
+		row.push_back(kbBtnFlvr);
+		iLoop++;
+		if(0 == iLoop % 3) {pFlavoursMenu->keyboard.push_back(row);row.clear();}
 	}
+	if(0 < row.size()) pFlavoursMenu->keyboard.push_back(row);
+
 	pFlavoursMenu->keyboard.push_back(getMainMenu());
 	fprintf(fp, "AURA %ld: Finishing SoapButton::prepareMenu::onClick\n", time(0)); fflush(fp);
 	return pFlavoursMenu;

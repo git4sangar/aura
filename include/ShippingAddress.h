@@ -33,13 +33,13 @@ class ShippingAddress :
 	std::tuple<std::string,unsigned int> m_Addr;
 	MenuRenderer m_RenderMenu;
 
-	TgBot::GenericReply::Ptr renderAptMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
-	TgBot::GenericReply::Ptr renderBlockMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
-	TgBot::GenericReply::Ptr renderBlockNoMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
-	TgBot::GenericReply::Ptr renderFloorMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
-	TgBot::GenericReply::Ptr renderFlatMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, std::string aptName, FILE *fp);
-	TgBot::GenericReply::Ptr shareContactMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
-	TgBot::GenericReply::Ptr renderCheckoutMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
+	TgBot::GenericReply::Ptr renderAptMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, TgBot::Message::Ptr pMsg, FILE *fp);
+	TgBot::GenericReply::Ptr renderBlockMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, TgBot::Message::Ptr pMsg, FILE *fp);
+	TgBot::GenericReply::Ptr renderBlockNoMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, TgBot::Message::Ptr pMsg, FILE *fp);
+	TgBot::GenericReply::Ptr renderFloorMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, TgBot::Message::Ptr pMsg, FILE *fp);
+	TgBot::GenericReply::Ptr renderFlatMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, std::string aptName, TgBot::Message::Ptr pMsg, FILE *fp);
+	TgBot::GenericReply::Ptr shareContactMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, TgBot::Message::Ptr pMsg, FILE *fp);
+	TgBot::GenericReply::Ptr renderCheckoutMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, TgBot::Message::Ptr pMsg, FILE *fp);
 	std::string floorNoToString(int iFloorNo);
 	std::vector<TgBot::KeyboardButton::Ptr> getLastRow(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns,
 														std::vector<TgBot::KeyboardButton::Ptr>&& lastRow);
@@ -59,7 +59,7 @@ public:
 	std::string prepareNotifyStr(unsigned int chatId);
 	std::string getMsg() { return m_StrMsg;}
 	std::string getParseMode() {return "HTML";}
-	TgBot::GenericReply::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, FILE *fp);
+	TgBot::GenericReply::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, TgBot::Message::Ptr pMsg, FILE *fp);
 	void onClick(TgBot::Message::Ptr pMessage, FILE *fp);
 	std::shared_ptr<AuraButton> getSharedPtr() {return shared_from_this();}
 

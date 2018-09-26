@@ -20,7 +20,7 @@ public:
 
 	std::string getMsg() { return m_StrOrder;}
 	std::string getParseMode() {return "HTML";}
-	TgBot::GenericReply::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listKBBtns, FILE *fp);
+	TgBot::GenericReply::Ptr prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listKBBtns, TgBot::Message::Ptr pMsg, FILE *fp);
 	void onClick(TgBot::Message::Ptr pMessage, FILE *fp);
 	std::shared_ptr<AuraButton> getSharedPtr() {return shared_from_this();}
 };
