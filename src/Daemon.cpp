@@ -78,7 +78,8 @@ void AuraMainLoop(FILE *fp) {
    auraButtons["/remind"]  = std::make_shared<ReminderButton>(hDB);
 
    pBot->getEvents().onAnyMessage( [pBot, &auraButtons, fp, &startSec](TgBot::Message::Ptr pMsg) {
-      fprintf(fp, "AURA %ld: Received \"%s\" onAnyMessage as it arrived\n", time(0),  pMsg->text.c_str()); fflush(fp);
+      fprintf(fp, "AURA %ld: Received \"%s\" for chatId: %d onAnyMessage as it arrived\n", time(0),
+            pMsg->text.c_str(), pMsg->chat->id); fflush(fp);
       static bool isSkipOver = false;
       std::shared_ptr<AuraButton> pAuraBtn = nullptr;
       std::string strCmd = pMsg->text;
@@ -104,7 +105,6 @@ void AuraMainLoop(FILE *fp) {
          pMsg->text  = strCmd = ShippingAddress::STR_BTN_CONTACT;
       }
 
-      fprintf(fp, "AURA %ld: Received \"%s\" onAnyMessage after processing\n", time(0),  strCmd.c_str()); fflush(fp);
       fprintf(fp, "AURA %ld: AuraBtnList Size %ld \n", time(0),  auraButtons.size()); fflush(fp);
 
       std::map<std::string, std::shared_ptr<AuraButton>>::const_iterator itr;
