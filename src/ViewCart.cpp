@@ -35,7 +35,7 @@ TgBot::GenericReply::Ptr ViewCart::prepareMenu(std::map<std::string, std::shared
 		pViewCartMenu->keyboard.push_back(getMainMenu());
 		pRet = pViewCartMenu;
 	} else {
-		pRet = listAuraBtns[StartButton::STR_BTN_VIEW_SOAPS]->prepareMenu(listAuraBtns, pMsg, fp);
+		pRet = listAuraBtns[StartButton::STR_BTN_BUY_SOAPS]->prepareMenu(listAuraBtns, pMsg, fp);
 	}
 
 	fprintf(fp, "AURA %ld: Finishing ViewCart::prepareMenu::onClick\n", time(0)); fflush(fp);

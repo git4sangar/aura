@@ -17,6 +17,7 @@ public:
 	std::shared_ptr<AuraButton> getSharedPtr() {return shared_from_this();}
 
 	static std::string STR_BTN_VIEW_SOAPS;
+	static std::string STR_BTN_BUY_SOAPS;
 	static std::string STR_BTN_VIEW_CART;
 	static std::string STR_BTN_VIEW_ORDERS;
 	static std::string STR_MSG_DEFF_RELEASE;

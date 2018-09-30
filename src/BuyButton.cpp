@@ -1,98 +1,55 @@
-//sgn
+//SGN
 
 #include <iostream>
 #include <memory>
 #include <vector>
 #include <SQLiteCpp/SQLiteCpp.h>
-#include <StartButton.h>
-#include <ShippingAddress.h>
 
-#include <ViewCart.h>
 #include <BuyButton.h>
 #include <DBInterface.h>
+#include <QuantityButton.h>
 
-std::string BuyButton::STR_BTN_OTHER_FLAVOURS = "Other Soaps";
+// Stringify param x.
+// Step (01): Replaces the pattern MAKE_STR(x) with MAKE_STR(value-of-x)
+#define MAKE_STR(x)  _MAKE_STR(x)
+// Step (02): Replaces the pattern _MAKE_STR(value-of-x) with quotes-added-param, ie "value-of-x"
+#define _MAKE_STR(x) #x          // Adds quotes to the param
 
-int BuyButton::m_Rows = 3;
-int BuyButton::m_Cols = 2;
+std::string BuyButton::STR_CHOOSE_A_SOAP = "Choose a soap from below list";
 
 TgBot::GenericReply::Ptr BuyButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, TgBot::Message::Ptr pMsg, FILE *fp) {
-	fprintf(fp, "AURA %ld: \"BuyButton::prepareMenu\" onClick\n", time(0)); fflush(fp);
-	std::vector<TgBot::KeyboardButton::Ptr> qntyBtns;
-	TgBot::KeyboardButton::Ptr 				qntyBtn;
+	fprintf(fp, "AURA %ld:BuyButton prepareMenu\n", time(0)); fflush(fp);
+	std::vector<TgBot::KeyboardButton::Ptr>	kbBuyBtns;
+	TgBot::KeyboardButton::Ptr 				kbBtnBuy;
 
-	int iLoop1 = 0, iLoop2, iRun = 0;
-	for(iLoop1 = 0, iRun = 0; iLoop1 < (m_Rows*m_Cols); iLoop1++) {
-		qntyBtn			= std::make_shared<TgBot::KeyboardButton>();
-		qntyBtn->text	= "Buy " + std::to_string(++iRun) + " " + m_Soap->m_Name + " Soap";
-		m_QntyEvents[qntyBtn->text]	= std::make_tuple(m_Soap->m_SoapId, iRun);
-		listAuraBtns[qntyBtn->text]	= shared_from_this();
-		qntyBtns.push_back(qntyBtn);
+	std::shared_ptr<QuantityButton> auraQntyBuy		= std::make_shared<QuantityButton>(getDBHandle());
+
+	std::vector<Soap::Ptr> soapFlvrs = getDBHandle()->getFlavours();
+	for(auto &flavour : soapFlvrs) {
+		kbBtnBuy		= std::make_shared<TgBot::KeyboardButton>();
+		kbBtnBuy->text	= "Buy " + flavour->m_Name + " soap";
+		kbBuyBtns.push_back(kbBtnBuy);
+		auraQntyBuy->setEvent(kbBtnBuy->text, flavour->m_SoapId);
+		listAuraBtns[kbBtnBuy->text]	= auraQntyBuy;
 	}
 
-	TgBot::ReplyKeyboardMarkup::Ptr pQntyMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
+	TgBot::ReplyKeyboardMarkup::Ptr pFlavoursMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
 	std::vector<TgBot::KeyboardButton::Ptr> row;
-
-	iRun = 0;
-	for(iLoop1 = 0; iLoop1 < m_Rows; iLoop1++) {
-		row.clear();
-		for(iLoop2 = 0; iLoop2 < m_Cols; iLoop2++) {
-			if(iRun < (m_Rows*m_Cols)) row.push_back(qntyBtns[iRun++]);
+	int iLoop = 0;
+	for(auto &kbBtn : kbBuyBtns) {
+		row.push_back(kbBtn);
+		iLoop++;
+		if(0 == (iLoop%2)) {
+			pFlavoursMenu->keyboard.push_back(row);
+			row.clear();
 		}
-		pQntyMenu->keyboard.push_back(row);
 	}
-
-	TgBot::KeyboardButton::Ptr kbBtnVwSoap, kbBtnVwCart, kbBtnChkOut;
-	row.clear();
-	kbBtnVwSoap 		= std::make_shared<TgBot::KeyboardButton>();
-	kbBtnVwSoap->text	= STR_BTN_OTHER_FLAVOURS;
-	listAuraBtns[kbBtnVwSoap->text] = listAuraBtns[StartButton::STR_BTN_VIEW_SOAPS];
-	row.push_back(kbBtnVwSoap);
-	kbBtnVwCart 		= std::make_shared<TgBot::KeyboardButton>();
-	kbBtnVwCart->text	= StartButton::STR_BTN_VIEW_CART;
-	row.push_back(kbBtnVwCart);
-	kbBtnChkOut 		= std::make_shared<TgBot::KeyboardButton>();
-	kbBtnChkOut->text	= ViewCart::STR_BTN_PURCHASE;
-	if(listAuraBtns.end() == listAuraBtns.find(ViewCart::STR_BTN_PURCHASE)) {
-		listAuraBtns[ViewCart::STR_BTN_PURCHASE]	= std::make_shared<ShippingAddress>(getDBHandle());
-	}
-	row.push_back(kbBtnChkOut);
-	pQntyMenu->keyboard.push_back(row);
-	fprintf(fp, "AURA %ld: Finishing prepareMenu\n", time(0)); fflush(fp);
-	return pQntyMenu;
+	if(row.size()) { row.push_back(getMainMenu()[0]); pFlavoursMenu->keyboard.push_back(row); }
+	else { pFlavoursMenu->keyboard.push_back(getMainMenu()); }
+	fprintf(fp, "AURA %ld: Finishing BuyButton::prepareMenu::onClick\n", time(0)); fflush(fp);
+	return pFlavoursMenu;
 }
 
 void BuyButton::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
-	fprintf(fp, "AURA %ld: \"%s\" onClick\n", time(0), pMsg->text.c_str()); fflush(fp);
-	std::map<std::string, int>::iterator itBuy = m_BuyEvents.find(pMsg->text);
-	if(m_BuyEvents.end() != itBuy) {
-		std::vector<Soap::Ptr> flvrs = getDBHandle()->getFlavours();
-		int iSoapId 	= m_BuyEvents[pMsg->text];
-		for(auto &flvr : flvrs) {
-			if(iSoapId == flvr->m_SoapId)
-				m_Soap = flvr;
-		}
-		m_MsgToUser		= "Choose quantity";
-		fprintf(fp, "AURA %ld: flavour selected %s\n", time(0), m_Soap->m_Name.c_str()); fflush(fp);
-	}
-	else if(m_QntyEvents.end() != m_QntyEvents.find(pMsg->text)) {
-		fprintf(fp, "AURA %ld: Getting Quantity %d\n", time(0), std::get<1>(m_QntyEvents[pMsg->text])); fflush(fp);
-		std::vector<Soap::Ptr> flvrs = getDBHandle()->getFlavours();
-		int iSoapId 	= std::get<0>(m_QntyEvents[pMsg->text]);
-		for(auto &flvr : flvrs) {
-			if(iSoapId == flvr->m_SoapId)
-				m_Soap = flvr;
-		}
-
-		getDBHandle()->addToCart(m_Soap->m_SoapId, pMsg->chat->id, std::get<1>(m_QntyEvents[pMsg->text]));
-		m_MsgToUser		= "Your cart is added with " +
-							std::to_string(std::get<1>(m_QntyEvents[pMsg->text])) +
-							std::string(" ") +
-							m_Soap->m_Name +
-							" Soap(s). To change quantity, choose again.";
-	}
-}
-
-void BuyButton::setEvent(std::string clickMsg, int soapId) {
-	m_BuyEvents[clickMsg] = soapId;
+	fprintf(fp, "AURA %ld:\"%s\" onClick\n", time(0), pMsg->text.c_str()); fflush(fp);
 }

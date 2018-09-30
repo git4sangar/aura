@@ -39,13 +39,12 @@ LINK_DIRECTORIES(${AURA_DEPS_LIB})
 add_executable(SoapSeller
 	src/Daemon.cpp
 	src/StartButton.cpp
-	src/SoapButton.cpp
-#	src/CartButton.cpp
+	src/ViewButton.cpp
+	src/BuyButton.cpp
 	src/OrdersButton.cpp
 #	src/FlavoursButton.cpp
 	src/DBInterface.cpp
-	src/BuyButton.cpp
-#	src/QuantityButton.cpp
+	src/QuantityButton.cpp
 	src/ViewCart.cpp
 	src/ShippingAddress.cpp
 	src/OTPButton.cpp
