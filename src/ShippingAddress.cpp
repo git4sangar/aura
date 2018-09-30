@@ -511,6 +511,7 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 				fprintf(fp, "AURA %ld: Address is %s\n", time(0), pMsg->text.c_str());
 				getDBHandle()->addAddressToShipping(pMsg->chat->id, pMsg->text);
 				//	POrder is not created yet. So create it.
+				getDBHandle()->deletePOrder(pMsg->chat->id);
 				getDBHandle()->createPOrder(pMsg->chat->id);
 				m_RenderMenu	= MenuRenderer::CONFIRM;
 				m_StrMsg		= getPaymentString(pMsg->chat->id, pMsg->from->firstName);
