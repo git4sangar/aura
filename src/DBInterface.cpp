@@ -150,6 +150,17 @@ std::vector<POrder::Ptr> DBInterface::getPOrdersForQuery(SQLite::Statement& quer
 	return pOrders;
 }
 
+POrder::Ptr DBInterface::getPOrderForOrderNo(unsigned int order_no) {
+	std::vector<POrder::Ptr> pOrders;
+	POrder::Ptr pOrder = nullptr;
+	std::stringstream ss;
+	ss << "SELECT * from POrder WHERE " << POrder::DB_TABLE_PORDER_COLUMN_ORDER_NO << " = " << order_no << ";";
+	SQLite::Statement query(*m_hDB, ss.str());
+	pOrders = getPOrdersForQuery(query);
+	if(!pOrders.empty()) pOrder = pOrders[0];
+	return pOrder;
+}
+
 std::vector<POrder::Ptr> DBInterface::getPOrdersForUser(unsigned int chatId) {
 	fprintf(m_Fp, "AURA %ld: getPOrdersForUser: chatId: %d\n", time(0), chatId); fflush(m_Fp);
 	POrder::Ptr pOrder;

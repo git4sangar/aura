@@ -115,6 +115,7 @@ public:
 	void createPOrder(unsigned int chatId);
 	void updatePOrderStatus(unsigned int order_no, CartStatus status);
 	std::vector<POrder::Ptr> getPOrdersForUser(unsigned int chatId);
+	POrder::Ptr getPOrderForOrderNo(unsigned int order_no);
 
 	void updateOrderNoForUser(unsigned int chatId);
 	Soap::Ptr getSoapById(unsigned int soapId);

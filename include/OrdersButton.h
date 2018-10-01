@@ -12,8 +12,8 @@ class OrdersButton : public AuraButton,
 					public std::enable_shared_from_this<OrdersButton> {
 	std::string m_StrOrder;
 	std::vector<POrder::Ptr> m_Orders;
-	std::map<std::string, POrder::Ptr> m_VwOrders, m_CnclOrders;
-	std::string getOrderString(DBInterface::Ptr hDB, POrder::Ptr pOrder);
+	std::map<std::string, unsigned int> m_VwOrders, m_CnclOrders;
+	std::string getOrderString(DBInterface::Ptr hDB, unsigned int order_no);
 public:
 	OrdersButton(DBInterface::Ptr hDB) : AuraButton(hDB) {}
 	virtual ~OrdersButton() {}
