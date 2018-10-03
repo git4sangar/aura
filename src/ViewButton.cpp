@@ -7,6 +7,7 @@
 
 #include <ViewButton.h>
 #include <DBInterface.h>
+#include <StartButton.h>
 #include <QuantityButton.h>
 
 // Stringify param x.
@@ -20,7 +21,7 @@ std::string ViewButton::STR_CHOOSE_A_SOAP = "Choose a soap from below list";
 TgBot::GenericReply::Ptr ViewButton::prepareMenu(std::map<std::string, std::shared_ptr<AuraButton>>& listAuraBtns, TgBot::Message::Ptr pMsg, FILE *fp) {
 	fprintf(fp, "AURA %ld:ViewButton prepareMenu\n", time(0)); fflush(fp);
 	std::vector<TgBot::KeyboardButton::Ptr>	kbBtnFlvrs;
-	TgBot::KeyboardButton::Ptr 				kbBtnFlvr;
+	TgBot::KeyboardButton::Ptr 				kbBtnFlvr, kbBtnBuy, kbBtnCart;
 
 	std::shared_ptr<QuantityButton> auraQntyBuy		= std::make_shared<QuantityButton>(getDBHandle());
 
@@ -44,8 +45,18 @@ TgBot::GenericReply::Ptr ViewButton::prepareMenu(std::map<std::string, std::shar
 			row.clear();
 		}
 	}
-	if(row.size()) { row.push_back(getMainMenu()[0]); pFlavoursMenu->keyboard.push_back(row); }
-	else { pFlavoursMenu->keyboard.push_back(getMainMenu()); }
+	//	row cotains element if no of soaps are in odd numbers. I'm going to ignore it
+	{
+		kbBtnBuy		= std::make_shared<TgBot::KeyboardButton>();
+		kbBtnBuy->text	= StartButton::STR_BTN_BUY_SOAPS;
+		kbBtnCart		= std::make_shared<TgBot::KeyboardButton>();
+		kbBtnCart->text	= StartButton::STR_BTN_VIEW_CART;
+		row.clear();
+		row.push_back(kbBtnBuy);
+		row.push_back(kbBtnCart);
+		row.push_back(getMainMenu()[0]);
+		pFlavoursMenu->keyboard.push_back(row);
+	}
 	fprintf(fp, "AURA %ld: Finishing ViewButton::prepareMenu::onClick\n", time(0)); fflush(fp);
 	return pFlavoursMenu;
 }

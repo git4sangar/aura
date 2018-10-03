@@ -16,19 +16,25 @@ TgBot::GenericReply::Ptr ViewCart::prepareMenu(std::map<std::string, std::shared
 	TgBot::GenericReply::Ptr pRet = nullptr;
 	TgBot::ReplyKeyboardMarkup::Ptr pViewCartMenu	= std::make_shared<TgBot::ReplyKeyboardMarkup>();
 	if(!m_IsCartEmpty) {
-		TgBot::KeyboardButton::Ptr kbBtnEmpty, kbBtnChkOut;
-		kbBtnEmpty		= std::make_shared<TgBot::KeyboardButton>();
-		kbBtnChkOut		= std::make_shared<TgBot::KeyboardButton>();
+		TgBot::KeyboardButton::Ptr kbBtnEmpty, kbBtnChkOut, kbBtnVw, kbBtnBuy;
+		kbBtnEmpty	= std::make_shared<TgBot::KeyboardButton>();
+		kbBtnChkOut	= std::make_shared<TgBot::KeyboardButton>();
+		kbBtnVw		= std::make_shared<TgBot::KeyboardButton>();
+		kbBtnBuy	= std::make_shared<TgBot::KeyboardButton>();
 
 		kbBtnEmpty->text	= STR_BTN_EMPTY_CART;
 		kbBtnChkOut->text	= STR_BTN_PURCHASE;
+		kbBtnVw->text		= StartButton::STR_BTN_VIEW_SOAPS;
+		kbBtnBuy->text		= StartButton::STR_BTN_BUY_SOAPS;
 
 		listAuraBtns[STR_BTN_EMPTY_CART]	= shared_from_this();
 		listAuraBtns[STR_BTN_PURCHASE]		= std::make_shared<ShippingAddress>(getDBHandle());
 
 		std::vector<TgBot::KeyboardButton::Ptr> row0, row1;
 		row0.push_back(kbBtnChkOut);
-		row1.push_back(kbBtnEmpty);
+		row0.push_back(kbBtnEmpty);
+		row1.push_back(kbBtnVw);
+		row1.push_back(kbBtnBuy);
 
 		pViewCartMenu->keyboard.push_back(row0);
 		pViewCartMenu->keyboard.push_back(row1);
