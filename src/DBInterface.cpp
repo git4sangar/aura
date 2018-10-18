@@ -445,6 +445,17 @@ void DBInterface::addColumnToShipping(unsigned int chatId, std::string colName, 
 	}
 }
 
+void DBInterface::removeAddressFromShipping(unsigned int chatId) {
+	fprintf(m_Fp, "AURA %ld: removeAddressFromShipping chatId: %d\n", time(0), chatId); fflush(m_Fp);
+	int order_no = getOrderNoForUser(chatId);
+	SQLite::Transaction transaction(*m_hDB);
+	std::stringstream ss;
+	ss << "DELETE from Shipping WHERE " <<
+		Shipping::DB_TABLE_SHIPPING_COLUMN_ORDER_NO << " = " << order_no;
+	m_hDB->exec(ss.str());
+	transaction.commit();
+}
+
 void DBInterface::addAddressToShipping(unsigned int chatId, std::string address) {
 	fprintf(m_Fp, "AURA %ld: addAddressToShipping address: %s\n", time(0), address.c_str()); fflush(m_Fp);
 	addColumnToShipping(chatId, Shipping::DB_TABLE_SHIPPING_COLUMN_ADDRESS, address);
@@ -675,7 +686,7 @@ void DBInterface::updateOrderNoForUser(unsigned int chatId) {
 }
 
 bool DBInterface::addNewUser(int64_t chatId, std::string fname, std::string lname, int64_t mobile) {
-	fprintf(m_Fp, "AURA %ld: addNewUser chatId: %lld, fname :%s\n", time(0), chatId, fname.c_str()); fflush(m_Fp);
+	fprintf(m_Fp, "AURA %ld: addNewUser chatId: %ld, fname :%s\n", time(0), chatId, fname.c_str()); fflush(m_Fp);
 	std::stringstream ss;
 	ss << "SELECT * FROM User WHERE " << User::DB_TABLE_USER_COLUMN_CHAT_ID << " = " << chatId << ";";
 	SQLite::Statement   query(*m_hDB, ss.str());

@@ -140,6 +140,7 @@ public:
 	void addFlatNoToShipping(unsigned int chatId, unsigned int flatNo);
 	void addAptNameToShipping(unsigned int chatId, std::string aptName);
 	void addAddressToShipping(unsigned int chatId, std::string address);
+	void removeAddressFromShipping(unsigned int chatId);
 	void addColumnToShipping(unsigned int chatId, std::string colName, std::string colValue);
 
 	bool updateShippingFromPrevOrder(unsigned int chatId, unsigned int m_OrderNo);
