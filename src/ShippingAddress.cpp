@@ -12,7 +12,7 @@
 	std::string ShippingAddress::STR_BTN_SSM	= "SSM Nagar";
 	std::string ShippingAddress::STR_BTN_BRKFLD	= "Brookfield";
 	std::string ShippingAddress::STR_BTN_GARUDA	= "Other";
-	std::string ShippingAddress::STR_BTN_PURVA	= "Fountain SQ";
+	std::string ShippingAddress::STR_BTN_PURVA	= "Purva Fountain SQ";
 	std::string ShippingAddress::STR_BTN_CONTACT= "Contact";
 	std::string ShippingAddress::STR_BTN_BACK	= "<-Address";
 	std::string ShippingAddress::STR_BTN_PAYTM	= "Paytm to 98406 25165";
@@ -159,7 +159,7 @@ TgBot::GenericReply::Ptr ShippingAddress::renderFloorMenu(std::map<std::string, 
 	std::vector<TgBot::KeyboardButton::Ptr> kbBtnFloors;
 	std::stringstream ss;
 
-	m_Rows = 3;
+	m_Rows = 5;
 	m_Cols = 3;
 
 	int iLoop1 = 0, iLoop2 = 0, iRun = 0;
@@ -412,6 +412,7 @@ void ShippingAddress::onClick(TgBot::Message::Ptr pMsg, FILE *fp) {
 			m_ChatId		= pMsg->chat->id;
 			m_StrMsg		= "Type your address in a single line & send.";
 		} else {
+			getDBHandle()->removeAddressFromShipping(pMsg->chat->id);
 			getDBHandle()->addAptNameToShipping(pMsg->chat->id, pMsg->text);
 			m_RenderMenu	= MenuRenderer::BLOCK;
 			m_StrMsg		= "Shipping Address: Choose your Block Letter\nEg: For C13, Choose C";
