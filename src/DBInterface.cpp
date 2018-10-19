@@ -210,7 +210,6 @@ void DBInterface::createPOrder(unsigned int chatId) {
 		strTime << "\", \"" << POrder::PORDER_PAYGW_VAL_NOTA << "\", " << tnow << ", " << 0 << ", "
 		<< getIntStatus(CartStatus::PENDING) << ");";
 
-	fprintf(m_Fp, "AURA %ld: createPOrder Query String\n%s\n", time(0), ss.str().c_str()); fflush(m_Fp);
 	SQLite::Transaction transaction(*m_hDB);
 	m_hDB->exec(ss.str());
 	transaction.commit();
@@ -686,7 +685,7 @@ void DBInterface::updateOrderNoForUser(unsigned int chatId) {
 }
 
 bool DBInterface::addNewUser(int64_t chatId, std::string fname, std::string lname, int64_t mobile) {
-	fprintf(m_Fp, "AURA %ld: addNewUser chatId: %ld, fname :%s\n", time(0), chatId, fname.c_str()); fflush(m_Fp);
+	fprintf(m_Fp, "AURA %ld: addNewUser fname :%s\n", time(0), fname.c_str()); fflush(m_Fp);
 	std::stringstream ss;
 	ss << "SELECT * FROM User WHERE " << User::DB_TABLE_USER_COLUMN_CHAT_ID << " = " << chatId << ";";
 	SQLite::Statement   query(*m_hDB, ss.str());
@@ -709,3 +708,4 @@ bool DBInterface::addNewUser(int64_t chatId, std::string fname, std::string lnam
 	}
 	return true;
 }
+
